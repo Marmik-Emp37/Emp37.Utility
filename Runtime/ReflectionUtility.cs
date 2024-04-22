@@ -5,6 +5,11 @@ using System.Reflection;
 
 namespace Emp37.Utility
 {
+      using Field = FieldInfo;
+      using Property = PropertyInfo;
+      using Method = MethodInfo;
+
+
       public static class ReflectionUtility
       {
             [Flags]
@@ -28,13 +33,14 @@ namespace Emp37.Utility
                   var key = (type, name);
                   if (!cachedMembers.TryGetValue(key, out var member))
                   {
+                        var returnType = typeof(T);
                         while (type != null)
                         {
-                              member = typeof(T) switch
+                              member = returnType switch
                               {
-                                    var field when field == typeof(FieldInfo) => type.GetField(name, bindings),
-                                    var property when property == typeof(PropertyInfo) => type.GetProperty(name, bindings),
-                                    var method when method == typeof(MethodInfo) => type.GetMethod(name, bindings),
+                                    _ when returnType == typeof(Field) => type.GetField(name, bindings),
+                                    _ when returnType == typeof(Property) => type.GetProperty(name, bindings),
+                                    _ when returnType == typeof(Method) => type.GetMethod(name, bindings),
                                     _ => throw new NotSupportedException()
                               };
                               if (member != null)
@@ -47,41 +53,48 @@ namespace Emp37.Utility
                   }
                   return member as T;
             }
-            public static object FetchValue(string name, object target, MemberType allowedTypes = MemberType.All, BindingFlags bindings = DEFAULT_FLAGS, object[] parameters = null)
+            public static bool TryFetchInfo<T>(string name, Type type, out T value, BindingFlags bindings = DEFAULT_FLAGS) where T : MemberInfo
+            {
+                  try
+                  {
+                        value = FetchInfo<T>(name, type, bindings);
+                  }
+                  catch (ArgumentException)
+                  {
+                        value = null;
+                  }
+                  return value != null;
+            }
+            public static object FetchValue(string name, object target, MemberType enabled = MemberType.All, BindingFlags bindings = DEFAULT_FLAGS)
             {
                   if (target == null) throw new ArgumentNullException(nameof(target));
 
-                  object value = null;
-                  Type type = target.GetType();
-
-                  if (allowedTypes.HasFlag(MemberType.Field))
+                  var type = target.GetType();
+                  if (enabled.HasFlag(MemberType.Field))
                   {
-                        var field = FetchInfo<FieldInfo>(name, type, bindings);
-                        if (field != null)
+                        if (TryFetchInfo<Field>(name, type, out var field, bindings))
                         {
                               return field.GetValue(target);
                         }
                   }
-                  if (allowedTypes.HasFlag(MemberType.Property))
+                  if (enabled.HasFlag(MemberType.Property))
                   {
-                        var property = FetchInfo<PropertyInfo>(name, type, bindings);
-                        if (property != null && property.CanRead)
+                        if (TryFetchInfo<Property>(name, type, out var property, bindings) && property.CanRead)
                         {
                               return property.GetValue(target);
                         }
                   }
-                  if (allowedTypes.HasFlag(MemberType.Method))
+                  if (enabled.HasFlag(MemberType.Method))
                   {
-                        var method = FetchInfo<MethodInfo>(name, type, bindings);
-                        if (method != null)
+                        if (TryFetchInfo<Method>(name, type, out var method, bindings))
                         {
-                              return method.Invoke(target, parameters);
+                              return method.Invoke(target, null);
                         }
                   }
-                  return value;
+                  return null;
             }
 
-            public static object InvokeWithNamedParametersAndReflection(MethodInfo method, object target, string[] names = null, BindingFlags bindings = DEFAULT_FLAGS)
+            public static object InvokeWithNamedParameters(Method method, object target, string[] names = null, BindingFlags bindings = DEFAULT_FLAGS)
             {
                   List<object> values = new();
                   ParameterInfo[] parameters = method.GetParameters();

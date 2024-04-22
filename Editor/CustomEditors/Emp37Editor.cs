@@ -100,7 +100,7 @@ namespace Emp37.Utility.Editor
 
                                     if (GUILayout.Button(method.Name, GUILayout.Height(button.Height)))
                                     {
-                                          InvokeWithNamedParametersAndReflection(method, target, button.Parameters);
+                                          InvokeWithNamedParameters(method, target, button.Parameters);
                                     }
                               }
                         }

@@ -27,7 +27,7 @@ namespace Emp37.Utility.Editor
 
                         if (method != null)
                         {
-                              ReflectionUtility.InvokeWithNamedParametersAndReflection(method, target, attribute.Parameters);
+                              ReflectionUtility.InvokeWithNamedParameters(method, target, attribute.Parameters);
                         }
                   }
             }
