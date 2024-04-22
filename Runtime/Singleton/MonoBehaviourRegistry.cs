@@ -101,10 +101,6 @@ namespace Emp37.Utility.Singleton
             /// </summary>
             public static void Wipe()
             {
-                  foreach (var key in database.Keys)
-                  {
-                        Debug.Log($"Unregistering Instance of type '{key.FullName}'.");
-                  }
                   database.Clear();
                   Debug.Log("Registry Wiped!");
             }
