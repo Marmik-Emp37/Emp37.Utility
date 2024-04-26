@@ -11,12 +11,12 @@ namespace Emp37.Utility
       public class InlineButtonAttribute : PropertyAttribute
       {
             public string Method, Name = null;
-            public readonly float Width = 50F;
+            public readonly float Width = 60F;
             public readonly string[] Parameters = null;
 
             public InlineButtonAttribute(string method) => Method = method;
             public InlineButtonAttribute(string method, string name) : this(method) => Name = name;
-            public InlineButtonAttribute(string method, string name, Size size) : this(method, name) => Width = size switch { Size.Small => 20F, Size.Medium => 75F, Size.Large => 120F, _ => Width, };
+            public InlineButtonAttribute(string method, string name, Size size) : this(method, name) => Width = size switch { Size.Small => 30F, Size.Medium => 60F, Size.Large => 90F, _ => Width, };
             public InlineButtonAttribute(string method, string name, Size size, params string[] parameters) : this(method, name, size) => Parameters = parameters;
       }
 }
