@@ -113,18 +113,18 @@ namespace Emp37.Utility.Editor
 
             private bool EvaluateVisibility(MemberInfo member)
             {
-                  var showAttribute = member.GetCustomAttribute<ShowWhenAttribute>();
-                  if (showAttribute != null)
+                  var a1 = member.GetCustomAttribute<ShowWhenAttribute>();
+                  if (a1 != null)
                   {
-                        if (FetchValue(showAttribute.ConditionName, target) is bool value)
+                        if (FetchValue(a1.ConditionName, target) is bool value)
                         {
                               return value;
                         }
                   }
-                  var hideAttribute = member.GetCustomAttribute<HideWhenAttribute>();
-                  if (hideAttribute != null)
+                  var a2 = member.GetCustomAttribute<HideWhenAttribute>();
+                  if (a2 != null)
                   {
-                        if (FetchValue(hideAttribute.ConditionName, target) is bool value)
+                        if (FetchValue(a2.ConditionName, target) is bool value)
                         {
                               return !value;
                         }
@@ -133,18 +133,18 @@ namespace Emp37.Utility.Editor
             }
             private bool EvaluateEnabled(MemberInfo member)
             {
-                  var enableAttribute = member.GetCustomAttribute<EnableWhenAttribute>();
-                  if (enableAttribute != null)
+                  var a1 = member.GetCustomAttribute<EnableWhenAttribute>();
+                  if (a1 != null)
                   {
-                        if (FetchValue(enableAttribute.ConditionName, target) is bool value)
+                        if (FetchValue(a1.ConditionName, target) is bool value)
                         {
                               return value;
                         }
                   }
-                  var disableAttribute = member.GetCustomAttribute<DisableWhenAttribute>();
-                  if (disableAttribute != null)
+                  var a2 = member.GetCustomAttribute<DisableWhenAttribute>();
+                  if (a2 != null)
                   {
-                        if (FetchValue(disableAttribute.ConditionName, target) is bool value)
+                        if (FetchValue(a2.ConditionName, target) is bool value)
                         {
                               return !value;
                         }

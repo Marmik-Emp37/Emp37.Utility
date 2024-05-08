@@ -353,46 +353,41 @@ namespace Emp37.Utility.Tween
             /// <param name="value">Normalized point on a linear path.</param>
             /// <param name="type">Type of curve to be simulated.</param>
             /// <returns>Corresponding point on a selected type path.</returns>
-            public static float EasedRatio(float value, Type type, float overshoot = 1F)
+            public static float EasedRatio(float value, Type type, float overshoot = 1F) => type switch
             {
-                  value = UnityEngine.Mathf.Clamp01(value);
-
-                  return type switch
-                  {
-                        Type.Linear => Linear(x: value),
-                        Type.InSine => EaseInSine(x: value),
-                        Type.OutSine => EaseOutSine(x: value),
-                        Type.InOutSine => EaseInOutSine(x: value),
-                        Type.InCubic => EaseInCubic(x: value),
-                        Type.OutCubic => EaseOutCubic(x: value),
-                        Type.InOutCubic => EaseInOutCubic(x: value),
-                        Type.InQuint => EaseInQuint(x: value),
-                        Type.OutQuint => EaseOutQuint(x: value),
-                        Type.InOutQuint => EaseInOutQuint(x: value),
-                        Type.InCirc => EaseInCirc(x: value),
-                        Type.OutCirc => EaseOutCirc(x: value),
-                        Type.InOutCirc => EaseInOutCirc(x: value),
-                        Type.InQuad => EaseInQuad(x: value),
-                        Type.OutQuad => EaseOutQuad(x: value),
-                        Type.InOutQuad => EaseInOutQuad(x: value),
-                        Type.InQuart => EaseInQuart(x: value),
-                        Type.OutQuart => EaseOutQuart(x: value),
-                        Type.InOutQuart => EaseInOutQuart(x: value),
-                        Type.InExpo => EaseInExpo(x: value),
-                        Type.OutExpo => EaseOutExpo(x: value),
-                        Type.InOutExpo => EaseInOutExpo(x: value),
-                        Type.InBack => EaseInBack(x: value, overshoot),
-                        Type.OutBack => EaseOutBack(x: value, overshoot),
-                        Type.InElastic => EaseInElastic(x: value, overshoot),
-                        Type.OutElastic => EaseOutElastic(x: value, overshoot),
-                        Type.InOutBack => EaseInOutBack(x: value, overshoot),
-                        Type.InOutElastic => EaseInOutElastic(x: value, overshoot),
-                        Type.InBounce => EaseInBounce(x: value),
-                        Type.OutBounce => EaseOutBounce(x: value),
-                        Type.InOutBounce => EaseInOutBounce(x: value),
-                        Type.BreakOutBounce => BreakOutBounce(x: value),
-                        _ => 1F
-                  };
-            }
+                  Type.Linear => Linear(x: value),
+                  Type.InSine => EaseInSine(x: value),
+                  Type.OutSine => EaseOutSine(x: value),
+                  Type.InOutSine => EaseInOutSine(x: value),
+                  Type.InCubic => EaseInCubic(x: value),
+                  Type.OutCubic => EaseOutCubic(x: value),
+                  Type.InOutCubic => EaseInOutCubic(x: value),
+                  Type.InQuint => EaseInQuint(x: value),
+                  Type.OutQuint => EaseOutQuint(x: value),
+                  Type.InOutQuint => EaseInOutQuint(x: value),
+                  Type.InCirc => EaseInCirc(x: value),
+                  Type.OutCirc => EaseOutCirc(x: value),
+                  Type.InOutCirc => EaseInOutCirc(x: value),
+                  Type.InQuad => EaseInQuad(x: value),
+                  Type.OutQuad => EaseOutQuad(x: value),
+                  Type.InOutQuad => EaseInOutQuad(x: value),
+                  Type.InQuart => EaseInQuart(x: value),
+                  Type.OutQuart => EaseOutQuart(x: value),
+                  Type.InOutQuart => EaseInOutQuart(x: value),
+                  Type.InExpo => EaseInExpo(x: value),
+                  Type.OutExpo => EaseOutExpo(x: value),
+                  Type.InOutExpo => EaseInOutExpo(x: value),
+                  Type.InBack => EaseInBack(x: value, overshoot),
+                  Type.OutBack => EaseOutBack(x: value, overshoot),
+                  Type.InElastic => EaseInElastic(x: value, overshoot),
+                  Type.OutElastic => EaseOutElastic(x: value, overshoot),
+                  Type.InOutBack => EaseInOutBack(x: value, overshoot),
+                  Type.InOutElastic => EaseInOutElastic(x: value, overshoot),
+                  Type.InBounce => EaseInBounce(x: value),
+                  Type.OutBounce => EaseOutBounce(x: value),
+                  Type.InOutBounce => EaseInOutBounce(x: value),
+                  Type.BreakOutBounce => BreakOutBounce(x: value),
+                  _ => 1F
+            };
       }
 }

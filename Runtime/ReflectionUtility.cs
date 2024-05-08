@@ -65,7 +65,7 @@ namespace Emp37.Utility
                   }
                   return value != null;
             }
-            public static object FetchValue(string name, object target, MemberType enabled = MemberType.All, BindingFlags bindings = DEFAULT_FLAGS)
+            public static object FetchValue(string name, object target, MemberType enabled = MemberType.All, BindingFlags bindings = DEFAULT_FLAGS, params object[] parameters)
             {
                   if (target == null) throw new ArgumentNullException(nameof(target));
 
@@ -88,7 +88,7 @@ namespace Emp37.Utility
                   {
                         if (TryFetchInfo<Method>(name, type, out var method, bindings))
                         {
-                              return method.Invoke(target, null);
+                              return method.Invoke(target, parameters);
                         }
                   }
                   return null;
