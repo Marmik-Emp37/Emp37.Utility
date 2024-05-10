@@ -113,16 +113,15 @@ namespace Emp37.Utility.Editor
 
             private bool EvaluateVisibility(MemberInfo member)
             {
-                  var a1 = member.GetCustomAttribute<ShowWhenAttribute>();
-                  if (a1 != null)
+                  if (member.TryGetAttribute(out ShowWhenAttribute a1))
                   {
                         if (FetchValue(a1.ConditionName, target) is bool value)
                         {
                               return value;
                         }
                   }
-                  var a2 = member.GetCustomAttribute<HideWhenAttribute>();
-                  if (a2 != null)
+                  else
+                  if (member.TryGetAttribute(out HideWhenAttribute a2))
                   {
                         if (FetchValue(a2.ConditionName, target) is bool value)
                         {
@@ -133,21 +132,25 @@ namespace Emp37.Utility.Editor
             }
             private bool EvaluateEnabled(MemberInfo member)
             {
-                  var a1 = member.GetCustomAttribute<EnableWhenAttribute>();
-                  if (a1 != null)
+                  if (member.TryGetAttribute(out EnableWhenAttribute a1))
                   {
                         if (FetchValue(a1.ConditionName, target) is bool value)
                         {
                               return value;
                         }
                   }
-                  var a2 = member.GetCustomAttribute<DisableWhenAttribute>();
-                  if (a2 != null)
+                  else
+                  if (member.TryGetAttribute(out DisableWhenAttribute a2))
                   {
                         if (FetchValue(a2.ConditionName, target) is bool value)
                         {
                               return !value;
                         }
+                  }
+                  else
+                  if (member.TryGetAttribute(out ReadonlyAttribute a3))
+                  {
+                        return a3.ExclusiveToPlaymode && !EditorApplication.isPlaying;
                   }
                   return true;
             }

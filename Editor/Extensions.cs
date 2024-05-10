@@ -52,5 +52,13 @@ namespace Emp37.Utility.Editor
                   return false;
             }
             #endregion
+
+            #region M E M B E R   I N F O
+            public static bool TryGetAttribute<T>(this MemberInfo member, out T attribute) where T : Attribute
+            {
+                  attribute = member.GetCustomAttribute<T>();
+                  return attribute != null;
+            }
+            #endregion
       }
 }
