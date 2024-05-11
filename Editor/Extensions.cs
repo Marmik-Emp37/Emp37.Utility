@@ -27,16 +27,15 @@ namespace Emp37.Utility.Editor
             }
             public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
             {
-                  attribute = default;
                   try
                   {
                         attribute = GetAttribute<TAttribute>(property, bindings);
-                        return attribute != null;
                   }
                   catch (ArgumentException)
                   {
-                        return false;
+                        attribute = default;
                   }
+                  return attribute != null;
             }
             public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
             {
@@ -53,12 +52,17 @@ namespace Emp37.Utility.Editor
             }
             #endregion
 
-            #region M E M B E R   I N F O
-            public static bool TryGetAttribute<T>(this MemberInfo member, out T attribute) where T : Attribute
+            public static bool TryGetAttribute<TAttribute>(this MemberInfo member, out TAttribute attribute) where TAttribute : Attribute
             {
-                  attribute = member.GetCustomAttribute<T>();
+                  try
+                  {
+                        attribute = member.GetCustomAttribute<TAttribute>();
+                  }
+                  catch (ArgumentException)
+                  {
+                        attribute = default;
+                  }
                   return attribute != null;
             }
-            #endregion
       }
 }

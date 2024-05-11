@@ -27,35 +27,36 @@ namespace Emp37.Utility.Editor
       {
             private Type targetType;
 
-            private SerializedProperty m_Script;
+            private bool showDefaultProperty;
+            private SerializedProperty defaultProperty;
+
             private SerializedProperty[] serializedProperties;
-
-            private MethodInfo[] methods;
-
-            private bool shouldHideDefaultScript;
+            private MethodInfo[] serializedMethods;
 
 
             private void OnEnable()
             {
                   targetType = target.GetType();
-                  shouldHideDefaultScript = targetType.IsDefined(typeof(HideDefaultScriptAttribute));
+
+                  showDefaultProperty = !targetType.IsDefined(typeof(HideDefaultScriptAttribute));
 
                   #region I N I T I A L I Z E   P R O P E R T I E S
                   if (serializedProperties == null)
                   {
-                        var properties = new List<SerializedProperty>();
-                        var iterator = serializedObject.GetIterator();
+                        Queue<SerializedProperty> properties = new();
+                        SerializedProperty iterator = serializedObject.GetIterator();
+
                         while (iterator.NextVisible(true))
                         {
-                              var property = serializedObject.FindProperty(iterator.name);
+                              SerializedProperty property = serializedObject.FindProperty(iterator.name);
                               if (property != null)
                               {
-                                    if (property.name == nameof(m_Script))
+                                    if (property.name == "m_Script")
                                     {
-                                          m_Script = property;
+                                          defaultProperty = property;
                                           continue;
                                     }
-                                    properties.Add(property);
+                                    properties.Enqueue(property);
                               }
                         }
                         serializedProperties = properties.ToArray();
@@ -63,44 +64,43 @@ namespace Emp37.Utility.Editor
                   #endregion
 
                   #region I N I T I A L I Z E   M E T H O D S
-                  methods = targetType.GetMethods(DEFAULT_FLAGS);
+                  serializedMethods = targetType.GetMethods(DEFAULT_FLAGS);
                   #endregion
             }
             public override void OnInspectorGUI()
             {
                   serializedObject.Update();
                   {
-                        #region D E F A U L T   F I E L D
-                        if (m_Script != null && !shouldHideDefaultScript)
+                        #region D E F A U L T   S C R I P T
+                        if (showDefaultProperty)
                         {
                               GUI.enabled = false;
-                              EditorGUILayout.PropertyField(m_Script);
+                              EditorGUILayout.PropertyField(defaultProperty);
                         }
                         #endregion
 
                         #region S E R I A L I Z E D   P R O P E R T I E S
                         foreach (var property in serializedProperties)
                         {
-                              var field = FetchInfo<FieldInfo>(property.name, targetType);
-                              if (!EvaluateVisibility(field)) continue;
-
-                              GUI.enabled = EvaluateEnabled(field);
-                              EditorGUILayout.PropertyField(property);
+                              FieldInfo field = FetchInfo<FieldInfo>(property.name, targetType);
+                              if (EvaluateVisibility(field))
+                              {
+                                    GUI.enabled = EvaluateEnabled(field);
+                                    EditorGUILayout.PropertyField(property);
+                              }
                         }
                         #endregion
 
                         #region B U T T O N S
-                        foreach (var method in methods)
+                        foreach (MethodInfo method in serializedMethods)
                         {
-                              var button = method.GetCustomAttribute<ButtonAttribute>();
-                              if (button != null && EvaluateVisibility(method))
+                              if (method.TryGetAttribute(out ButtonAttribute a0) && EvaluateVisibility(method))
                               {
                                     GUI.enabled = EvaluateEnabled(method);
-                                    GUI.backgroundColor = ColorLibrary.Pick(button.Shade);
-
-                                    if (GUILayout.Button(method.Name, GUILayout.Height(button.Height)))
+                                    GUI.backgroundColor = ColorLibrary.Pick(a0.Shade);
+                                    if (GUILayout.Button(method.Name, GUILayout.Height(a0.Height)))
                                     {
-                                          InvokeWithNamedParameters(method, target, button.Parameters);
+                                          InvokeWithNamedParameters(method, target, a0.Parameters);
                                     }
                               }
                         }
@@ -111,46 +111,34 @@ namespace Emp37.Utility.Editor
                   serializedObject.ApplyModifiedProperties();
             }
 
-            private bool EvaluateVisibility(MemberInfo member)
+            private bool EvaluateEnabled(MemberInfo member)
             {
-                  if (member.TryGetAttribute(out ShowWhenAttribute a1))
+                  if (member.TryGetAttribute(out EnableWhenAttribute a0) && FetchValue(a0.ConditionName, target) is bool v0)
                   {
-                        if (FetchValue(a1.ConditionName, target) is bool value)
-                        {
-                              return value;
-                        }
+                        return v0;
                   }
                   else
-                  if (member.TryGetAttribute(out HideWhenAttribute a2))
+                  if (member.TryGetAttribute(out DisableWhenAttribute a1) && FetchValue(a1.ConditionName, target) is bool v1)
                   {
-                        if (FetchValue(a2.ConditionName, target) is bool value)
-                        {
-                              return !value;
-                        }
+                        return !v1;
+                  }
+                  else
+                  if (member.TryGetAttribute(out ReadonlyAttribute a2))
+                  {
+                        return a2.ExclusiveToPlaymode && !EditorApplication.isPlaying;
                   }
                   return true;
             }
-            private bool EvaluateEnabled(MemberInfo member)
+            private bool EvaluateVisibility(MemberInfo member)
             {
-                  if (member.TryGetAttribute(out EnableWhenAttribute a1))
+                  if (member.TryGetAttribute(out ShowWhenAttribute a0) && FetchValue(a0.ConditionName, target) is bool v0)
                   {
-                        if (FetchValue(a1.ConditionName, target) is bool value)
-                        {
-                              return value;
-                        }
+                        return v0;
                   }
                   else
-                  if (member.TryGetAttribute(out DisableWhenAttribute a2))
+                  if (member.TryGetAttribute(out HideWhenAttribute a1) && FetchValue(a0.ConditionName, target) is bool v1)
                   {
-                        if (FetchValue(a2.ConditionName, target) is bool value)
-                        {
-                              return !value;
-                        }
-                  }
-                  else
-                  if (member.TryGetAttribute(out ReadonlyAttribute a3))
-                  {
-                        return a3.ExclusiveToPlaymode && !EditorApplication.isPlaying;
+                        return !v1;
                   }
                   return true;
             }
