@@ -52,6 +52,7 @@ namespace Emp37.Utility.Editor
             }
             #endregion
 
+            #region M E M B E R   I N F O
             public static bool TryGetAttribute<TAttribute>(this MemberInfo member, out TAttribute attribute) where TAttribute : Attribute
             {
                   try
@@ -64,5 +65,6 @@ namespace Emp37.Utility.Editor
                   }
                   return attribute != null;
             }
+            #endregion
       }
 }

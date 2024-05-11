@@ -91,7 +91,7 @@ namespace Emp37.Utility.Editor
                         }
                         #endregion
 
-                        #region B U T T O N S
+                        #region S E R I A L I Z E D   M E TH O D S
                         foreach (MethodInfo method in serializedMethods)
                         {
                               if (method.TryGetAttribute(out ButtonAttribute a0) && EvaluateVisibility(method))
