@@ -113,14 +113,20 @@ namespace Emp37.Utility.Editor
 
             private bool EvaluateEnabled(MemberInfo member)
             {
-                  if (member.TryGetAttribute(out EnableWhenAttribute a0) && FetchValue(a0.ConditionName, target) is bool v0)
+                  if (member.TryGetAttribute(out EnableWhenAttribute a0))
                   {
-                        return v0;
+                        if (FetchValue(a0.ConditionName, target) is bool value)
+                        {
+                              return value;
+                        }
                   }
                   else
-                  if (member.TryGetAttribute(out DisableWhenAttribute a1) && FetchValue(a1.ConditionName, target) is bool v1)
+                  if (member.TryGetAttribute(out DisableWhenAttribute a1))
                   {
-                        return !v1;
+                        if (FetchValue(a1.ConditionName, target) is bool value)
+                        {
+                              return !value;
+                        }
                   }
                   else
                   if (member.TryGetAttribute(out ReadonlyAttribute a2))
@@ -131,14 +137,20 @@ namespace Emp37.Utility.Editor
             }
             private bool EvaluateVisibility(MemberInfo member)
             {
-                  if (member.TryGetAttribute(out ShowWhenAttribute a0) && FetchValue(a0.ConditionName, target) is bool v0)
+                  if (member.TryGetAttribute(out ShowWhenAttribute a0))
                   {
-                        return v0;
+                        if (FetchValue(a0.ConditionName, target) is bool value)
+                        {
+                              return value;
+                        }
                   }
                   else
-                  if (member.TryGetAttribute(out HideWhenAttribute a1) && FetchValue(a0.ConditionName, target) is bool v1)
+                  if (member.TryGetAttribute(out HideWhenAttribute a1))
                   {
-                        return !v1;
+                        if (FetchValue(a1.ConditionName, target) is bool value)
+                        {
+                              return !value;
+                        }
                   }
                   return true;
             }

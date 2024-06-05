@@ -3,36 +3,47 @@ using UnityEngine.Events;
 
 namespace Emp37.Utility.Tween
 {
-      internal abstract class Builder<T>
+      using static Ease;
+
+
+      internal abstract class Builder<T> where T : struct
       {
-            private protected readonly Transform transform;
-            private protected T A, B;
-            private readonly float duration;
-            private readonly Ease.Type type;
+            internal enum Delta { Scaled, Unscaled }
+
+            private protected delegate T Fetch();
+            private protected delegate void Assign(T value);
 
             private float elapsed;
-
+            private bool initialised;
             private float delay, overshoot = 1F;
-            private TimeMode delta;
-            private UnityAction onComplete = delegate { };
+            private Delta delta;
+            private UnityAction onComplete;
+            private protected T a;
+            private readonly T b;
+            private readonly float duration;
+            private readonly Type type;
+            private protected readonly Transform transform;
+            internal bool IsComplete { get; private set; }
+            internal bool IsValid => transform && duration > 0F && !a.Equals(b);
 
-            private bool init;
-
-
-            public Builder(Transform transform, T target, float duration, Ease.Type type)
+            internal Builder(Transform transform, T b, float duration, Type type)
             {
                   this.transform = transform;
-                  B = target;
+                  this.b = b;
                   this.duration = duration;
                   this.type = type;
+                  onComplete = delegate { IsComplete = true; };
             }
 
-            public void Update()
+            private protected abstract void Initialize();
+            private protected abstract void OnEase(float ratio);
+
+            internal void Update()
             {
                   float deltaTime = delta switch
                   {
-                        TimeMode.Unscaled => Time.unscaledDeltaTime,
-                        _ => Time.deltaTime,
+                        Delta.Unscaled => Time.unscaledDeltaTime,
+                        _ => Time.deltaTime
                   };
 
                   if (delay > 0F)
@@ -40,53 +51,18 @@ namespace Emp37.Utility.Tween
                         delay -= deltaTime;
                         return;
                   }
-                  if (!init)
+
+                  if (!initialised)
                   {
                         Initialize();
-                        init = true;
+                        initialised = true;
                   }
-                  if (elapsed < 1F)
-                  {
-                        elapsed = Mathf.Clamp01(elapsed + deltaTime / duration);
-                        OnEase(value: Ease.EasedRatio(elapsed, type, overshoot));
-                  }
-                  else
-                  {
-                        onComplete.Invoke();
-                  }
+
+                  elapsed = Mathf.Clamp01(elapsed + deltaTime / duration);
+                  float T = EasedRatio(elapsed, type, overshoot);
+                  OnEase(ratio: T);
+
+                  if (elapsed == 1F) onComplete.Invoke();
             }
-
-            private protected abstract void Initialize();
-            private protected abstract float OnEase(float value);
-
-
-            #region C H A I N E D   M E T H O D S
-#pragma warning disable IDE1006 // Naming Styles
-            public Builder<T> setDelay(float value)
-            {
-                  delay = value;
-
-                  return this;
-            }
-            public Builder<T> setMode(TimeMode mode)
-            {
-                  delta = mode;
-
-                  return this;
-            }
-            public Builder<T> setOvershoot(float value)
-            {
-                  overshoot = value;
-
-                  return this;
-            }
-            public Builder<T> setOnComplete(UnityAction action)
-            {
-                  onComplete = action;
-
-                  return this;
-            }
-#pragma warning restore IDE1006 // Naming Styles
-            #endregion
       }
 }
