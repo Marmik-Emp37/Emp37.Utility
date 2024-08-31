@@ -3,66 +3,74 @@ using UnityEngine.Events;
 
 namespace Emp37.Utility.Tween
 {
-      using static Ease;
-
-
-      internal abstract class Builder<T> where T : struct
+#pragma warning disable IDE1006
+      public abstract class Builder<T> where T : struct
       {
-            internal enum Delta { Scaled, Unscaled }
+            private readonly Transform transform;
 
-            private protected delegate T Fetch();
-            private protected delegate void Assign(T value);
+            private T start;
+            private readonly T end;
 
-            private float elapsed;
-            private bool initialised;
-            private float delay, overshoot = 1F;
-            private Delta delta;
-            private UnityAction onComplete;
-            private protected T a;
-            private readonly T b;
+            private bool initialised, completed;
+            private float delay, overshoot = 1F, elapsedTime;
+            private Delta deltaMode;
+            private readonly Ease.Type tweenType;
             private readonly float duration;
-            private readonly Type type;
-            private protected readonly Transform transform;
-            internal bool IsComplete { get; private set; }
-            internal bool IsValid => transform && duration > 0F && !a.Equals(b);
 
-            internal Builder(Transform transform, T b, float duration, Type type)
+            private UnityAction onStart, onComplete;
+            protected Transform Transform => transform;
+
+
+            public Builder(Transform transform, float duration, T end, Ease.Type tweenType)
             {
                   this.transform = transform;
-                  this.b = b;
                   this.duration = duration;
-                  this.type = type;
-                  onComplete = delegate { IsComplete = true; };
+                  this.end = end;
+                  this.tweenType = tweenType;
             }
 
-            private protected abstract void Initialize();
-            private protected abstract void OnEase(float ratio);
+            protected abstract void Init(ref T a);
+            protected abstract T InterpolateValues(T a, T b, float t);
+            protected abstract void OnEase(T value);
 
             internal void Update()
             {
-                  float deltaTime = delta switch
-                  {
-                        Delta.Unscaled => Time.unscaledDeltaTime,
-                        _ => Time.deltaTime
-                  };
-
+                  if (completed) return;
                   if (delay > 0F)
                   {
-                        delay -= deltaTime;
+                        delay -= Time.deltaTime;
                         return;
                   }
-
                   if (!initialised)
                   {
-                        Initialize();
+                        Init(ref start);
                         initialised = true;
+
+                        onStart?.Invoke();
                   }
-
-                  elapsed = Mathf.Clamp01(elapsed + deltaTime / duration);
-                  float T = EasedRatio(elapsed, type, overshoot);
-                  OnEase(ratio: T);
-
-                  if (elapsed == 1F) onComplete.Invoke();
+                  if (elapsedTime < 1F)
+                  {
+                        var deltaTime = deltaMode switch
+                        {
+                              Delta.Unscaled => Time.unscaledDeltaTime,
+                              _ => Time.deltaTime
+                        };
+                        elapsedTime = Mathf.Clamp01(elapsedTime + deltaTime / duration);
+                        T calculatedValue = InterpolateValues(start, end, Ease.EasedRatio(tweenType, elapsedTime, overshoot));
+                        OnEase(calculatedValue);
+                  }
+                  else
+                  {
+                        onComplete?.Invoke();
+                        completed = true;
+                  }
             }
+
+            public Builder<T> setDelay(float value) { delay = value; return this; }
+            public Builder<T> setOvershoot(float value) { overshoot = value; return this; }
+            public Builder<T> setDelta(Delta value) { deltaMode = value; return this; }
+            public Builder<T> setOnStart(UnityAction action) { onStart = action; return this; }
+            public Builder<T> setOnComplete(UnityAction action) { onComplete = action; return this; }
       }
+#pragma warning restore IDE1006
 }

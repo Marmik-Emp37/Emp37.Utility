@@ -1,3 +1,4 @@
+using UnityEngine;
 using static System.MathF;
 
 namespace Emp37.Utility.Tween
@@ -353,7 +354,7 @@ namespace Emp37.Utility.Tween
             /// <param name="value">Normalized point on a linear path.</param>
             /// <param name="type">Type of curve to be simulated.</param>
             /// <returns>Corresponding point on a selected type path.</returns>
-            public static float EasedRatio(float value, Type type, float overshoot = 1F) => type switch
+            public static float EasedRatio(Type type, float value, float overshoot = 1F) => type switch
             {
                   Type.Linear => Linear(x: value),
                   Type.InSine => EaseInSine(x: value),
@@ -389,5 +390,9 @@ namespace Emp37.Utility.Tween
                   Type.BreakOutBounce => BreakOutBounce(x: value),
                   _ => 1F
             };
+            public static float EasedRatioClamped(Type type, float value, float overshoot = 1F)
+            {
+                  return Mathf.Clamp01(value: EasedRatio(type, value, overshoot));
+            }
       }
 }
