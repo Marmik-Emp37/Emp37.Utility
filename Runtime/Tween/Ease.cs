@@ -1,3 +1,4 @@
+using Unity.VisualScripting.YamlDotNet.Core.Tokens;
 using UnityEngine;
 using static System.MathF;
 
@@ -348,11 +349,12 @@ namespace Emp37.Utility.Tween
             }
             #endregion
 
+
             /// <summary>
             /// Simulates transition of a value on a non-linear path.
             /// </summary>
-            /// <param name="value">Normalized point on a linear path.</param>
             /// <param name="type">Type of curve to be simulated.</param>
+            /// <param name="value">Normalized point on a linear path.</param>
             /// <returns>Corresponding point on a selected type path.</returns>
             public static float EasedRatio(Type type, float value, float overshoot = 1F) => type switch
             {
@@ -380,9 +382,9 @@ namespace Emp37.Utility.Tween
                   Type.InOutExpo => EaseInOutExpo(x: value),
                   Type.InBack => EaseInBack(x: value, overshoot),
                   Type.OutBack => EaseOutBack(x: value, overshoot),
+                  Type.InOutBack => EaseInOutBack(x: value, overshoot),
                   Type.InElastic => EaseInElastic(x: value, overshoot),
                   Type.OutElastic => EaseOutElastic(x: value, overshoot),
-                  Type.InOutBack => EaseInOutBack(x: value, overshoot),
                   Type.InOutElastic => EaseInOutElastic(x: value, overshoot),
                   Type.InBounce => EaseInBounce(x: value),
                   Type.OutBounce => EaseOutBounce(x: value),
@@ -390,9 +392,5 @@ namespace Emp37.Utility.Tween
                   Type.BreakOutBounce => BreakOutBounce(x: value),
                   _ => 1F
             };
-            public static float EasedRatioClamped(Type type, float value, float overshoot = 1F)
-            {
-                  return Mathf.Clamp01(value: EasedRatio(type, value, overshoot));
-            }
       }
 }

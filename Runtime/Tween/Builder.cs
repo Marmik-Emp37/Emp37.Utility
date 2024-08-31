@@ -6,70 +6,76 @@ namespace Emp37.Utility.Tween
 #pragma warning disable IDE1006
       public abstract class Builder<T> where T : struct
       {
-            private readonly Transform transform;
+            private bool initialised, _isComplete;
 
             private T start;
             private readonly T end;
 
-            private bool initialised, completed;
-            private float delay, overshoot = 1F, elapsedTime;
-            private Delta deltaMode;
+            private readonly Transform _transform;
+            private readonly float durationMultiplier;
             private readonly Ease.Type tweenType;
-            private readonly float duration;
-
+            private Delta deltaMode;
+            private float delay, overshoot = 1F, linearRatio;
+            private UnityAction<float> onUpdate;
             private UnityAction onStart, onComplete;
-            protected Transform Transform => transform;
+
+            protected Transform Transform => _transform;
+            public bool IsComplete => _isComplete;
 
 
             public Builder(Transform transform, float duration, T end, Ease.Type tweenType)
             {
-                  this.transform = transform;
-                  this.duration = duration;
+                  _transform = transform;
+                  durationMultiplier = 1F / duration;
                   this.end = end;
                   this.tweenType = tweenType;
             }
 
-            protected abstract void Init(ref T a);
-            protected abstract T InterpolateValues(T a, T b, float t);
+            protected abstract void Initialisation(ref T a);
             protected abstract void OnEase(T value);
+            protected abstract T Interpolation(T a, T b, float t);
 
             internal void Update()
             {
-                  if (completed) return;
+                  if (_isComplete) return;
+
+                  var deltaTime = deltaMode switch
+                  {
+                        Delta.Unscaled => Time.unscaledDeltaTime,
+                        _ => Time.deltaTime
+                  };
                   if (delay > 0F)
                   {
-                        delay -= Time.deltaTime;
+                        delay -= deltaTime;
                         return;
                   }
                   if (!initialised)
                   {
-                        Init(ref start);
+                        Initialisation(ref start);
                         initialised = true;
 
                         onStart?.Invoke();
                   }
-                  if (elapsedTime < 1F)
+                  if (linearRatio < 1F)
                   {
-                        var deltaTime = deltaMode switch
-                        {
-                              Delta.Unscaled => Time.unscaledDeltaTime,
-                              _ => Time.deltaTime
-                        };
-                        elapsedTime = Mathf.Clamp01(elapsedTime + deltaTime / duration);
-                        T calculatedValue = InterpolateValues(start, end, Ease.EasedRatio(tweenType, elapsedTime, overshoot));
-                        OnEase(calculatedValue);
+                        linearRatio = Mathf.Clamp01(linearRatio + deltaTime * durationMultiplier);
+                        float progress = Ease.EasedRatio(tweenType, linearRatio, overshoot);
+                        OnEase(value: Interpolation(start, end, progress));
+
+                        onUpdate?.Invoke(progress);
                   }
                   else
                   {
                         onComplete?.Invoke();
-                        completed = true;
+                        _isComplete = true;
                   }
             }
 
+            public Builder<T> setDelta(Delta value) { deltaMode = value; return this; }
             public Builder<T> setDelay(float value) { delay = value; return this; }
             public Builder<T> setOvershoot(float value) { overshoot = value; return this; }
-            public Builder<T> setDelta(Delta value) { deltaMode = value; return this; }
             public Builder<T> setOnStart(UnityAction action) { onStart = action; return this; }
+            public Builder<T> setOnUpdate(UnityAction<float> action) { onUpdate = action; return this; }
             public Builder<T> setOnComplete(UnityAction action) { onComplete = action; return this; }
       }
 #pragma warning restore IDE1006
