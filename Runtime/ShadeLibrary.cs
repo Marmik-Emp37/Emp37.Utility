@@ -6,7 +6,7 @@ namespace Emp37.Utility
 {
       using static Shades;
 
-      public readonly struct ColorLibrary
+      public readonly struct ShadeLibrary
       {
             private static readonly Dictionary<Shades, Color32> library = new()
             {
@@ -80,6 +80,7 @@ namespace Emp37.Utility
                   { Yellow, new(255, 255, 000, 255) }
             };
             private static readonly int shadesLength = System.Enum.GetValues(typeof(Shades)).Length;
+
             public static Color32 PickRandom => Pick((Shades) Random.Range(0, shadesLength));
             public static Color32 Pick(Shades shade) => library[shade];
       }

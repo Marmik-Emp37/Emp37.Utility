@@ -16,7 +16,7 @@ namespace Emp37.Utility
 
             public SeparatorAttribute(Shades shade = Shades.Black, byte thickness = 3, bool stretch = false, byte alpha = byte.MaxValue)
             {
-                  Color = ColorLibrary.Pick(shade).WithAlpha(alpha);
+                  Color = ShadeLibrary.Pick(shade).WithAlpha(alpha);
                   Thickness = thickness;
                   Stretch = stretch;
             }

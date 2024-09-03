@@ -97,7 +97,7 @@ namespace Emp37.Utility.Editor
                               if (method.TryGetAttribute(out ButtonAttribute a0) && EvaluateVisibility(method))
                               {
                                     GUI.enabled = EvaluateEnabled(method);
-                                    GUI.backgroundColor = ColorLibrary.Pick(a0.Shade);
+                                    GUI.backgroundColor = ShadeLibrary.Pick(a0.Shade);
                                     if (GUILayout.Button(method.Name, GUILayout.Height(a0.Height)))
                                     {
                                           InvokeWithNamedParameters(method, target, a0.Parameters);

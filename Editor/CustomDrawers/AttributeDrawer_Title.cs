@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace Emp37.Utility.Editor
 {
-      using static ColorLibrary;
+      using static ShadeLibrary;
 
 
       [CustomPropertyDrawer(typeof(TitleAttribute), true)]
