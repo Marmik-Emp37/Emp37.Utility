@@ -14,6 +14,7 @@ namespace Emp37.Utility.Singleton
       {
             public static T Instance { get; private set; }
 
+
             protected virtual void Awake()
             {
                   Debug.Assert(condition: Instance == null, message: $"Multiple instances of type '{typeof(T).Name}' exist on this scene.", context: this);

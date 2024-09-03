@@ -12,22 +12,45 @@ namespace Emp37.Utility.Singleton
       /// </remarks>
       public abstract class Dynamic<T> : MonoBehaviour where T : Dynamic<T>
       {
-            private static T instance; public static T Instance => instance ??= Application.isPlaying ? (FindObjectOfType<T>(false) ?? new GameObject(typeof(T).Name + " : Singleton").AddComponent<T>()) : null;
+            private static T _instance;
 
+            public static T Instance
+            {
+                  get
+                  {
+                        if (!Application.isPlaying) return null;
+
+                        _instance = FindObjectOfType<T>(includeInactive: false);
+                        if (_instance == null)
+                        {
+                              GameObject singleton = new($"{typeof(T).Name} : Singleton");
+                              _instance = singleton.AddComponent<T>();
+                        }
+                        return _instance;
+                  }
+            }
+
+            /// <summary>
+            /// Initializes the singleton instance of type <typeparamref name="T"/>.
+            /// </summary>
+            /// <param name="persistent">If true, the singleton instance will persist across scene loads using <see cref="Object.DontDestroyOnLoad"/>.</param>
+            /// <remarks>If a duplicate instance is detected, the current gameObject will be destroyed, and the existing singleton instance will remain.</remarks>
             protected void Initialize(bool persistent)
             {
-                  if (instance != null && instance != this)
-                  {
-                        string type = typeof(T).FullName;
+                  string typeName = typeof(T).FullName;
 
-                        Debug.LogWarning($"Duplicate instance of type '{type}' detected, destroying gameObject '{name}'.");
+                  if (_instance != null && _instance != this)
+                  {
+                        Debug.LogWarning($"Duplicate instance of type '{typeName}' detected. Destroying gameObject '{name}'.");
                         Destroy(gameObject);
-                        Debug.Log($"Instance of type '{type}' is currently set at object named: '{Instance.name}'.", Instance);
-                        return;
                   }
-                  instance = this as T;
-                  if (persistent) DontDestroyOnLoad(gameObject);
+                  else
+                  {
+                        _instance = this as T;
+                        if (persistent) DontDestroyOnLoad(gameObject);
+                        Debug.Log($"Singleton instance of type '{typeName}' is set on object named: '{_instance.name}'.", _instance);
+                  }
             }
-            protected virtual void OnDestroy() => instance = instance == this ? null : instance;
+            protected virtual void OnDestroy() => _instance = _instance == this ? null : _instance;
       }
 }

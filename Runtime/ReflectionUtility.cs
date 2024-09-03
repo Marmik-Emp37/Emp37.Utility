@@ -31,9 +31,9 @@ namespace Emp37.Utility
                   if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException(nameof(name));
 
                   var key = (type, name);
-                  if (!cachedMembers.TryGetValue(key, out var member))
+                  if (!cachedMembers.TryGetValue(key, out MemberInfo member))
                   {
-                        var returnType = typeof(T);
+                        Type returnType = typeof(T);
                         while (type != null)
                         {
                               member = returnType switch
@@ -69,24 +69,24 @@ namespace Emp37.Utility
             {
                   if (target == null) throw new ArgumentNullException(nameof(target));
 
-                  var type = target.GetType();
+                  Type type = target.GetType();
                   if (enabled.HasFlag(MemberType.Field))
                   {
-                        if (TryFetchInfo<Field>(name, type, out var field, bindings))
+                        if (TryFetchInfo(name, type, out Field field, bindings))
                         {
                               return field.GetValue(target);
                         }
                   }
                   if (enabled.HasFlag(MemberType.Property))
                   {
-                        if (TryFetchInfo<Property>(name, type, out var property, bindings) && property.CanRead)
+                        if (TryFetchInfo(name, type, out Property property, bindings) && property.CanRead)
                         {
                               return property.GetValue(target);
                         }
                   }
                   if (enabled.HasFlag(MemberType.Method))
                   {
-                        if (TryFetchInfo<Method>(name, type, out var method, bindings))
+                        if (TryFetchInfo(name, type, out Method method, bindings))
                         {
                               return method.Invoke(target, parameters);
                         }

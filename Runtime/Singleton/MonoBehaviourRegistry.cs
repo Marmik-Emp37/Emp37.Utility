@@ -19,6 +19,7 @@ namespace Emp37.Utility.Singleton
             /// <remarks>This property provides a newline-separated string containing all registered types on this registry.</remarks>
             public static string Read => string.Join('\n', database.Keys);
 
+
             /// <summary>
             /// Retrieves the registered instance of a specific type.
             /// </summary>
@@ -27,9 +28,9 @@ namespace Emp37.Utility.Singleton
             /// <remarks>It is recommended to cache the return value for improved performance when conducting frequent lookups of the same type.</remarks>
             public static TBehaviour Lookup<TBehaviour>() where TBehaviour : MonoBehaviour
             {
-                  var type = typeof(TBehaviour);
+                  Type type = typeof(TBehaviour);
 
-                  if (database.TryGetValue(type, out var instance))
+                  if (database.TryGetValue(type, out MonoBehaviour instance))
                   {
                         return instance as TBehaviour;
                   }
@@ -39,7 +40,6 @@ namespace Emp37.Utility.Singleton
                         return null;
                   }
             }
-
             /// <summary>
             /// Registers a MonoBehaviour instance in the registry.
             /// </summary>
@@ -65,7 +65,6 @@ namespace Emp37.Utility.Singleton
                         Debug.Log($"Registered Instance of type '{type.Name}'.");
                   }
             }
-
             /// <summary>
             /// Unregisters a MonoBehaviour instance from the registry.
             /// </summary>
@@ -95,7 +94,6 @@ namespace Emp37.Utility.Singleton
                         Debug.LogWarning(message + "This Instance does not exist in the database.");
                   }
             }
-
             /// <summary>
             /// Erases all entries from the registry, unregistering all registered instances.
             /// </summary>
