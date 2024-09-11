@@ -1,5 +1,3 @@
-using Unity.VisualScripting.YamlDotNet.Core.Tokens;
-using UnityEngine;
 using static System.MathF;
 
 namespace Emp37.Utility.Tween
@@ -42,313 +40,324 @@ namespace Emp37.Utility.Tween
                   BreakOutBounce,
             }
 
+
             #region E A S I N G   F U N C T I O N S
-            private static float Linear(float x) => x;
+            private static float Linear(float progress)
+            {
+                  return progress;
+            }
 
             // S I N E
-            private static float EaseInSine(float x)
+            private static float EaseInSine(float progress)
             {
-                  x *= PI * 0.5F;
-
-                  return 1F - Cos(x);
+                  return 1F - Cos(progress * PI * 0.5F);
             }
-            private static float EaseOutSine(float x)
+            private static float EaseOutSine(float progress)
             {
-                  x *= PI * 0.5F;
-
-                  return Sin(x);
+                  return Sin(progress * PI * 0.5F);
             }
-            private static float EaseInOutSine(float x)
+            private static float EaseInOutSine(float progress)
             {
-                  x *= PI;
-
-                  return (Cos(x) - 1F) * -0.5F;
+                  return -0.5F * (Cos(progress * PI) - 1F);
             }
 
             // C U B I C
-            private static float EaseInCubic(float x)
+            private static float EaseInCubic(float progress)
             {
-                  return x * x * x;
+                  return progress * progress * progress;
             }
-            private static float EaseOutCubic(float x)
+            private static float EaseOutCubic(float progress)
             {
-                  x--;
-
-                  return x * x * x + 1F;
+                  progress--;
+                  return progress * progress * progress + 1F;
             }
-            private static float EaseInOutCubic(float x)
+            private static float EaseInOutCubic(float progress)
             {
-                  if (x < 0.5F)
+                  if (progress < 0.5F)
                   {
-                        return 4F * x * x * x;
+                        return 4F * progress * progress * progress;
                   }
                   else
                   {
-                        x = -2F * x + 2F;
-
-                        return 1F - (x * x * x * 0.5F);
+                        progress = -2F * progress + 2F;
+                        return 1F - (progress * progress * progress * 0.5F);
                   }
             }
 
             // Q U I N T
-            private static float EaseInQuint(float x)
+            private static float EaseInQuint(float progress)
             {
-                  return x * x * x * x * x;
+                  return progress * progress * progress * progress * progress;
             }
-            private static float EaseOutQuint(float x)
+            private static float EaseOutQuint(float progress)
             {
-                  x = 1F - x;
-
-                  return 1F - x * x * x * x * x;
+                  progress = 1F - progress;
+                  return 1F - progress * progress * progress * progress * progress;
             }
-            private static float EaseInOutQuint(float x)
+            private static float EaseInOutQuint(float progress)
             {
-                  if (x < 0.5F)
+                  if (progress < 0.5F)
                   {
-                        return 16F * x * x * x * x * x;
+                        return 16F * progress * progress * progress * progress * progress;
                   }
                   else
                   {
-                        x = (x * -2F) + 2F;
-
-                        return 1F - (x * x * x * x * x * 0.5F);
+                        progress = (-2F * progress) + 2F;
+                        return 1F - (progress * progress * progress * progress * progress * 0.5F);
                   }
             }
 
             // C I R C
-            private static float EaseInCirc(float x)
+            private static float EaseInCirc(float progress)
             {
-                  if (x <= 1F)
+                  if (progress <= 1F)
                   {
-                        return 1F - Sqrt(1F - x * x);
+                        return 1F - Sqrt(1F - progress * progress);
                   }
                   else
                   {
                         return 1F;
                   }
             }
-            private static float EaseOutCirc(float x)
+            private static float EaseOutCirc(float progress)
             {
-                  x--;
-
-                  return Sqrt(1F - x * x);
+                  progress--;
+                  return Sqrt(1F - progress * progress);
             }
-            private static float EaseInOutCirc(float x)
+            private static float EaseInOutCirc(float progress)
             {
-                  if (x < 0.5F)
+                  if (progress < 0.5F)
                   {
-                        x *= 2F;
-
-                        return 0.5F * (1F - Sqrt(1F - (x * x)));
+                        progress *= 2F;
+                        return 0.5F * (1F - Sqrt(1F - (progress * progress)));
                   }
                   else
                   {
-                        x = -2F * x + 2F;
-
-                        return 0.5F * (Sqrt(1F - (x * x)) + 1F);
+                        progress = -2F * progress + 2F;
+                        return 0.5F * (Sqrt(1F - (progress * progress)) + 1F);
                   }
             }
 
             // Q U A D
-            private static float EaseInQuad(float x)
+            private static float EaseInQuad(float progress)
             {
-                  return x * x;
+                  return progress * progress;
             }
-            private static float EaseOutQuad(float x)
+            private static float EaseOutQuad(float progress)
             {
-                  x = 1F - x;
-
-                  return 1F - x * x;
+                  progress = 1F - progress;
+                  return 1F - progress * progress;
             }
-            private static float EaseInOutQuad(float x)
+            private static float EaseInOutQuad(float progress)
             {
-                  if (x < 0.5F)
+                  if (progress < 0.5F)
                   {
-                        return x * x * 2F;
+                        return progress * progress * 2F;
                   }
                   else
                   {
-                        x = (-2F * x) + 2F;
-
-                        return 1F - (x * x * 0.5F);
+                        progress = (progress * -2F) + 2F;
+                        return 1F - (progress * progress * 0.5F);
                   }
             }
 
             // Q U A R T
-            private static float EaseInQuart(float x)
+            private static float EaseInQuart(float progress)
             {
-                  return x * x * x * x;
+                  return progress * progress * progress * progress;
             }
-            private static float EaseOutQuart(float x)
+            private static float EaseOutQuart(float progress)
             {
-                  x--;
-
-                  return -(x * x * x * x - 1F);
+                  progress--;
+                  return -(progress * progress * progress * progress - 1F);
             }
-            private static float EaseInOutQuart(float x)
+            private static float EaseInOutQuart(float progress)
             {
-                  if (x < 0.5F)
+                  if (progress < 0.5F)
                   {
-                        return 8F * x * x * x * x;
+                        return 8F * progress * progress * progress * progress;
                   }
                   else
                   {
-                        x = (-2F * x) + 2F;
-
-                        return 1F - (x * x * x * x * 0.5F);
+                        progress = (-2F * progress) + 2F;
+                        return 1F - (progress * progress * progress * progress * 0.5F);
                   }
             }
 
             // E X P O
-            private static float EaseInExpo(float x)
+            private static float EaseInExpo(float progress)
             {
-                  return Pow(2F, 10F * x - 10F);
+                  return Pow(2F, 10F * progress - 10F);
             }
-            private static float EaseOutExpo(float x)
+            private static float EaseOutExpo(float progress)
             {
-                  if (x == 1F)
+                  if (progress == 1F)
                   {
                         return 1F;
                   }
                   else
                   {
-                        return 1F - Pow(2F, -10F * x);
+                        return 1F - Pow(2F, -10F * progress);
                   }
             }
-            private static float EaseInOutExpo(float x)
+            private static float EaseInOutExpo(float progress)
             {
-                  if (x == 0F) return 0F; else if (x == 1F) return 1F;
+                  if (progress == 0F) return 0F;
+                  else if (progress == 1F) return 1F;
 
-                  float p = 20F * x - 10F;
+                  float e = 20F * progress - 10F;
 
-                  if (x < 0.5F)
+                  if (progress < 0.5F)
                   {
-                        return Pow(2F, p) * 0.5F;
+                        return Pow(2F, e) * 0.5F;
                   }
                   else
                   {
-                        return (2F - Pow(2F, -p)) * 0.5F;
+                        return (2F - Pow(2F, -e)) * 0.5F;
+                  }
+            }
+
+            // B A C K
+            private const float BackSpringConstant = 1.70158F;
+
+            private static float EaseInBack(float progress, float overshoot)
+            {
+                  float spring = BackSpringConstant * overshoot;
+
+                  return progress * progress * ((spring + 1F) * progress - spring);
+            }
+            private static float EaseOutBack(float progress, float overshoot)
+            {
+                  float spring = BackSpringConstant * overshoot;
+
+                  progress--;
+                  return progress * progress * ((spring + 1F) * progress + spring) + 1F;
+            }
+            private static float EaseInOutBack(float progress, float overshoot)
+            {
+                  const float midpointTension = 1.525F;
+                  float spring = BackSpringConstant * overshoot * midpointTension;
+
+                  if (progress < 0.5F)
+                  {
+                        progress *= 2F;
+                        return progress * progress * ((spring + 1F) * progress - spring) * 0.5F;
+                  }
+                  else
+                  {
+                        progress = (progress * 2F) - 2F;
+                        return (progress * progress * ((spring + 1F) * progress + spring) + 2F) * 0.5F;
                   }
             }
 
             // B O U N C E
-            private static float EaseInBounce(float x)
+            private static float EaseInBounce(float progress)
             {
-                  return 1F - EaseOutBounce(1F - x);
+                  return 1F - EaseOutBounce(1F - progress);
             }
-            private static float EaseOutBounce(float x)
+            private static float EaseOutBounce(float progress)
             {
-                  const float B1 = 2.75F, B2 = 7.5625F;
+                  const float effect = 2.75F, strength = 7.5625F;
+                  const float c1 = 1F / effect, c2 = 2F / effect, c3 = 2.5F / effect;
+                  const float exitOffset = 2.625F / effect;
 
-                  return x < 1F / B1 ? B2 * x * x : x < 2F / B1 ? B2 * (x -= 1.5F / B1) * x + 0.75F : x < 2.5F / B1 ? B2 * (x -= 2.25F / B1) * x + 0.9375F : B2 * (x -= 2.625F / B1) * x + 0.984375F;
-            }
-            private static float EaseInOutBounce(float x)
-            {
-                  return (x < 0.5F ? 1F - EaseOutBounce(1F - (2F * x)) : 1F + EaseOutBounce((2F * x) - 1F)) * 0.5F;
-            }
-
-            // B A C K
-            private const float Back = 1.70158F;
-
-            private static float EaseInBack(float x, float overshoot)
-            {
-                  float spring = Back * overshoot;
-
-                  return x * x * ((spring + 1F) * x - spring);
-            }
-            private static float EaseOutBack(float x, float overshoot)
-            {
-                  float spring = Back * overshoot;
-
-                  x--;
-
-                  return x * x * ((spring + 1F) * x + spring) + 1F;
-            }
-            private static float EaseInOutBack(float x, float overshoot)
-            {
-                  float spring = Back * overshoot * 1.525F;
-
-                  if (x < 0.5F)
+                  if (progress < c1)
                   {
-                        x *= 2F;
-
-                        return x * x * ((spring + 1F) * x - spring) * 0.5F;
+                        return strength * progress * progress;
+                  }
+                  else if (progress < c2)
+                  {
+                        progress -= 1.5F / effect;
+                        return strength * progress * progress + 0.75F;
+                  }
+                  else if (progress < c3)
+                  {
+                        progress -= 2.25F / effect;
+                        return strength * progress * progress + 0.9375F;
                   }
                   else
                   {
-                        x = (2F * x) - 2F;
-
-                        return (x * x * ((spring + 1F) * x + spring) + 2F) * 0.5F;
+                        progress -= exitOffset;
+                        return strength * progress * progress + 0.984375F;
+                  }
+            }
+            private static float EaseInOutBounce(float progress)
+            {
+                  if (progress < 0.5F)
+                  {
+                        return (1F - EaseOutBounce(1F - (progress * 2F))) * 0.5F;
+                  }
+                  else
+                  {
+                        return (1F + EaseOutBounce((2F * progress) - 1F)) * 0.5F;
                   }
             }
 
             // E L A S T I C
-            private static float EaseInElastic(float x, float overshoot, float period = 0.3F)
+            private static float EaseInElastic(float progress, float overshoot, float period)
             {
-                  if (x == 0F) return 0F; else if (x == 1F) return 1F;
+                  if (progress == 0F) return 0F;
+                  else if (progress == 1F) return 1F;
 
-                  float c = 2F * PI / period;
+                  float shift = period / 4F;
 
-                  if (overshoot > 1F && x > 0.6F)
+                  if (overshoot > 1F && progress > 0.6F)
                   {
-                        overshoot = 1F + ((1F - x) / 0.4F * (overshoot - 1F));
+                        overshoot = 1F + ((1F - progress) / 0.4F * (overshoot - 1F));
                   }
-
-                  x--;
-
-                  return Pow(2F, 10F * x) * Sin((x - c) * c) * overshoot;
+                  progress--;
+                  return -(Pow(2F, 10F * progress) * Sin((progress - shift) * (2F * PI) / period)) * overshoot;
             }
-            private static float EaseOutElastic(float x, float overshoot, float period = 0.3F)
+            private static float EaseOutElastic(float progress, float overshoot, float period)
             {
-                  if (x == 0F) return 0F; else if (x == 1F) return 1F;
+                  if (progress == 0F) return 0F;
+                  else if (progress == 1F) return 1F;
 
-                  float c = 2F * PI / period;
+                  float shift = period / 4F;
 
-                  if (overshoot > 1F && x < 0.4F)
+                  if (overshoot > 1F && progress < 0.4F)
                   {
-                        overshoot = 1F + (x / 0.4F * (overshoot - 1F));
+                        overshoot = 1F + (progress / 0.4F * (overshoot - 1F));
                   }
-
-                  return 1F + Pow(2F, -10F * x) * Sin((x - 0.075F) * c) * overshoot;
+                  return 1F + Pow(2F, -10F * progress) * Sin((progress - shift) * (2F * PI) / period) * overshoot;
             }
-            public static float EaseInOutElastic(float x, float overshoot, float period = 0.5F)
+            private static float EaseInOutElastic(float progress, float overshoot, float period)
             {
-                  if (x == 0F) return 0F; else if (x == 1F) return 1F;
+                  if (progress == 0F) return 0F; else if (progress == 1F) return 1F;
 
-                  float c = 2F * PI / period, s = period / 4F;
-
-                  x *= 2F;
-
+                  progress = (progress * 2F) - 1F;
                   if (overshoot > 1F)
                   {
-                        if (x < 0.2F)
+                        float relativeProgress = progress + 1F;
+                        if (relativeProgress < 0.2F)
                         {
-                              overshoot = 1F + (x / 0.2F * (overshoot - 1F));
+                              overshoot = 1F + (relativeProgress / 0.2F * (overshoot - 1F));
                         }
-                        else
-                        if (x > 0.8F)
+                        if (relativeProgress > 0.8F)
                         {
-                              overshoot = 1F + ((1F - x) / 0.2F * (overshoot - 1F));
+                              overshoot = 1F + ((1F - relativeProgress) / 0.2F * (overshoot - 1F));
                         }
                   }
 
-                  if (x-- < 1F)
+                  float shift = period / 4F;
+                  float scaledProgress = 10F * progress, sineFactor = Sin((progress - shift) * (2F * PI) / period);
+
+                  if (progress < 0F)
                   {
-                        return -0.5F * (Pow(2F, 10F * x) * Sin((x - s) * c)) * overshoot;
+                        return -0.5F * (Pow(2F, scaledProgress) * sineFactor) * overshoot;
                   }
                   else
                   {
-                        return 1F + Pow(2F, -10F * x) * Sin((x - s) * c) * 0.5F * overshoot;
+                        return 1F + 0.5F * Pow(2F, -scaledProgress) * sineFactor * overshoot;
                   }
             }
 
             // C U S T O M
-            private static float BreakOutBounce(float x)
+            private static float BreakOutBounce(float progress)
             {
-                  return (x < 0.5F ? 1F - EaseInBounce(1F - (2F * x)) : 1F + EaseOutBounce((2F * x) - 1F)) * 0.5F;
+                  return (progress < 0.5F ? 1F - EaseInBounce(1F - (2F * progress)) : 1F + EaseOutBounce((2F * progress) - 1F)) * 0.5F;
             }
             #endregion
-
 
             /// <summary>
             /// Simulates transition of a value on a non-linear path.
@@ -356,40 +365,40 @@ namespace Emp37.Utility.Tween
             /// <param name="type">Type of curve to be simulated.</param>
             /// <param name="value">Normalized point on a linear path.</param>
             /// <returns>Corresponding point on a selected type path.</returns>
-            public static float EasedRatio(Type type, float value, float overshoot = 1F) => type switch
+            public static float EasedRatio(float value, Type type, float overshoot = 1F, float period = 0.4F) => type switch
             {
-                  Type.Linear => Linear(x: value),
-                  Type.InSine => EaseInSine(x: value),
-                  Type.OutSine => EaseOutSine(x: value),
-                  Type.InOutSine => EaseInOutSine(x: value),
-                  Type.InCubic => EaseInCubic(x: value),
-                  Type.OutCubic => EaseOutCubic(x: value),
-                  Type.InOutCubic => EaseInOutCubic(x: value),
-                  Type.InQuint => EaseInQuint(x: value),
-                  Type.OutQuint => EaseOutQuint(x: value),
-                  Type.InOutQuint => EaseInOutQuint(x: value),
-                  Type.InCirc => EaseInCirc(x: value),
-                  Type.OutCirc => EaseOutCirc(x: value),
-                  Type.InOutCirc => EaseInOutCirc(x: value),
-                  Type.InQuad => EaseInQuad(x: value),
-                  Type.OutQuad => EaseOutQuad(x: value),
-                  Type.InOutQuad => EaseInOutQuad(x: value),
-                  Type.InQuart => EaseInQuart(x: value),
-                  Type.OutQuart => EaseOutQuart(x: value),
-                  Type.InOutQuart => EaseInOutQuart(x: value),
-                  Type.InExpo => EaseInExpo(x: value),
-                  Type.OutExpo => EaseOutExpo(x: value),
-                  Type.InOutExpo => EaseInOutExpo(x: value),
-                  Type.InBack => EaseInBack(x: value, overshoot),
-                  Type.OutBack => EaseOutBack(x: value, overshoot),
-                  Type.InOutBack => EaseInOutBack(x: value, overshoot),
-                  Type.InElastic => EaseInElastic(x: value, overshoot),
-                  Type.OutElastic => EaseOutElastic(x: value, overshoot),
-                  Type.InOutElastic => EaseInOutElastic(x: value, overshoot),
-                  Type.InBounce => EaseInBounce(x: value),
-                  Type.OutBounce => EaseOutBounce(x: value),
-                  Type.InOutBounce => EaseInOutBounce(x: value),
-                  Type.BreakOutBounce => BreakOutBounce(x: value),
+                  Type.Linear => Linear(value),
+                  Type.InSine => EaseInSine(value),
+                  Type.OutSine => EaseOutSine(value),
+                  Type.InOutSine => EaseInOutSine(value),
+                  Type.InCubic => EaseInCubic(value),
+                  Type.OutCubic => EaseOutCubic(value),
+                  Type.InOutCubic => EaseInOutCubic(value),
+                  Type.InQuint => EaseInQuint(value),
+                  Type.OutQuint => EaseOutQuint(value),
+                  Type.InOutQuint => EaseInOutQuint(value),
+                  Type.InCirc => EaseInCirc(value),
+                  Type.OutCirc => EaseOutCirc(value),
+                  Type.InOutCirc => EaseInOutCirc(value),
+                  Type.InQuad => EaseInQuad(value),
+                  Type.OutQuad => EaseOutQuad(value),
+                  Type.InOutQuad => EaseInOutQuad(value),
+                  Type.InQuart => EaseInQuart(value),
+                  Type.OutQuart => EaseOutQuart(value),
+                  Type.InOutQuart => EaseInOutQuart(value),
+                  Type.InExpo => EaseInExpo(value),
+                  Type.OutExpo => EaseOutExpo(value),
+                  Type.InOutExpo => EaseInOutExpo(value),
+                  Type.InBack => EaseInBack(value, overshoot),
+                  Type.OutBack => EaseOutBack(value, overshoot),
+                  Type.InOutBack => EaseInOutBack(value, overshoot),
+                  Type.InElastic => EaseInElastic(value, overshoot, period),
+                  Type.OutElastic => EaseOutElastic(value, overshoot, period),
+                  Type.InOutElastic => EaseInOutElastic(value, overshoot, period),
+                  Type.InBounce => EaseInBounce(value),
+                  Type.OutBounce => EaseOutBounce(value),
+                  Type.InOutBounce => EaseInOutBounce(value),
+                  Type.BreakOutBounce => BreakOutBounce(value),
                   _ => 1F
             };
       }
