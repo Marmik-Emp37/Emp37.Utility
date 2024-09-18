@@ -28,50 +28,50 @@ namespace Emp37.Utility.Tween
                   InExpo,
                   OutExpo,
                   InOutExpo,
-                  InBounce,
-                  OutBounce,
-                  InOutBounce,
                   InBack,
                   OutBack,
                   InOutBack,
+                  InBounce,
+                  OutBounce,
+                  InOutBounce,
+                  BreakOutBounce,
                   InElastic,
                   OutElastic,
                   InOutElastic,
-                  BreakOutBounce,
             }
 
 
             #region E A S I N G   F U N C T I O N S
-            private static float Linear(float progress)
+            public static float Linear(float progress)
             {
                   return progress;
             }
 
             // S I N E
-            private static float EaseInSine(float progress)
+            public static float InSine(float progress)
             {
                   return 1F - Cos(progress * PI * 0.5F);
             }
-            private static float EaseOutSine(float progress)
+            public static float OutSine(float progress)
             {
                   return Sin(progress * PI * 0.5F);
             }
-            private static float EaseInOutSine(float progress)
+            public static float InOutSine(float progress)
             {
                   return -0.5F * (Cos(progress * PI) - 1F);
             }
 
             // C U B I C
-            private static float EaseInCubic(float progress)
+            public static float InCubic(float progress)
             {
                   return progress * progress * progress;
             }
-            private static float EaseOutCubic(float progress)
+            public static float OutCubic(float progress)
             {
                   progress--;
                   return progress * progress * progress + 1F;
             }
-            private static float EaseInOutCubic(float progress)
+            public static float InOutCubic(float progress)
             {
                   if (progress < 0.5F)
                   {
@@ -85,16 +85,16 @@ namespace Emp37.Utility.Tween
             }
 
             // Q U I N T
-            private static float EaseInQuint(float progress)
+            public static float InQuint(float progress)
             {
                   return progress * progress * progress * progress * progress;
             }
-            private static float EaseOutQuint(float progress)
+            public static float OutQuint(float progress)
             {
                   progress = 1F - progress;
                   return 1F - progress * progress * progress * progress * progress;
             }
-            private static float EaseInOutQuint(float progress)
+            public static float InOutQuint(float progress)
             {
                   if (progress < 0.5F)
                   {
@@ -108,7 +108,7 @@ namespace Emp37.Utility.Tween
             }
 
             // C I R C
-            private static float EaseInCirc(float progress)
+            public static float InCirc(float progress)
             {
                   if (progress <= 1F)
                   {
@@ -119,12 +119,12 @@ namespace Emp37.Utility.Tween
                         return 1F;
                   }
             }
-            private static float EaseOutCirc(float progress)
+            public static float OutCirc(float progress)
             {
                   progress--;
                   return Sqrt(1F - progress * progress);
             }
-            private static float EaseInOutCirc(float progress)
+            public static float InOutCirc(float progress)
             {
                   if (progress < 0.5F)
                   {
@@ -139,16 +139,16 @@ namespace Emp37.Utility.Tween
             }
 
             // Q U A D
-            private static float EaseInQuad(float progress)
+            public static float InQuad(float progress)
             {
                   return progress * progress;
             }
-            private static float EaseOutQuad(float progress)
+            public static float OutQuad(float progress)
             {
                   progress = 1F - progress;
                   return 1F - progress * progress;
             }
-            private static float EaseInOutQuad(float progress)
+            public static float InOutQuad(float progress)
             {
                   if (progress < 0.5F)
                   {
@@ -162,16 +162,16 @@ namespace Emp37.Utility.Tween
             }
 
             // Q U A R T
-            private static float EaseInQuart(float progress)
+            public static float InQuart(float progress)
             {
                   return progress * progress * progress * progress;
             }
-            private static float EaseOutQuart(float progress)
+            public static float OutQuart(float progress)
             {
                   progress--;
                   return -(progress * progress * progress * progress - 1F);
             }
-            private static float EaseInOutQuart(float progress)
+            public static float InOutQuart(float progress)
             {
                   if (progress < 0.5F)
                   {
@@ -185,11 +185,11 @@ namespace Emp37.Utility.Tween
             }
 
             // E X P O
-            private static float EaseInExpo(float progress)
+            public static float InExpo(float progress)
             {
                   return Pow(2F, 10F * progress - 10F);
             }
-            private static float EaseOutExpo(float progress)
+            public static float OutExpo(float progress)
             {
                   if (progress == 1F)
                   {
@@ -200,7 +200,7 @@ namespace Emp37.Utility.Tween
                         return 1F - Pow(2F, -10F * progress);
                   }
             }
-            private static float EaseInOutExpo(float progress)
+            public static float InOutExpo(float progress)
             {
                   if (progress == 0F) return 0F;
                   else if (progress == 1F) return 1F;
@@ -218,25 +218,24 @@ namespace Emp37.Utility.Tween
             }
 
             // B A C K
-            private const float BackSpringConstant = 1.70158F;
-
-            private static float EaseInBack(float progress, float overshoot)
+            private const float easeBackSpringConstant = 1.70158F;
+            public static float InBack(float progress, float overshoot)
             {
-                  float spring = BackSpringConstant * overshoot;
+                  float spring = easeBackSpringConstant * overshoot;
 
                   return progress * progress * ((spring + 1F) * progress - spring);
             }
-            private static float EaseOutBack(float progress, float overshoot)
+            public static float OutBack(float progress, float overshoot)
             {
-                  float spring = BackSpringConstant * overshoot;
+                  float spring = easeBackSpringConstant * overshoot;
 
                   progress--;
                   return progress * progress * ((spring + 1F) * progress + spring) + 1F;
             }
-            private static float EaseInOutBack(float progress, float overshoot)
+            public static float InOutBack(float progress, float overshoot)
             {
                   const float midpointTension = 1.525F;
-                  float spring = BackSpringConstant * overshoot * midpointTension;
+                  float spring = easeBackSpringConstant * overshoot * midpointTension;
 
                   if (progress < 0.5F)
                   {
@@ -251,11 +250,11 @@ namespace Emp37.Utility.Tween
             }
 
             // B O U N C E
-            private static float EaseInBounce(float progress)
+            public static float InBounce(float progress)
             {
-                  return 1F - EaseOutBounce(1F - progress);
+                  return 1F - OutBounce(1F - progress);
             }
-            private static float EaseOutBounce(float progress)
+            public static float OutBounce(float progress)
             {
                   const float effect = 2.75F, strength = 7.5625F;
                   const float c1 = 1F / effect, c2 = 2F / effect, c3 = 2.5F / effect;
@@ -281,20 +280,24 @@ namespace Emp37.Utility.Tween
                         return strength * progress * progress + 0.984375F;
                   }
             }
-            private static float EaseInOutBounce(float progress)
+            public static float InOutBounce(float progress)
             {
                   if (progress < 0.5F)
                   {
-                        return (1F - EaseOutBounce(1F - (progress * 2F))) * 0.5F;
+                        return (1F - OutBounce(1F - (progress * 2F))) * 0.5F;
                   }
                   else
                   {
-                        return (1F + EaseOutBounce((2F * progress) - 1F)) * 0.5F;
+                        return (1F + OutBounce((2F * progress) - 1F)) * 0.5F;
                   }
+            }
+            public static float BreakOutBounce(float progress)
+            {
+                  return (progress < 0.5F ? 1F - InBounce(1F - (2F * progress)) : 1F + OutBounce((2F * progress) - 1F)) * 0.5F;
             }
 
             // E L A S T I C
-            private static float EaseInElastic(float progress, float overshoot, float period)
+            public static float InElastic(float progress, float overshoot, float period)
             {
                   if (progress == 0F) return 0F;
                   else if (progress == 1F) return 1F;
@@ -308,7 +311,7 @@ namespace Emp37.Utility.Tween
                   progress--;
                   return -(Pow(2F, 10F * progress) * Sin((progress - shift) * (2F * PI) / period)) * overshoot;
             }
-            private static float EaseOutElastic(float progress, float overshoot, float period)
+            public static float OutElastic(float progress, float overshoot, float period)
             {
                   if (progress == 0F) return 0F;
                   else if (progress == 1F) return 1F;
@@ -321,7 +324,7 @@ namespace Emp37.Utility.Tween
                   }
                   return 1F + Pow(2F, -10F * progress) * Sin((progress - shift) * (2F * PI) / period) * overshoot;
             }
-            private static float EaseInOutElastic(float progress, float overshoot, float period)
+            public static float InOutElastic(float progress, float overshoot, float period)
             {
                   if (progress == 0F) return 0F; else if (progress == 1F) return 1F;
 
@@ -351,55 +354,6 @@ namespace Emp37.Utility.Tween
                         return 1F + 0.5F * Pow(2F, -scaledProgress) * sineFactor * overshoot;
                   }
             }
-
-            // C U S T O M
-            private static float BreakOutBounce(float progress)
-            {
-                  return (progress < 0.5F ? 1F - EaseInBounce(1F - (2F * progress)) : 1F + EaseOutBounce((2F * progress) - 1F)) * 0.5F;
-            }
             #endregion
-
-            /// <summary>
-            /// Simulates transition of a value on a non-linear path.
-            /// </summary>
-            /// <param name="type">Type of curve to be simulated.</param>
-            /// <param name="value">Normalized point on a linear path.</param>
-            /// <returns>Corresponding point on a selected type path.</returns>
-            public static float EasedRatio(float value, Type type, float overshoot = 1F, float period = 0.4F) => type switch
-            {
-                  Type.Linear => Linear(value),
-                  Type.InSine => EaseInSine(value),
-                  Type.OutSine => EaseOutSine(value),
-                  Type.InOutSine => EaseInOutSine(value),
-                  Type.InCubic => EaseInCubic(value),
-                  Type.OutCubic => EaseOutCubic(value),
-                  Type.InOutCubic => EaseInOutCubic(value),
-                  Type.InQuint => EaseInQuint(value),
-                  Type.OutQuint => EaseOutQuint(value),
-                  Type.InOutQuint => EaseInOutQuint(value),
-                  Type.InCirc => EaseInCirc(value),
-                  Type.OutCirc => EaseOutCirc(value),
-                  Type.InOutCirc => EaseInOutCirc(value),
-                  Type.InQuad => EaseInQuad(value),
-                  Type.OutQuad => EaseOutQuad(value),
-                  Type.InOutQuad => EaseInOutQuad(value),
-                  Type.InQuart => EaseInQuart(value),
-                  Type.OutQuart => EaseOutQuart(value),
-                  Type.InOutQuart => EaseInOutQuart(value),
-                  Type.InExpo => EaseInExpo(value),
-                  Type.OutExpo => EaseOutExpo(value),
-                  Type.InOutExpo => EaseInOutExpo(value),
-                  Type.InBack => EaseInBack(value, overshoot),
-                  Type.OutBack => EaseOutBack(value, overshoot),
-                  Type.InOutBack => EaseInOutBack(value, overshoot),
-                  Type.InElastic => EaseInElastic(value, overshoot, period),
-                  Type.OutElastic => EaseOutElastic(value, overshoot, period),
-                  Type.InOutElastic => EaseInOutElastic(value, overshoot, period),
-                  Type.InBounce => EaseInBounce(value),
-                  Type.OutBounce => EaseOutBounce(value),
-                  Type.InOutBounce => EaseInOutBounce(value),
-                  Type.BreakOutBounce => BreakOutBounce(value),
-                  _ => 1F
-            };
       }
 }
