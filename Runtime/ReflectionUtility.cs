@@ -93,7 +93,6 @@ namespace Emp37.Utility
                   }
                   return null;
             }
-
             public static object InvokeWithNamedParameters(Method method, object target, string[] names = null, BindingFlags bindings = DEFAULT_FLAGS)
             {
                   List<object> values = new();
