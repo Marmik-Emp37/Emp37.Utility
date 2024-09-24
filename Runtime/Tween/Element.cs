@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.Events;
@@ -17,13 +18,34 @@ namespace Emp37.Utility.Tween
             private Vector3 initial;
             private float delay, progress, overshoot = 1F, period = 0.37F;
             private Delta deltaMode;
-            private Func<float, float> easeMethod;
+            private Func<float> easeMethod;
             private UnityAction onInitialize, onStart, onComplete;
             private UnityAction<float> onUpdate;
             private UnityAction<Vector3> onTween;
 
             public bool IsComplete { get; private set; }
-            public bool IsValid => transform && durationMultiplier > 0F && initial != target;
+            public bool IsValid
+            {
+                  get
+                  {
+                        List<string> warnings = new();
+
+                        if (!transform) warnings.Add("Missing or null Transform reference.");
+                        if (durationMultiplier <= 0F) warnings.Add($"Invalid duration {1F / durationMultiplier} value. It must be greater than 0.");
+                        if (initial == target) warnings.Add("Initial and target values are the same, no tweening necessary.");
+                        if (onInitialize == null) warnings.Add("Initialization action is not set.");
+                        if (onTween == null) warnings.Add("Tween action is not set.");
+                        if (warnings.Count > 0)
+                        {
+                              foreach (var warning in warnings)
+                              {
+                                    Debug.LogWarning("Validation Failed: " + warning);
+                              }
+                              return false;
+                        }
+                        return true;
+                  }
+            }
 
 
             private Element(Transform transform, Vector3 target, float duration)
@@ -31,7 +53,7 @@ namespace Emp37.Utility.Tween
                   this.transform = transform;
                   this.target = target;
                   durationMultiplier = 1F / duration;
-                  easeMethod = value => Linear(value);
+                  easeMethod = () => Linear(progress);
             }
 
             public static ITweenAction Build(Transform transform, Vector3 target, float duration) => new Element(transform, target, duration);
@@ -52,14 +74,13 @@ namespace Emp37.Utility.Tween
                         initialized = true;
                         onStart?.Invoke();
                   }
-                  if (progress < 1F)
-                  {
-                        progress = Mathf.Clamp01(progress + deltaTime * durationMultiplier);
-                        float easedRatio = easeMethod(progress);
-                        onTween(Vector3.LerpUnclamped(initial, target, easedRatio));
-                        onUpdate?.Invoke(easedRatio);
-                  }
-                  else
+
+                  progress = Mathf.Clamp01(progress + deltaTime * durationMultiplier);
+                  float easedRatio = easeMethod();
+                  onTween(Vector3.LerpUnclamped(initial, target, easedRatio));
+                  onUpdate?.Invoke(easedRatio);
+
+                  if (progress == 1F)
                   {
                         IsComplete = true;
                         onComplete?.Invoke();
@@ -69,38 +90,38 @@ namespace Emp37.Utility.Tween
             {
                   easeMethod = type switch
                   {
-                        Type.InSine => value => InSine(value),
-                        Type.OutSine => value => OutSine(value),
-                        Type.InOutSine => value => InOutSine(value),
-                        Type.InCubic => value => InCubic(value),
-                        Type.OutCubic => value => OutCubic(value),
-                        Type.InOutCubic => value => InOutCubic(value),
-                        Type.InQuint => value => InQuint(value),
-                        Type.OutQuint => value => OutQuint(value),
-                        Type.InOutQuint => value => InOutQuint(value),
-                        Type.InCirc => value => InCirc(value),
-                        Type.OutCirc => value => OutCirc(value),
-                        Type.InOutCirc => value => InOutCirc(value),
-                        Type.InQuad => value => InQuad(value),
-                        Type.OutQuad => value => OutQuad(value),
-                        Type.InOutQuad => value => InOutQuad(value),
-                        Type.InQuart => value => InQuart(value),
-                        Type.OutQuart => value => OutQuart(value),
-                        Type.InOutQuart => value => InOutQuart(value),
-                        Type.InExpo => value => InExpo(value),
-                        Type.OutExpo => value => OutExpo(value),
-                        Type.InOutExpo => value => InOutExpo(value),
-                        Type.InBack => value => InBack(value, overshoot),
-                        Type.OutBack => value => OutBack(value, overshoot),
-                        Type.InOutBack => value => InOutBack(value, overshoot),
-                        Type.InElastic => value => InElastic(value, overshoot, period),
-                        Type.OutElastic => value => OutElastic(value, overshoot, period),
-                        Type.InOutElastic => value => InOutElastic(value, overshoot, period),
-                        Type.InBounce => value => InBounce(value),
-                        Type.OutBounce => value => OutBounce(value),
-                        Type.InOutBounce => value => InOutBounce(value),
-                        Type.BreakOutBounce => value => BreakOutBounce(value),
-                        _ => value => Linear(value)
+                        Type.InSine => () => InSine(progress),
+                        Type.OutSine => () => OutSine(progress),
+                        Type.InOutSine => () => InOutSine(progress),
+                        Type.InCubic => () => InCubic(progress),
+                        Type.OutCubic => () => OutCubic(progress),
+                        Type.InOutCubic => () => InOutCubic(progress),
+                        Type.InQuint => () => InQuint(progress),
+                        Type.OutQuint => () => OutQuint(progress),
+                        Type.InOutQuint => () => InOutQuint(progress),
+                        Type.InCirc => () => InCirc(progress),
+                        Type.OutCirc => () => OutCirc(progress),
+                        Type.InOutCirc => () => InOutCirc(progress),
+                        Type.InQuad => () => InQuad(progress),
+                        Type.OutQuad => () => OutQuad(progress),
+                        Type.InOutQuad => () => InOutQuad(progress),
+                        Type.InQuart => () => InQuart(progress),
+                        Type.OutQuart => () => OutQuart(progress),
+                        Type.InOutQuart => () => InOutQuart(progress),
+                        Type.InExpo => () => InExpo(progress),
+                        Type.OutExpo => () => OutExpo(progress),
+                        Type.InOutExpo => () => InOutExpo(progress),
+                        Type.InBack => () => InBack(progress, overshoot),
+                        Type.OutBack => () => OutBack(progress, overshoot),
+                        Type.InOutBack => () => InOutBack(progress, overshoot),
+                        Type.InElastic => () => InElastic(progress, overshoot, period),
+                        Type.OutElastic => () => OutElastic(progress, overshoot, period),
+                        Type.InOutElastic => () => InOutElastic(progress, overshoot, period),
+                        Type.InBounce => () => InBounce(progress),
+                        Type.OutBounce => () => OutBounce(progress),
+                        Type.InOutBounce => () => InOutBounce(progress),
+                        Type.BreakOutBounce => () => BreakOutBounce(progress),
+                        _ => () => Linear(progress)
                   };
                   return this;
             }
@@ -137,32 +158,33 @@ namespace Emp37.Utility.Tween
             /// </summary>
             public Element setOnComplete(UnityAction action) { onComplete = action; return this; }
 
+
             #region T W E E N    A C T I O N S
-            Element ITweenAction.executeMove()
+            Element ITweenAction.executeMove(Vector3? value)
             {
-                  onInitialize = () => initial = transform.position;
+                  onInitialize = () => initial = value ?? transform.position;
                   onTween = value => transform.position = value;
                   return this;
             }
-            Element ITweenAction.executeRotate()
+            Element ITweenAction.executeRotate(Vector3? value)
             {
-                  onInitialize = () => initial = transform.eulerAngles;
+                  onInitialize = () => initial = value ?? transform.eulerAngles;
                   onTween = value => transform.eulerAngles = value;
                   return this;
             }
-            Element ITweenAction.executeScale()
+            Element ITweenAction.executeScale(Vector3? value)
             {
-                  onInitialize = () => initial = transform.localScale;
+                  onInitialize = () => initial = value ?? transform.localScale;
                   onTween = value => transform.localScale = value;
                   return this;
             }
-            Element ITweenAction.executeAlpha()
+            Element ITweenAction.executeAlpha(float? value)
             {
                   if (!transform.TryGetComponent(out CanvasGroup group))
                   {
                         throw new MissingComponentException($"'{transform.name}' is missing a {nameof(CanvasGroup)} component, which is required for alpha tweening.");
                   }
-                  onInitialize = () => initial = group.alpha * Vector3.right;
+                  onInitialize = () => initial = (value ?? group.alpha) * Vector3.right;
                   onTween = value => group.alpha = value.x;
                   return this;
             }
