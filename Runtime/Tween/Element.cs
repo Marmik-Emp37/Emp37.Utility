@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace Emp37.Utility.Tween
             private readonly float durationMultiplier;
             private readonly Vector3 target;
             private Vector3 initial;
+            private ITweenAction.Type actionType;
             private float delay, progress, overshoot = 1F, period = 0.37F;
             private Delta deltaMode;
             private Func<float> easeMethod;
@@ -24,26 +26,25 @@ namespace Emp37.Utility.Tween
             private UnityAction<Vector3> onTween;
 
             public bool IsComplete { get; private set; }
-            public bool IsValid
+            public bool IsInvalid
             {
                   get
                   {
-                        List<string> warnings = new();
-
-                        if (!transform) warnings.Add("Missing or null Transform reference.");
-                        if (durationMultiplier <= 0F) warnings.Add($"Invalid duration {1F / durationMultiplier} value. It must be greater than 0.");
-                        if (initial == target) warnings.Add("Initial and target values are the same, no tweening necessary.");
-                        if (onInitialize == null) warnings.Add("Initialization action is not set.");
-                        if (onTween == null) warnings.Add("Tween action is not set.");
-                        if (warnings.Count > 0)
+                        bool output;
+                        List<string> warnings = (new[]
                         {
-                              foreach (var warning in warnings)
-                              {
-                                    Debug.LogWarning("Validation Failed: " + warning);
-                              }
-                              return false;
+                              (!transform, "Missing or null Transform reference."),
+                              (durationMultiplier <= 0F, $"Invalid duration {1F / durationMultiplier} value. It must be greater than 0."),
+                              (initial == target, "Initial and target values are the same, no tweening necessary."),
+                              (onInitialize == null, "Initialization action is not set."),
+                              (onTween == null, "Tween action is not set.")
+                        }).Where(condition => condition.Item1).Select(condition => condition.Item2).ToList();
+
+                        if (output = warnings.Any())
+                        {
+                              warnings.ForEach(warning => Debug.LogWarning("Validation Failed: " + warning));
                         }
-                        return true;
+                        return output;
                   }
             }
 
@@ -62,7 +63,8 @@ namespace Emp37.Utility.Tween
             {
                   if (IsComplete) return;
 
-                  float deltaTime = deltaMode == Delta.Unscaled ? Time.unscaledDeltaTime : Time.deltaTime;
+                  float deltaTime = (deltaMode == Delta.Unscaled) ? Time.unscaledDeltaTime : Time.deltaTime;
+
                   if (delay > 0F)
                   {
                         delay -= deltaTime;
@@ -70,14 +72,16 @@ namespace Emp37.Utility.Tween
                   }
                   if (!initialized)
                   {
-                        onInitialize();
                         initialized = true;
+                        onInitialize();
                         onStart?.Invoke();
                   }
-
                   progress = Mathf.Clamp01(progress + deltaTime * durationMultiplier);
+
                   float easedRatio = easeMethod();
-                  onTween(Vector3.LerpUnclamped(initial, target, easedRatio));
+                  Vector3 value = Vector3.LerpUnclamped(initial, target, easedRatio);
+
+                  onTween(value);
                   onUpdate?.Invoke(easedRatio);
 
                   if (progress == 1F)
@@ -86,6 +90,9 @@ namespace Emp37.Utility.Tween
                         onComplete?.Invoke();
                   }
             }
+            internal bool ConflictsWith(Element other) => transform == other.transform && actionType == other.actionType;
+
+            #region C H A I N E D   M E T H O D S
             public Element setEase(Type type)
             {
                   easeMethod = type switch
@@ -157,33 +164,44 @@ namespace Emp37.Utility.Tween
             /// Sets a callback to be invoked when the tween completes.
             /// </summary>
             public Element setOnComplete(UnityAction action) { onComplete = action; return this; }
-
+            #endregion
 
             #region T W E E N    A C T I O N S
             Element ITweenAction.executeMove(Vector3? value)
             {
+                  actionType = ITweenAction.Type.Move;
                   onInitialize = () => initial = value ?? transform.position;
                   onTween = value => transform.position = value;
                   return this;
             }
+            Element ITweenAction.executeMoveLocal(Vector3? value)
+            {
+                  actionType = ITweenAction.Type.MoveLocal;
+                  onInitialize = () => initial = value ?? transform.localPosition;
+                  onTween = value => transform.localPosition = value;
+                  return this;
+            }
             Element ITweenAction.executeRotate(Vector3? value)
             {
+                  actionType = ITweenAction.Type.Rotate;
                   onInitialize = () => initial = value ?? transform.eulerAngles;
                   onTween = value => transform.eulerAngles = value;
                   return this;
             }
             Element ITweenAction.executeScale(Vector3? value)
             {
+                  actionType = ITweenAction.Type.Scale;
                   onInitialize = () => initial = value ?? transform.localScale;
                   onTween = value => transform.localScale = value;
                   return this;
             }
-            Element ITweenAction.executeAlpha(float? value)
+            Element ITweenAction.executeCanvasAlpha(float? value)
             {
                   if (!transform.TryGetComponent(out CanvasGroup group))
                   {
                         throw new MissingComponentException($"'{transform.name}' is missing a {nameof(CanvasGroup)} component, which is required for alpha tweening.");
                   }
+                  actionType = ITweenAction.Type.CanvasAlpha;
                   onInitialize = () => initial = (value ?? group.alpha) * Vector3.right;
                   onTween = value => group.alpha = value.x;
                   return this;

@@ -2,18 +2,19 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-using Emp37.Utility.Tween;
-
-namespace Emp37.Utility
+namespace Emp37.Utility.Tween
 {
       public class Engine : MonoBehaviour
       {
+            private static Engine instance;
+
             private static readonly List<Element> tweens = new();
 
 
-            private void Update()
+            private void LateUpdate()
             {
-                  for (int i = 0; i < tweens.Count; i++)
+                  int count = tweens.Count;
+                  for (int i = count - 1; i >= 0; i--)
                   {
                         var context = tweens[i];
                         context.Update();
@@ -22,20 +23,39 @@ namespace Emp37.Utility
                               tweens.RemoveAt(i);
                         }
                   }
-                  if (tweens.Count == 0)
+                  if (count == 0)
                   {
                         enabled = false;
                   }
             }
-
-
-            public void Push(Element tween)
+            private void OnDestroy()
             {
-                  if (tween.IsValid && Application.isPlaying)
+                  instance = null;
+            }
+
+            private static void Initialize()
+            {
+                  if (instance != null) return;
+
+                  instance = FindObjectOfType<Engine>();
+                  if (instance == null)
                   {
-                        tweens.Add(tween);
-                        enabled = true;
+                        instance = new GameObject(typeof(Engine).FullName).AddComponent<Engine>();
                   }
+                  DontDestroyOnLoad(instance);
+            }
+            public static void Push(Element tween)
+            {
+                  if (!Application.isPlaying || tween.IsInvalid) return;
+
+                  Initialize();
+
+                  if (tweens.FindIndex(existingTween => existingTween.ConflictsWith(tween)) is int index && index != -1)
+                  {
+                        tweens.RemoveAt(index);
+                  }
+                  tweens.Add(tween);
+                  instance.enabled = true;
             }
       }
 }

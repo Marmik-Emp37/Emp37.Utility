@@ -13,7 +13,7 @@ namespace Emp37.Utility
       public static class ReflectionUtility
       {
             [Flags]
-            public enum MemberType
+            public enum MemberTypes
             {
                   Field = 1,
                   Property = 2,
@@ -65,26 +65,26 @@ namespace Emp37.Utility
                   }
                   return value != null;
             }
-            public static object FetchValue(string name, object target, MemberType enabled = MemberType.All, BindingFlags bindings = DEFAULT_FLAGS, params object[] parameters)
+            public static object FetchValue(string name, object target, MemberTypes enabled = MemberTypes.All, BindingFlags bindings = DEFAULT_FLAGS, params object[] parameters)
             {
                   if (target == null) throw new ArgumentNullException(nameof(target));
 
                   Type type = target.GetType();
-                  if (enabled.HasFlag(MemberType.Field))
+                  if (enabled.HasFlag(MemberTypes.Field))
                   {
                         if (TryFetchInfo(name, type, out Field field, bindings))
                         {
                               return field.GetValue(target);
                         }
                   }
-                  if (enabled.HasFlag(MemberType.Property))
+                  if (enabled.HasFlag(MemberTypes.Property))
                   {
                         if (TryFetchInfo(name, type, out Property property, bindings) && property.CanRead)
                         {
                               return property.GetValue(target);
                         }
                   }
-                  if (enabled.HasFlag(MemberType.Method))
+                  if (enabled.HasFlag(MemberTypes.Method))
                   {
                         if (TryFetchInfo(name, type, out Method method, bindings))
                         {
@@ -104,7 +104,7 @@ namespace Emp37.Utility
 
                         for (byte i = 0; i < parameters.Length; i++)
                         {
-                              object value = FetchValue(names[i], target, MemberType.Field | MemberType.Property, bindings);
+                              object value = FetchValue(names[i], target, MemberTypes.Field | MemberTypes.Property, bindings);
 
                               Assert(value != null, $"Unable to fetch value for '{names[i]}' in type '{target.GetType().FullName}'. The member may not exist or may not be accessible.");
 
