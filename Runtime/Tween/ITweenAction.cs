@@ -7,6 +7,7 @@ namespace Emp37.Utility.Tween
       {
             public enum Type
             {
+                  None,
                   Move, MoveLocal, Rotate, Scale,
                   CanvasAlpha
             }

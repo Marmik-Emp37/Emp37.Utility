@@ -31,14 +31,13 @@ namespace Emp37.Utility.Tween
                   get
                   {
                         bool output;
-                        List<string> warnings = (new[]
+                        List<string> warnings = new (bool condition, string message)[]
                         {
                               (!transform, "Missing or null Transform reference."),
                               (durationMultiplier <= 0F, $"Invalid duration {1F / durationMultiplier} value. It must be greater than 0."),
                               (initial == target, "Initial and target values are the same, no tweening necessary."),
-                              (onInitialize == null, "Initialization action is not set."),
-                              (onTween == null, "Tween action is not set.")
-                        }).Where(condition => condition.Item1).Select(condition => condition.Item2).ToList();
+                              (actionType == 0, "No tween action defined for this element."),
+                        }.Where(warning => warning.condition).Select(warning => warning.message).ToList();
 
                         if (output = warnings.Any())
                         {
@@ -92,7 +91,7 @@ namespace Emp37.Utility.Tween
             }
             internal bool ConflictsWith(Element other) => transform == other.transform && actionType == other.actionType;
 
-            #region C H A I N E D   M E T H O D S
+            #region T W E E N   C O N F I G U R A T I O N
             public Element setEase(Type type)
             {
                   easeMethod = type switch
@@ -202,7 +201,7 @@ namespace Emp37.Utility.Tween
                         throw new MissingComponentException($"'{transform.name}' is missing a {nameof(CanvasGroup)} component, which is required for alpha tweening.");
                   }
                   actionType = ITweenAction.Type.CanvasAlpha;
-                  onInitialize = () => initial = (value ?? group.alpha) * Vector3.right;
+                  onInitialize = () => initial = new(x: value ?? group.alpha, y: 0F);
                   onTween = value => group.alpha = value.x;
                   return this;
             }
