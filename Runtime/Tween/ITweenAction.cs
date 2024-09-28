@@ -8,8 +8,9 @@ namespace Emp37.Utility.Tween
             public enum Type
             {
                   None,
-                  Move, MoveLocal, Rotate, Scale,
-                  CanvasAlpha
+                  Move, MoveLocal, Rotate, Scale, // transform
+                  CanvasAlpha, // canvasGroup
+                  SpriteAlpha, SpriteTint // spriteRenderer
             }
 
             public Element executeMove(Vector3? value = null);
@@ -18,6 +19,9 @@ namespace Emp37.Utility.Tween
             public Element executeScale(Vector3? value = null);
 
             public Element executeCanvasAlpha(float? value = null);
+
+            public Element executeSpriteAlpha(float? value = null);
+            public Element executeSpriteTint(Color? value = null);
       }
 #pragma warning restore IDE1006
 }
