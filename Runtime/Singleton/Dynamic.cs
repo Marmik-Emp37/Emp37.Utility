@@ -12,9 +12,7 @@ namespace Emp37.Utility.Singleton
       /// </remarks>
       public abstract class Dynamic<T> : MonoBehaviour where T : Dynamic<T>
       {
-            private static T _instance;
-
-            public static T Instance
+            private static T _instance; public static T Instance
             {
                   get
                   {
@@ -23,12 +21,12 @@ namespace Emp37.Utility.Singleton
                         _instance = FindObjectOfType<T>(includeInactive: false);
                         if (_instance == null)
                         {
-                              GameObject singleton = new($"{typeof(T).Name} : Singleton");
-                              _instance = singleton.AddComponent<T>();
+                              _instance = new GameObject($"{typeof(T).Name} : Singleton").AddComponent<T>();
                         }
                         return _instance;
                   }
             }
+
 
             /// <summary>
             /// Initializes the singleton instance of type <typeparamref name="T"/>.
@@ -37,20 +35,16 @@ namespace Emp37.Utility.Singleton
             /// <remarks>If a duplicate instance is detected, the current gameObject will be destroyed, and the existing singleton instance will remain.</remarks>
             protected void Initialize(bool persistent)
             {
-                  string typeName = typeof(T).FullName;
-
-                  if (_instance != null && _instance != this)
-                  {
-                        Debug.LogWarning($"Duplicate instance of type '{typeName}' detected. Destroying gameObject '{name}'.");
-                        Destroy(gameObject);
-                  }
-                  else
+                  if (_instance == null || _instance == this)
                   {
                         _instance = this as T;
                         if (persistent) DontDestroyOnLoad(gameObject);
-                        Debug.Log($"Singleton instance of type '{typeName}' is set on object named: '{_instance.name}'.", _instance);
+                        return;
                   }
+                  Debug.LogWarning($"Duplicate instance of type '{typeof(T).FullName}' detected. Destroying gameObject '{name}'.");
+                  Destroy(gameObject);
             }
+
             protected virtual void OnDestroy() => _instance = _instance == this ? null : _instance;
       }
 }

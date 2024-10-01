@@ -17,9 +17,7 @@ namespace Emp37.Utility.Tween
             public Element executeMoveLocal(Vector3? value = null);
             public Element executeRotate(Vector3? value = null);
             public Element executeScale(Vector3? value = null);
-
             public Element executeCanvasAlpha(float? value = null);
-
             public Element executeSpriteAlpha(float? value = null);
             public Element executeSpriteTint(Color? value = null);
       }

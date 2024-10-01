@@ -103,10 +103,15 @@ namespace Emp37.Utility.Tween
                   }
             }
             internal bool ConflictsWith(Element other) => transform == other.transform && actionType == other.actionType;
-            private void HandleMissingComponent(System.Type component, ITweenAction.Type action)
+            private T EnsureComponent<T>(ITweenAction.Type action) where T : Component
             {
+                  if (transform.TryGetComponent(out T component))
+                  {
+                        return component;
+                  }
                   throw new MissingComponentException($"{nameof(GameObject)} '{transform.name}' is missing a {component} component, which is required for '{action}' tweening.");
             }
+
 
             #region T W E E N   C O N F I G U R A T I O N
             public Element setEase(Type type)
@@ -213,10 +218,7 @@ namespace Emp37.Utility.Tween
             }
             Element ITweenAction.executeCanvasAlpha(float? value)
             {
-                  if (!transform.TryGetComponent(out CanvasGroup group))
-                  {
-                        HandleMissingComponent(typeof(CanvasGroup), ITweenAction.Type.CanvasAlpha);
-                  }
+                  var group = EnsureComponent<CanvasGroup>(ITweenAction.Type.CanvasAlpha);
                   actionType = ITweenAction.Type.CanvasAlpha;
                   onInitialize = () => initial = new(x: value ?? group.alpha, y: 0F);
                   onTween = value => group.alpha = value.x;
@@ -224,24 +226,26 @@ namespace Emp37.Utility.Tween
             }
             Element ITweenAction.executeSpriteAlpha(float? value)
             {
-                  if (!transform.TryGetComponent(out SpriteRenderer renderer))
-                  {
-                        HandleMissingComponent(typeof(SpriteRenderer), ITweenAction.Type.SpriteAlpha);
-                  }
+                  var renderer = EnsureComponent<SpriteRenderer>(ITweenAction.Type.SpriteAlpha);
                   actionType = ITweenAction.Type.SpriteAlpha;
                   onInitialize = () => initial = new(x: value ?? renderer.color.a, y: 0F);
-                  onTween = value => { Color tint = renderer.color; tint.a = value.x; renderer.color = tint; };
+                  onTween = value =>
+                  {
+                        var tint = renderer.color;
+                        tint.a = value.x;
+                        renderer.color = tint;
+                  };
                   return this;
             }
             Element ITweenAction.executeSpriteTint(Color? value)
             {
-                  if (!transform.TryGetComponent(out SpriteRenderer renderer))
-                  {
-                        HandleMissingComponent(typeof(SpriteRenderer), ITweenAction.Type.SpriteTint);
-                  }
+                  var renderer = EnsureComponent<SpriteRenderer>(ITweenAction.Type.SpriteTint);
                   actionType = ITweenAction.Type.SpriteTint;
-                  Color tint = value ?? renderer.color;
-                  onInitialize = () => initial = new(x: tint.r, y: tint.g, z: tint.b);
+                  onInitialize = () =>
+                  {
+                        var tint = value ?? renderer.color;
+                        initial = new(x: tint.r, y: tint.g, z: tint.b);
+                  };
                   onTween = value => renderer.color = new(r: value.x, g: value.y, b: value.z, renderer.color.a);
                   return this;
             }

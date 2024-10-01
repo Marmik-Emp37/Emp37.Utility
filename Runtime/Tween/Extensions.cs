@@ -110,5 +110,18 @@ namespace Emp37.Utility.Tween
                   Engine.Push(tween);
                   return tween;
             }
+
+            public static Element TweenAlpha(this SpriteRenderer renderer, float target, float duration)
+            {
+                  var tween = Element.Build(renderer.transform, new(target, 0F), duration).executeSpriteAlpha();
+                  Engine.Push(tween);
+                  return tween;
+            }
+            public static Element TweenTint(this SpriteRenderer renderer, Color target, float duration)
+            {
+                  var tween = Element.Build(renderer.transform, new(target.r, target.g, target.b), duration).executeSpriteTint();
+                  Engine.Push(tween);
+                  return tween;
+            }
       }
 }

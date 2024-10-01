@@ -7,7 +7,6 @@ namespace Emp37.Utility.Tween
       public class Engine : MonoBehaviour
       {
             private static Engine instance;
-
             private static readonly List<Element> tweens = new();
 
 
@@ -35,12 +34,10 @@ namespace Emp37.Utility.Tween
 
             private static void Initialize()
             {
-                  if (instance != null) return;
-
                   instance = FindObjectOfType<Engine>();
                   if (instance == null)
                   {
-                        instance = new GameObject(typeof(Engine).FullName).AddComponent<Engine>();
+                        instance = new GameObject(typeof(Engine).Name).AddComponent<Engine>();
                   }
                   DontDestroyOnLoad(instance);
             }
@@ -48,9 +45,10 @@ namespace Emp37.Utility.Tween
             {
                   if (!Application.isPlaying || tween.IsInvalid) return;
 
-                  Initialize();
+                  if (instance == null) Initialize();
 
-                  if (tweens.FindIndex(existingTween => existingTween.ConflictsWith(tween)) is int index && index != -1)
+                  int index = tweens.FindIndex(existingTween => existingTween.ConflictsWith(tween));
+                  if (index != -1)
                   {
                         tweens.RemoveAt(index);
                   }

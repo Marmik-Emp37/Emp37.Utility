@@ -29,14 +29,13 @@ namespace Emp37.Utility.Singleton
             public static TBehaviour Lookup<TBehaviour>() where TBehaviour : MonoBehaviour
             {
                   Type type = typeof(TBehaviour);
-
                   if (database.TryGetValue(type, out MonoBehaviour instance))
                   {
                         return instance as TBehaviour;
                   }
                   else
                   {
-                        Debug.LogWarning($"Instance of type '{type}' was not found in the registry.");
+                        Debug.LogWarning($"Instance of type '{type.FullName}' was not found in the registry.");
                         return null;
                   }
             }
@@ -52,17 +51,17 @@ namespace Emp37.Utility.Singleton
                         return;
                   }
                   Type type = instance.GetType();
-                  string message = $"Unable to register Instance of type '{type}': ";
+                  string message = $"Unable to unregister type '{type.FullName}': ";
 
                   if (database.ContainsKey(type))
                   {
-                        Debug.LogError(message + "This Instance already exists in the database.", database[type]);
+                        Debug.LogError(message + "Instance already exists in the database.", database[type]);
                         UnityEngine.Object.Destroy(instance);
                   }
                   else
                   {
                         database.Add(type, instance);
-                        Debug.Log($"Registered Instance of type '{type.Name}'.");
+                        Debug.Log($"Registered instance of type '{type.FullName}'.");
                   }
             }
             /// <summary>
@@ -77,21 +76,21 @@ namespace Emp37.Utility.Singleton
                         return;
                   }
                   Type type = instance.GetType();
-                  string message = $"Unable to unregister Instance of type '{type}': ";
+                  string message = $"Unable to unregister type '{type.FullName}': ";
 
                   if (database.ContainsKey(type))
                   {
                         if (database[type] != instance)
                         {
-                              Debug.LogWarning(message + "The provided Instance does not match the registered Instance.");
+                              Debug.LogWarning(message + "The provided instance does not match any registered instance type.");
                               return;
                         }
                         database.Remove(type);
-                        Debug.Log($"Unregistered Instance of type '{type.Name}'.");
+                        Debug.Log($"Unregistered instance of type '{type.FullName}'.");
                   }
                   else
                   {
-                        Debug.LogWarning(message + "This Instance does not exist in the database.");
+                        Debug.LogWarning(message + "Instance does not exist in the database.");
                   }
             }
             /// <summary>
