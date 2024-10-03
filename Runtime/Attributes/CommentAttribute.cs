@@ -15,7 +15,7 @@ namespace Emp37.Utility
             public readonly FontStyle Style;
 
             public CommentAttribute(string text) => Content = new(text);
-            public CommentAttribute(string text, Shades tint) : this(text) => Tint = ShadeLibrary.Pick(tint);
-            public CommentAttribute(string text, Shades tint, FontStyle style) : this(text, tint) => Style = style;
+            public CommentAttribute(string text, Shade tint) : this(text) => Tint = ShadeLibrary.Pick(tint);
+            public CommentAttribute(string text, Shade tint, FontStyle style) : this(text, tint) => Style = style;
       }
 }

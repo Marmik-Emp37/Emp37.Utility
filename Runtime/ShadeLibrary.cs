@@ -4,12 +4,12 @@ using UnityEngine;
 
 namespace Emp37.Utility
 {
-      using static Shades;
+      using static Shade;
 
 
       public readonly struct ShadeLibrary
       {
-            private static readonly Dictionary<Shades, Color32> library = new()
+            private static readonly Dictionary<Shade, Color32> library = new()
             {
                   {
                         Amaranth,
@@ -284,9 +284,9 @@ namespace Emp37.Utility
                         new(255, 255, 000, 255)
                   }
             };
-            private static readonly int shadesLength = System.Enum.GetValues(typeof(Shades)).Length;
+            private static readonly int shadesLength = System.Enum.GetValues(typeof(Shade)).Length;
 
-            public static Color32 PickRandom => Pick((Shades) Random.Range(0, shadesLength));
-            public static Color32 Pick(Shades shade) => library[shade];
+            public static Color32 PickRandom => Pick((Shade) Random.Range(0, shadesLength));
+            public static Color32 Pick(Shade shade) => library[shade];
       }
 }

@@ -12,7 +12,7 @@ namespace Emp37.Utility
       {
             public readonly float Height = 21F;
             public readonly string[] Parameters = null;
-            public Shades Shade = Shades.White;
+            public Shade Shade = Shade.White;
 
             public ButtonAttribute()
             {

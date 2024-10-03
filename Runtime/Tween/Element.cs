@@ -112,7 +112,6 @@ namespace Emp37.Utility.Tween
                   throw new MissingComponentException($"{nameof(GameObject)} '{transform.name}' is missing a {component} component, which is required for '{action}' tweening.");
             }
 
-
             #region T W E E N   C O N F I G U R A T I O N
             public Element setEase(Type type)
             {

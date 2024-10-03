@@ -1,6 +1,6 @@
 namespace Emp37.Utility
 {
-      public enum Shades
+      public enum Shade
       {
             /// <summary>
             /// A <b><i>reddish-rose tint</i></b> that is a representation of the colour of the flower of the amaranth plant.

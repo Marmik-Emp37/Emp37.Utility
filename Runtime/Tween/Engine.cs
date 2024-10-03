@@ -32,20 +32,24 @@ namespace Emp37.Utility.Tween
                   instance = null;
             }
 
-            private static void Initialize()
+            public static Engine Initialize()
             {
-                  instance = FindObjectOfType<Engine>();
                   if (instance == null)
                   {
-                        instance = new GameObject(typeof(Engine).Name).AddComponent<Engine>();
+                        instance = FindObjectOfType<Engine>();
+                        if (instance == null)
+                        {
+                              instance = new GameObject(typeof(Engine).Name).AddComponent<Engine>();
+                        }
+                        DontDestroyOnLoad(instance);
                   }
-                  DontDestroyOnLoad(instance);
+                  return instance;
             }
             public static void Push(Element tween)
             {
                   if (!Application.isPlaying || tween.IsInvalid) return;
 
-                  if (instance == null) Initialize();
+                  instance = instance != null ? instance : Initialize();
 
                   int index = tweens.FindIndex(existingTween => existingTween.ConflictsWith(tween));
                   if (index != -1)
