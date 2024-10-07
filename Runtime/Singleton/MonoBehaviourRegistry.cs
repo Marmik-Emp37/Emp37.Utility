@@ -6,7 +6,8 @@ using UnityEngine;
 namespace Emp37.Utility.Singleton
 {
       /// <summary>
-      /// Singleton manager for registering and managing MonoBehaviours.
+      ///A registry for managing <see cref="MonoBehaviour"/> instances.
+      /// <para>Use <see cref="Register"/> to add an instance, <see cref="Unregister"/> to remove an instance, and <see cref="Get{TBehaviour}"/> to retrieve a registered MonoBehaviour.</para>
       /// </summary>
       public static class MonoBehaviourRegistry
       {
@@ -17,8 +18,7 @@ namespace Emp37.Utility.Singleton
             /// <br>Intended for logging and debugging purposes.</br>
             /// </summary>
             /// <remarks>This property provides a newline-separated string containing all registered types on this registry.</remarks>
-            public static string Read => string.Join('\n', database.Keys);
-
+            public static string RegisteredTypes => string.Join("\n", database.Keys);
 
             /// <summary>
             /// Retrieves the registered instance of a specific type.
@@ -26,19 +26,17 @@ namespace Emp37.Utility.Singleton
             /// <typeparam name="TBehaviour">Type of the MonoBehaviour to retrieve.</typeparam>
             /// <returns>Instance of type T if found, otherwise null.</returns>
             /// <remarks>It is recommended to cache the return value for improved performance when conducting frequent lookups of the same type.</remarks>
-            public static TBehaviour Lookup<TBehaviour>() where TBehaviour : MonoBehaviour
+            public static TBehaviour Get<TBehaviour>() where TBehaviour : MonoBehaviour
             {
                   Type type = typeof(TBehaviour);
                   if (database.TryGetValue(type, out MonoBehaviour instance))
                   {
                         return instance as TBehaviour;
                   }
-                  else
-                  {
-                        Debug.LogWarning($"Instance of type '{type.FullName}' was not found in the registry.");
-                        return null;
-                  }
+                  Log($"No registered instance found for type '{type.FullName}'. Ensure that this type has been registered before attempting to retrieve it.", LogType.Warning);
+                  return null;
             }
+
             /// <summary>
             /// Registers a MonoBehaviour instance in the registry.
             /// </summary>
@@ -47,23 +45,21 @@ namespace Emp37.Utility.Singleton
             {
                   if (instance == null)
                   {
-                        Debug.LogWarning("Instance is null.");
+                        Log("Cannot register a null instance.", LogType.Warning);
                         return;
                   }
                   Type type = instance.GetType();
-                  string message = $"Unable to unregister type '{type.FullName}': ";
-
                   if (database.ContainsKey(type))
                   {
-                        Debug.LogError(message + "Instance already exists in the database.", database[type]);
-                        UnityEngine.Object.Destroy(instance);
+                        Log($"An instance of type '{type.FullName}' is already registered. The new instance on GameObject '{instance.name}' will not be registered to prevent conflicts.", LogType.Error, database[type]);
                   }
                   else
                   {
                         database.Add(type, instance);
-                        Debug.Log($"Registered instance of type '{type.FullName}'.");
+                        Log($"Registered instance of type '{type.FullName}'.", context: instance);
                   }
             }
+
             /// <summary>
             /// Unregisters a MonoBehaviour instance from the registry.
             /// </summary>
@@ -72,34 +68,35 @@ namespace Emp37.Utility.Singleton
             {
                   if (instance == null)
                   {
-                        Debug.LogWarning("Instance is null.");
+                        Log("Cannot unregister a null instance.", LogType.Warning);
                         return;
                   }
                   Type type = instance.GetType();
-                  string message = $"Unable to unregister type '{type.FullName}': ";
-
                   if (database.ContainsKey(type))
                   {
                         if (database[type] != instance)
                         {
-                              Debug.LogWarning(message + "The provided instance does not match any registered instance type.");
+                              Log($"The provided instance does not match the registered instance for type '{type.FullName}'.", LogType.Warning);
                               return;
                         }
                         database.Remove(type);
-                        Debug.Log($"Unregistered instance of type '{type.FullName}'.");
+                        Log($"Unregistered instance of type '{type.FullName}'.");
                   }
                   else
                   {
-                        Debug.LogWarning(message + "Instance does not exist in the database.");
+                        Log($"No registered instance found for type '{type.FullName}'. Ensure that this type has been registered before attempting to unregister it.", LogType.Warning);
                   }
             }
+
             /// <summary>
             /// Erases all entries from the registry, unregistering all registered instances.
             /// </summary>
             public static void Wipe()
             {
                   database.Clear();
-                  Debug.Log("Registry Wiped!");
+                  Log("All registered instances have been removed.");
             }
+
+            private static void Log(string message, LogType type = LogType.Log, UnityEngine.Object context = null) => Debug.unityLogger.Log(type, message: '[' + nameof(MonoBehaviourRegistry) + "]: " + message, context);
       }
 }
