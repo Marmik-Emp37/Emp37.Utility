@@ -5,46 +5,67 @@ namespace Emp37.Utility.Singleton
       /// <summary>
       /// A dynamic MonoBehaviour-based singleton to use at runtime.
       /// </summary>
+      /// <typeparam name="T">The type of the singleton, which must inherit from <see cref="Dynamic{T}"/>.</typeparam>
       /// <remarks>
       /// <b>NOTE:</b> This implementation -
-      /// <br>• destroys any duplicate gameObject of type T instantiated at runtime.</br>
-      /// <br>• supports implicit placement of the component T on the scene.</br>
+      /// <br>• Requires calling <see cref="Initialize(bool)"/> to properly set up the singleton instance.</br>
+      /// <br>• Destroys any additional instances of <typeparamref name="T"/> detected at runtime to enforce the singleton implementation.</br>
+      /// <br>• Supports automatic instantiation of the singleton if uninitialized.</br>
+      /// <br>• Supports implicit placement of the component T on the scene.</br>
+      /// <br>• Usage example for a singleton of type <see cref="Dynamic{T}"></see>:</br>
+      /// <code>
+      /// public class MySingleton : Dynamic&lt;MySingleton&gt;
+      /// {
+      ///     void Awake()
+      ///     {
+      ///         Initialize(true); //make this singleton persist across scenes
+      ///     }
+      /// }
+      /// </code>
       /// </remarks>
       public abstract class Dynamic<T> : MonoBehaviour where T : Dynamic<T>
       {
-            private static T _instance; public static T Instance
+            private static T _instance;
+            private static object @lock = new();
+            private static bool isQuitting;
+
+            public static T Instance
             {
                   get
                   {
-                        if (!Application.isPlaying) return null;
-
-                        _instance = FindObjectOfType<T>(includeInactive: false);
-                        if (_instance == null)
+                        if (isQuitting)
                         {
-                              _instance = new GameObject($"{typeof(T).Name} : Singleton").AddComponent<T>();
+                              Debug.LogWarning($"Instance of '{typeof(T)}' no longer exists. Returning null.");
+                              return null;
+                        }
+                        lock (@lock)
+                        {
+                              if (_instance == null)
+                              {
+                                    _instance = new GameObject($"{typeof(T).Name}: Singleton").AddComponent<T>();
+                                    DontDestroyOnLoad(_instance);
+                              }
                         }
                         return _instance;
                   }
             }
 
 
-            /// <summary>
-            /// Initializes the singleton instance of type <typeparamref name="T"/>.
-            /// </summary>
-            /// <param name="persistent">If true, the singleton instance will persist across scene loads using <see cref="Object.DontDestroyOnLoad"/>.</param>
-            /// <remarks>If a duplicate instance is detected, the current gameObject will be destroyed, and the existing singleton instance will remain.</remarks>
             protected void Initialize(bool persistent)
             {
-                  if (_instance == null || _instance == this)
+                  if (_instance != null && _instance != this)
+                  {
+                        Object context = _instance.gameObject;
+                        Destroy(_instance);
+                        Debug.LogWarning($"An additional instance of '{typeof(T).FullName}' was detected on '{name}'. This duplicate was destroyed to preserve the singleton implementation.", context);
+                  }
+                  else
                   {
                         _instance = this as T;
-                        if (persistent) DontDestroyOnLoad(gameObject);
-                        return;
+                        if (persistent) DontDestroyOnLoad(this);
                   }
-                  Debug.LogWarning($"Duplicate instance of type '{typeof(T).FullName}' detected. Destroying gameObject '{name}'.");
-                  Destroy(gameObject);
             }
 
-            protected virtual void OnDestroy() => _instance = _instance == this ? null : _instance;
+            protected virtual void OnApplicationQuit() => isQuitting = true;
       }
 }
