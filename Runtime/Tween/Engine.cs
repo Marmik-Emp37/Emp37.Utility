@@ -9,6 +9,13 @@ namespace Emp37.Utility.Tween
             private static Engine instance;
             private static readonly List<Element> tweens = new();
 
+            static Engine()
+            {
+                  if (!Application.isPlaying) return;
+                  instance = new GameObject(nameof(Engine)).AddComponent<Engine>();
+                  DontDestroyOnLoad(instance);
+            }
+
 
             private void LateUpdate()
             {
@@ -32,24 +39,9 @@ namespace Emp37.Utility.Tween
                   instance = null;
             }
 
-            public static Engine Initialize()
-            {
-                  if (instance == null)
-                  {
-                        instance = FindObjectOfType<Engine>();
-                        if (instance == null)
-                        {
-                              instance = new GameObject(typeof(Engine).Name).AddComponent<Engine>();
-                        }
-                        DontDestroyOnLoad(instance);
-                  }
-                  return instance;
-            }
             public static void Push(Element tween)
             {
                   if (!Application.isPlaying || tween.IsInvalid) return;
-
-                  instance = instance != null ? instance : Initialize();
 
                   int index = tweens.FindIndex(existingTween => existingTween.ConflictsWith(tween));
                   if (index != -1)

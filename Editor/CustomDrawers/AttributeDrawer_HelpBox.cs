@@ -21,7 +21,7 @@ namespace Emp37.Utility.Editor
 
 
             public override void Initialize()
-            {
+            { 
                   var type = Attribute.MessageType;
                   Icon = type is 0 ? null : EditorGUIUtility.IconContent("console." + type switch { MessageType.Warning => "warnicon", MessageType.Error => "erroricon", _ => "infoicon", });
             }

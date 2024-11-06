@@ -51,6 +51,8 @@ namespace Emp37.Utility.Singleton
             }
 
 
+            protected virtual void OnApplicationQuit() => isQuitting = true;
+
             protected void Initialize(bool persistent)
             {
                   if (_instance != null && _instance != this)
@@ -65,7 +67,5 @@ namespace Emp37.Utility.Singleton
                         if (persistent) DontDestroyOnLoad(this);
                   }
             }
-
-            protected virtual void OnApplicationQuit() => isQuitting = true;
       }
 }
