@@ -1,0 +1,15 @@
+In-Progress:
+	• Boolean Toggle Attribute.
+
+---------------------------------------------------------------
+
+Stashed:
+	• Tween Engine Fix.
+	• Swatches Window.
+	• MessageIfAttributeForClass.
+
+---------------------------------------------------------------
+
+Completed:
+	1. Button Naming / Auto-Naming Support.
+	2. Title Text Styling Presets.
