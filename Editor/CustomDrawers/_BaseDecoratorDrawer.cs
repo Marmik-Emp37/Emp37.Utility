@@ -6,6 +6,7 @@ namespace Emp37.Utility.Editor
       {
             private bool init;
 
+
             public virtual void Initialize() { }
             public override void OnGUI(Rect position)
             {

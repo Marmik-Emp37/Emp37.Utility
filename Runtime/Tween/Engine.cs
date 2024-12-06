@@ -34,7 +34,7 @@ namespace Emp37.Utility.Tween
 
             private static void Initialize()
             {
-                  instance = FindObjectOfType<Engine>();
+                  instance = FindFirstObjectByType<Engine>();
                   if (instance == null)
                   {
                         instance = new GameObject(typeof(Engine).Name).AddComponent<Engine>();

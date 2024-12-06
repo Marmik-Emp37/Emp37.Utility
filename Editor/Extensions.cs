@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 
 using UnityEditor;
@@ -19,51 +18,45 @@ namespace Emp37.Utility.Editor
             /// <returns>Attribute of type TAttribute if found, otherwise null.</returns>
             /// <exception cref="ArgumentNullException">When the serialized property is null.</exception>
             /// <exception cref="ArgumentException">When the serialized property target object type is null.</exception>
-            public static TAttribute GetAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
+            public static TAttribute GetAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = ReflectionFlags) where TAttribute : Attribute
             {
                   if (property == null) throw new ArgumentNullException(nameof(property), "SerializedProperty cannot be null.");
-                  var type = property.serializedObject.targetObject.GetType() ?? throw new ArgumentException($"Target targetType of property '{property.name}' is null or the serialized object is not set.");
-
-                  return FetchInfo<FieldInfo>(property.name, type, bindings)?.GetCustomAttribute<TAttribute>();
+                  object target = (property.serializedObject?.targetObject) ?? throw new ArgumentException($"Serialized object or its target is null for property '{property.name}'.");
+                  FieldInfo field = FetchInfo<FieldInfo>(property.name, target.GetType(), bindings) ?? throw new MissingFieldException($"Field '{property.name}' not found in target type '{target.GetType().FullName}'.");
+                  return field.GetCustomAttribute<TAttribute>();
             }
-            public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
+            public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags bindings = ReflectionFlags) where TAttribute : Attribute
             {
-                  try
-                  {
-                        attribute = GetAttribute<TAttribute>(property, bindings);
-                  }
-                  catch (ArgumentException)
-                  {
-                        attribute = default;
-                  }
+                  attribute = property?.GetAttribute<TAttribute>(bindings);
                   return attribute != null;
             }
-            public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
+            public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = ReflectionFlags) where TAttribute : Attribute
             {
-                  var type = property.serializedObject.targetObject.GetType();
-                  if (type != null)
+                  if (property == null)
                   {
-                        var field = FetchInfo<FieldInfo>(property.name, type, bindings);
-                        if (field != null)
-                        {
-                              return field.IsDefined(typeof(TAttribute));
-                        }
+                        Log($"{nameof(property)} is null.");
+                        return false;
                   }
-                  return false;
+                  if (property.serializedObject.targetObject is not object target)
+                  {
+                        Log($"{nameof(SerializedObject)} or it's target is null.");
+                        return false;
+                  }
+                  FieldInfo field = FetchInfo<FieldInfo>(property.name, target.GetType(), bindings);
+                  if (field == null)
+                  {
+                        Log($"'{property.name}' not found in type '{target.GetType().FullName}'.");
+                  }
+                  return field.IsDefined(typeof(TAttribute), inherit: true);
+
+                  static void Log(string message) => UnityEngine.Debug.LogWarning($"Unable to check attribute '{typeof(TAttribute).Name}': {message}");
             }
             #endregion
 
             #region M E M B E R   I N F O
             public static bool TryGetAttribute<TAttribute>(this MemberInfo member, out TAttribute attribute) where TAttribute : Attribute
             {
-                  try
-                  {
-                        attribute = member.GetCustomAttribute<TAttribute>();
-                  }
-                  catch (ArgumentException)
-                  {
-                        attribute = default;
-                  }
+                  attribute = member?.GetCustomAttribute<TAttribute>();
                   return attribute != null;
             }
             #endregion

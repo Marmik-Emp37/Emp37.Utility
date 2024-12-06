@@ -1,12 +1,10 @@
 using UnityEngine;
 
 using UnityEditor;
+using Type = UnityEditor.SerializedPropertyType;
 
 namespace Emp37.Utility.Editor
 {
-      using Type = SerializedPropertyType;
-
-
       [CustomPropertyDrawer(typeof(RepeatAttribute), true)]
       internal class AttributeDrawer_Repeat : BasePropertyDrawer
       {

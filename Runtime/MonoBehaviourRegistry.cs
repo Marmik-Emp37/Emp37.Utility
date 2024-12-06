@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace Emp37.Utility.Singleton
+namespace Emp37.Utility
 {
       /// <summary>
       ///A registry for managing <see cref="MonoBehaviour"/> instances.

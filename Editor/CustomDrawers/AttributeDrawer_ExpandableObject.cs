@@ -1,6 +1,7 @@
 using UnityEngine;
 
 using UnityEditor;
+using Type = UnityEditor.MessageType;
 
 namespace Emp37.Utility.Editor
 {
@@ -8,6 +9,7 @@ namespace Emp37.Utility.Editor
       internal class AttributeDrawer_ExpandableObject : BasePropertyDrawer // ~Warped Imagination
       {
             private UnityEditor.Editor m_Editor = null;
+
 
             public override void Initialize(SerializedProperty property)
             {
@@ -18,7 +20,7 @@ namespace Emp37.Utility.Editor
 #if UNITY_2022_1_OR_NEWER
                   if (property.propertyType != SerializedPropertyType.ObjectReference)
                   {
-                        EditorGUI.HelpBox(position, $"Use ExpandableObject attribute on a field of type '{SerializedPropertyType.ObjectReference}'.", UnityEditor.MessageType.Error);
+                        EditorGUI.HelpBox(position, $"Use ExpandableObject attribute on a field of type '{SerializedPropertyType.ObjectReference}'.", Type.Error);
                         return;
                   }
                   EditorGUI.PropertyField(position, property, label);
@@ -40,7 +42,7 @@ namespace Emp37.Utility.Editor
                         }
                   }
 #else
-                  EditorGUI.HelpBox(position, "The ExpandableObject attribute is not supported in Unity versions older than 2022.", UnityEditor.MessageType.Error);
+                  EditorGUI.HelpBox(position, "The ExpandableObject attribute is not supported in Unity versions older than 2022.", Type.Error);
 #endif
             }
       }

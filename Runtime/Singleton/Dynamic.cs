@@ -26,38 +26,34 @@ namespace Emp37.Utility.Singleton
       public abstract class Dynamic<T> : MonoBehaviour where T : Dynamic<T>
       {
             private static T _instance;
-            private static object @lock = new();
-            private static bool isQuitting;
+            private static bool isExiting;
 
             public static T Instance
             {
                   get
                   {
-                        if (isQuitting)
+                        if (isExiting)
                         {
                               Debug.LogWarning($"Instance of '{typeof(T)}' no longer exists. Returning null.");
                               return null;
                         }
-                        lock (@lock)
+                        if (_instance == null)
                         {
-                              if (_instance == null)
-                              {
-                                    _instance = new GameObject($"{typeof(T).Name}: Singleton").AddComponent<T>();
-                                    DontDestroyOnLoad(_instance);
-                              }
+                              _instance = FindFirstObjectByType<T>() ?? new GameObject($"{typeof(T).Name}: Singleton").AddComponent<T>();
+                              DontDestroyOnLoad(_instance);
                         }
                         return _instance;
                   }
             }
 
 
-            protected virtual void OnApplicationQuit() => isQuitting = true;
+            protected virtual void OnApplicationQuit() => isExiting = true;
 
             protected void Initialize(bool persistent)
             {
                   if (_instance != null && _instance != this)
                   {
-                        Object context = _instance.gameObject;
+                        Object context = gameObject;
                         Destroy(_instance);
                         Debug.LogWarning($"An additional instance of '{typeof(T).FullName}' was detected on '{name}'. This duplicate was destroyed to preserve the singleton implementation.", context);
                   }
