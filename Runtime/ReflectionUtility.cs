@@ -21,11 +21,11 @@ namespace Emp37.Utility
                   All = 7,
             }
 
-            public const BindingFlags DEFAULT_FLAGS = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            public const BindingFlags DefaultFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
             private static readonly Dictionary<(Type, string), MemberInfo> cachedMembers = new();
 
-            public static T FetchInfo<T>(string name, Type type, BindingFlags bindings = DEFAULT_FLAGS) where T : MemberInfo
+            public static T FetchInfo<T>(string name, Type type, BindingFlags bindings = DefaultFlags) where T : MemberInfo
             {
                   if (type == null) throw new ArgumentNullException(nameof(type));
                   if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException(nameof(name));
@@ -53,7 +53,7 @@ namespace Emp37.Utility
                   }
                   return member as T;
             }
-            public static bool TryFetchInfo<T>(string name, Type type, out T value, BindingFlags bindings = DEFAULT_FLAGS) where T : MemberInfo
+            public static bool TryFetchInfo<T>(string name, Type type, out T value, BindingFlags bindings = DefaultFlags) where T : MemberInfo
             {
                   try
                   {
@@ -65,7 +65,7 @@ namespace Emp37.Utility
                   }
                   return value != null;
             }
-            public static object FetchValue(string name, object target, MemberTypes enabled = MemberTypes.All, BindingFlags bindings = DEFAULT_FLAGS, params object[] parameters)
+            public static object FetchValue(string name, object target, MemberTypes enabled = MemberTypes.All, BindingFlags bindings = DefaultFlags, params object[] parameters)
             {
                   if (target == null) throw new ArgumentNullException(nameof(target));
 
@@ -93,7 +93,7 @@ namespace Emp37.Utility
                   }
                   return null;
             }
-            public static object InvokeMethod(Method method, object target, string[] args = null, BindingFlags bindings = DEFAULT_FLAGS)
+            public static object InvokeMethod(Method method, object target, string[] args = null, BindingFlags bindings = DefaultFlags)
             {
                   List<object> values = new();
                   ParameterInfo[] parameters = method.GetParameters();
@@ -110,7 +110,7 @@ namespace Emp37.Utility
 
                               Type parameterType = value.GetType(), expectedType = parameters[i].ParameterType;
 
-                              Assert(expectedType == parameterType, $"Parameter type mismatch at index {i}. Expected type '{expectedType}' but recieved '{parameterType}'.");
+                              Assert(expectedType == parameterType, $"Parameter type mismatch at index {i}. Expected type '{expectedType}' but received '{parameterType}'.");
 
                               values.Add(value);
                         }
