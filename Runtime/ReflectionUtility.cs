@@ -70,26 +70,17 @@ namespace Emp37.Utility
                   if (target == null) throw new ArgumentNullException(nameof(target));
 
                   Type type = target.GetType();
-                  if (enabled.HasFlag(MemberTypes.Field))
+                  if (enabled.HasFlag(MemberTypes.Field) && TryFetchInfo(name, type, out Field field, bindings))
                   {
-                        if (TryFetchInfo(name, type, out Field field, bindings))
-                        {
-                              return field.GetValue(target);
-                        }
+                        return field.GetValue(target);
                   }
-                  if (enabled.HasFlag(MemberTypes.Property))
+                  if (enabled.HasFlag(MemberTypes.Property) && TryFetchInfo(name, type, out Property property, bindings) && property.CanRead)
                   {
-                        if (TryFetchInfo(name, type, out Property property, bindings) && property.CanRead)
-                        {
-                              return property.GetValue(target);
-                        }
+                        return property.GetValue(target);
                   }
-                  if (enabled.HasFlag(MemberTypes.Method))
+                  if (enabled.HasFlag(MemberTypes.Method) && TryFetchInfo(name, type, out Method method, bindings))
                   {
-                        if (TryFetchInfo(name, type, out Method method, bindings))
-                        {
-                              return method.Invoke(target, parameters);
-                        }
+                        return method.Invoke(target, parameters);
                   }
                   return null;
             }
