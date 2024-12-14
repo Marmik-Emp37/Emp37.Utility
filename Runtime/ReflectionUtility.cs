@@ -30,7 +30,7 @@ namespace Emp37.Utility
                   if (type == null) throw new ArgumentNullException(nameof(type));
                   if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException(nameof(name));
 
-                  var key = (type, name);
+                  (Type, string) key = (type, name);
                   if (!cachedMembers.TryGetValue(key, out MemberInfo member))
                   {
                         Type returnType = typeof(T);
@@ -59,7 +59,7 @@ namespace Emp37.Utility
                   {
                         value = FetchInfo<T>(name, type, bindings);
                   }
-                  catch (ArgumentException)
+                  catch (Exception)
                   {
                         value = null;
                   }
@@ -70,6 +70,7 @@ namespace Emp37.Utility
                   if (target == null) throw new ArgumentNullException(nameof(target));
 
                   Type type = target.GetType();
+
                   if (enabled.HasFlag(MemberTypes.Field) && TryFetchInfo(name, type, out Field field, bindings))
                   {
                         return field.GetValue(target);

@@ -1,19 +1,14 @@
 using UnityEngine;
 
 using UnityEditor;
+using Type = UnityEditor.SerializedPropertyType;
 
 namespace Emp37.Utility.Editor
 {
-      using Type = SerializedPropertyType;
-
-
       [CustomPropertyDrawer(typeof(MaxAttribute))]
       internal class AttributeDrawer_Max : BasePropertyDrawer
       {
-            public override void Initialize(SerializedProperty property)
-            {
-                  Validate(property);
-            }
+            public override void Initialize(SerializedProperty property) => Validate(property);
             public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
             {
                   if (property.propertyType is not (Type.Float or Type.Integer or Type.Vector2 or Type.Vector3 or Type.Vector2Int or Type.Vector3Int))

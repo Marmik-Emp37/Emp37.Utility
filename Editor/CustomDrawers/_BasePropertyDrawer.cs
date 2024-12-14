@@ -8,6 +8,7 @@ namespace Emp37.Utility.Editor
       {
             private bool init;
 
+
             public virtual void Initialize(SerializedProperty property) { }
             public abstract void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label);
 

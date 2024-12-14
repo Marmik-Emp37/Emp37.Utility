@@ -7,31 +7,31 @@ namespace Emp37.Utility.Editor
       [CustomPropertyDrawer(typeof(CommentAttribute), true)]
       internal class AttributeDrawer_Comment : BasePropertyDrawer
       {
-            private const byte BackgroundAlpha = 25;
-            private const float MinHeight = 21F, BlockWidth = 3F;
-
-            private readonly GUIStyle style = new(EditorStyles.label) { richText = true, wordWrap = true };
-
             private CommentAttribute Attribute => attribute as CommentAttribute;
+
+            private const byte BackgroundAlpha = 25;
+            private const float MinHeight = 21F, StripWidth = 3F;
+
+            private readonly GUIStyle labelStyle = new(EditorStyles.label) { richText = true, wordWrap = true };
 
 
             public override void Initialize(SerializedProperty property)
             {
-                  style.fontStyle = Attribute.Style;
+                  labelStyle.fontStyle = Attribute.Style;
             }
             public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
             {
-                  var commentArea = position;
-                  commentArea.size = new(x: EditorGUIHelper.ReleventWidth, y: GetStyleHeight(Attribute.Content) /* - [ 1 ]*/);
-                  EditorGUI.LabelField(commentArea, Attribute.Content, style);
+                  Rect commentRect = position;
+                  commentRect.size = new(x: EditorGUIHelper.ReleventWidth, y: GetStyleHeight(Attribute.Content) /* - [ 1 ]*/);
+                  EditorGUI.LabelField(commentRect, Attribute.Content, labelStyle);
 
-                  EditorGUI.DrawRect(commentArea, Attribute.Tint.WithAlpha(BackgroundAlpha));
+                  EditorGUI.DrawRect(commentRect, Attribute.Tint.WithAlpha(BackgroundAlpha));
 
-                  commentArea.width = BlockWidth;
-                  commentArea.x -= commentArea.width + 1;
-                  EditorGUI.DrawRect(commentArea, Attribute.Tint);
+                  commentRect.width = StripWidth;
+                  commentRect.x -= commentRect.width + 1;
+                  EditorGUI.DrawRect(commentRect, Attribute.Tint);
 
-                  position.y += commentArea.height + EditorGUIUtility.standardVerticalSpacing; // - [ 2 ]
+                  position.y += commentRect.height + EditorGUIUtility.standardVerticalSpacing; // - [ 2 ]
                   position.height = EditorGUI.GetPropertyHeight(property);
                   EditorGUI.PropertyField(position, property, label, true);
             }
@@ -42,6 +42,6 @@ namespace Emp37.Utility.Editor
                   return height;
             }
 
-            private float GetStyleHeight(GUIContent content) => Mathf.Clamp(style.CalcHeight(content, EditorGUIHelper.ReleventWidth), MinHeight, float.MaxValue);
+            private float GetStyleHeight(GUIContent content) => Mathf.Clamp(labelStyle.CalcHeight(content, EditorGUIHelper.ReleventWidth), MinHeight, float.MaxValue);
       }
 }
