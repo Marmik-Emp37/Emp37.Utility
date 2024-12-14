@@ -10,7 +10,6 @@ namespace Emp37.Utility.Editor
 {
       using static ReflectionUtility;
 
-
       internal class Emp37Editor : UnityEditor.Editor
       {
             private Type targetType;
@@ -33,7 +32,6 @@ namespace Emp37.Utility.Editor
                   {
                         Queue<SerializedProperty> properties = new();
                         SerializedProperty iterator = serializedObject.GetIterator();
-
                         while (iterator.NextVisible(true))
                         {
                               SerializedProperty property = serializedObject.FindProperty(iterator.name);
@@ -43,7 +41,6 @@ namespace Emp37.Utility.Editor
                               }
                         }
                         monoScript = properties.Dequeue();
-
                         serializedProperties = properties.ToArray();
                   }
                   #endregion
@@ -64,30 +61,44 @@ namespace Emp37.Utility.Editor
                         }
                         #endregion
 
+                        bool isLayoutActive = false;
+
                         #region S E R I A L I Z E D   P R O P E R T I E S
-                        foreach (var property in serializedProperties)
+                        foreach (SerializedProperty property in serializedProperties)
                         {
                               FieldInfo field = FetchInfo<FieldInfo>(property.name, targetType);
+                              EvaluateLayout(field, ref isLayoutActive);
                               if (EvaluateVisibility(field))
                               {
                                     GUI.enabled = EvaluateEnabled(field);
                                     EditorGUILayout.PropertyField(property);
                               }
                         }
+                        if (isLayoutActive)
+                        {
+                              isLayoutActive = false;
+                              EditorGUILayout.EndHorizontal();
+                        }
                         #endregion
 
                         #region S E R I A L I Z E D   M E TH O D S
                         foreach (MethodInfo method in serializedMethods)
                         {
-                              if (method.TryGetAttribute(out ButtonAttribute a0) && EvaluateVisibility(method))
+                              EvaluateLayout(method, ref isLayoutActive);
+                              if (method.TryGetAttribute(out ButtonAttribute button) && EvaluateVisibility(method))
                               {
                                     GUI.enabled = EvaluateEnabled(method);
-                                    GUI.backgroundColor = a0.BackgroundColor;
-                                    if (GUILayout.Button(a0.Name ?? method.Name.ToTitleCase(), GUILayout.Height(a0.Height)))
+                                    GUI.backgroundColor = button.BackgroundColor;
+
+                                    if (GUILayout.Button(button.Name ?? method.Name.ToTitleCase(), GUILayout.Height(button.Height)))
                                     {
-                                          InvokeMethod(method, target, a0.Parameters);
+                                          InvokeMethod(method, target, button.Parameters);
                                     }
                               }
+                        }
+                        if (isLayoutActive)
+                        {
+                              EditorGUILayout.EndHorizontal();
                         }
                         #endregion
 
@@ -96,48 +107,51 @@ namespace Emp37.Utility.Editor
                   serializedObject.ApplyModifiedProperties();
             }
 
+            private void EvaluateLayout(MemberInfo member, ref bool state)
+            {
+                  if (member.TryGetAttribute(out HorizontalGroupAttribute horizontalGroup) && horizontalGroup.State != state)
+                  {
+                        if (state = horizontalGroup.State)
+                        {
+                              EditorGUILayout.BeginHorizontal();
+                        }
+                        else
+                        {
+                              EditorGUILayout.EndHorizontal();
+                        }
+                  }
+            }
             private bool EvaluateEnabled(MemberInfo member)
             {
-                  if (member.TryGetAttribute(out EnableWhenAttribute a0))
+                  bool output = true;
+
+                  if (member.TryGetAttribute(out ReadonlyAttribute readonlyAttr))
                   {
-                        if (FetchValue(a0.ConditionName, target) is bool value)
-                        {
-                              return value;
-                        }
+                        output &= readonlyAttr.ExclusiveToPlaymode && !EditorApplication.isPlaying;
                   }
-                  else
-                  if (member.TryGetAttribute(out DisableWhenAttribute a1))
+                  if (member.TryGetAttribute(out EnableWhenAttribute enableAttr))
                   {
-                        if (FetchValue(a1.ConditionName, target) is bool value)
-                        {
-                              return !value;
-                        }
+                        output &= FetchValue(enableAttr.ConditionName, target) is bool enableFlag && enableFlag;
                   }
-                  else
-                  if (member.TryGetAttribute(out ReadonlyAttribute a2))
+                  if (member.TryGetAttribute(out DisableWhenAttribute disableAttr))
                   {
-                        return a2.ExclusiveToPlaymode && !EditorApplication.isPlaying;
+                        output &= FetchValue(disableAttr.ConditionName, target) is bool disableFlag && !disableFlag;
                   }
-                  return true;
+                  return output;
             }
             private bool EvaluateVisibility(MemberInfo member)
             {
-                  if (member.TryGetAttribute(out ShowWhenAttribute a0))
+                  bool output = true;
+
+                  if (member.TryGetAttribute(out ShowWhenAttribute showAttr))
                   {
-                        if (FetchValue(a0.ConditionName, target) is bool value)
-                        {
-                              return value;
-                        }
+                        output &= FetchValue(showAttr.ConditionName, target) is bool showFlag && showFlag;
                   }
-                  else
-                  if (member.TryGetAttribute(out HideWhenAttribute a1))
+                  if (member.TryGetAttribute(out HideWhenAttribute hideAttr))
                   {
-                        if (FetchValue(a1.ConditionName, target) is bool value)
-                        {
-                              return !value;
-                        }
+                        output &= FetchValue(hideAttr.ConditionName, target) is bool hideFlag && !hideFlag;
                   }
-                  return true;
+                  return output;
             }
       }
 }

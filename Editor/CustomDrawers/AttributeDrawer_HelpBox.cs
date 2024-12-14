@@ -7,21 +7,20 @@ namespace Emp37.Utility.Editor
       [CustomPropertyDrawer(typeof(HelpBoxAttribute), true)]
       internal class AttributeDrawer_HelpBox : BaseDecoratorDrawer
       {
+            private HelpBoxAttribute Attribute => attribute as HelpBoxAttribute;
+
             private const float BoxOffset = -4F, TextOffset = 34F;
 
-            private static readonly GUIStyle label = new(EditorStyles.label)
+            private GUIContent Icon;
+            private static readonly GUIStyle labelStyle = new(EditorStyles.label)
             {
                   alignment = TextAnchor.MiddleLeft,
                   wordWrap = true,
             };
 
-            private GUIContent Icon;
-
-            private HelpBoxAttribute Attribute => attribute as HelpBoxAttribute;
-
 
             public override void Initialize()
-            { 
+            {
                   var type = Attribute.MessageType;
                   Icon = type is 0 ? null : EditorGUIUtility.IconContent("console." + type switch { MessageType.Warning => "warnicon", MessageType.Error => "erroricon", _ => "infoicon", });
             }
@@ -37,7 +36,7 @@ namespace Emp37.Utility.Editor
                         EditorGUI.LabelField(position, Icon);
                         position = position.Indent(TextOffset);
                   }
-                  EditorGUI.LabelField(position, Attribute.Message, label);
+                  EditorGUI.LabelField(position, Attribute.Message, labelStyle);
             }
             public override float GetHeight() => Attribute.Height + EditorGUIUtility.standardVerticalSpacing;
       }
