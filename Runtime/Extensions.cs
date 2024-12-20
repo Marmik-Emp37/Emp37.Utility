@@ -41,8 +41,8 @@ namespace Emp37.Utility
             /// Formats a string by adding spaces between characters and converting them to uppercase.
             /// </summary>
             /// <param name="input">The input string to format.</param>
-            public static string ToStylizedTitleCase(this string input) => string.IsNullOrWhiteSpace(input) ? string.Empty : string.Concat(input.Select((c, i) => char.IsWhiteSpace(c) ? "" : char.IsUpper(c) ? (i > 0 ? "   " : "") + c : " " + char.ToUpper(c)));
-            public static string ToTitleCase(this string input) => string.IsNullOrWhiteSpace(input) ? string.Empty : string.Concat(input.Select((c, i) => (i > 0 && char.IsUpper(c) ? " " : "") + c));
+            public static string ToStylizedTitleCase(this string input) => string.IsNullOrWhiteSpace(input) ? string.Empty : string.Concat(input.Select((c, idx) => char.IsWhiteSpace(c) ? "" : char.IsUpper(c) ? (idx > 0 ? "   " : "") + c : " " + char.ToUpper(c)));
+            public static string ToTitleCase(this string input) => string.IsNullOrWhiteSpace(input) ? string.Empty : string.Concat(input.Select((c, idx) => (idx > 0 && char.IsUpper(c) ? " " : "") + c));
             #endregion
       }
 }
