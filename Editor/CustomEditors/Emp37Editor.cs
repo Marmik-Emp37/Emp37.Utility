@@ -20,6 +20,8 @@ namespace Emp37.Utility.Editor
             private SerializedProperty[] serializedProperties;
             private MethodInfo[] serializedMethods;
 
+            private bool isLayoutActive;
+
 
             private void OnEnable()
             {
@@ -49,6 +51,7 @@ namespace Emp37.Utility.Editor
                   serializedMethods = targetType.GetMethods(DefaultFlags);
                   #endregion
             }
+
             public override void OnInspectorGUI()
             {
                   serializedObject.Update();
@@ -61,30 +64,24 @@ namespace Emp37.Utility.Editor
                         }
                         #endregion
 
-                        bool isLayoutActive = false;
-
                         #region S E R I A L I Z E D   P R O P E R T I E S
                         foreach (SerializedProperty property in serializedProperties)
                         {
                               FieldInfo field = FetchInfo<FieldInfo>(property.name, targetType);
-                              EvaluateLayout(field, ref isLayoutActive);
+                              EvaluateLayouts(field);
                               if (EvaluateVisibility(field))
                               {
                                     GUI.enabled = EvaluateEnabled(field);
                                     EditorGUILayout.PropertyField(property);
                               }
                         }
-                        if (isLayoutActive)
-                        {
-                              isLayoutActive = false;
-                              EditorGUILayout.EndHorizontal();
-                        }
+                        ResolveLayouts();
                         #endregion
 
                         #region S E R I A L I Z E D   M E TH O D S
                         foreach (MethodInfo method in serializedMethods)
                         {
-                              EvaluateLayout(method, ref isLayoutActive);
+                              EvaluateLayouts(method);
                               if (method.TryGetAttribute(out ButtonAttribute button) && EvaluateVisibility(method))
                               {
                                     GUI.enabled = EvaluateEnabled(method);
@@ -96,10 +93,7 @@ namespace Emp37.Utility.Editor
                                     }
                               }
                         }
-                        if (isLayoutActive)
-                        {
-                              EditorGUILayout.EndHorizontal();
-                        }
+                        ResolveLayouts();
                         #endregion
 
                         GUI.enabled = true;
@@ -107,11 +101,11 @@ namespace Emp37.Utility.Editor
                   serializedObject.ApplyModifiedProperties();
             }
 
-            private void EvaluateLayout(MemberInfo member, ref bool state)
+            private void EvaluateLayouts(MemberInfo member)
             {
-                  if (member.TryGetAttribute(out HorizontalGroupAttribute horizontalGroup) && horizontalGroup.State != state)
+                  if (member.TryGetAttribute(out HorizontalGroupAttribute horizontalGroup) && isLayoutActive != horizontalGroup.State)
                   {
-                        if (state = horizontalGroup.State)
+                        if (isLayoutActive = horizontalGroup.State)
                         {
                               EditorGUILayout.BeginHorizontal();
                         }
@@ -119,6 +113,14 @@ namespace Emp37.Utility.Editor
                         {
                               EditorGUILayout.EndHorizontal();
                         }
+                  }
+            }
+            private void ResolveLayouts()
+            {
+                  if (isLayoutActive)
+                  {
+                        isLayoutActive = false;
+                        EditorGUILayout.EndHorizontal();
                   }
             }
             private bool EvaluateEnabled(MemberInfo member)
