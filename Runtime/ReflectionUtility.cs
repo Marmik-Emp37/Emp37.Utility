@@ -9,7 +9,6 @@ namespace Emp37.Utility
       using Property = PropertyInfo;
       using Method = MethodInfo;
 
-
       public static class ReflectionUtility
       {
             [Flags]

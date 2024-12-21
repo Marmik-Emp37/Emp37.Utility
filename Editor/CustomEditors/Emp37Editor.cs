@@ -20,7 +20,7 @@ namespace Emp37.Utility.Editor
             private SerializedProperty[] serializedProperties;
             private MethodInfo[] serializedMethods;
 
-            private bool isLayoutActive;
+            private bool isRowActive, isColumnActive;
 
 
             private void OnEnable()
@@ -67,11 +67,13 @@ namespace Emp37.Utility.Editor
                         #region S E R I A L I Z E D   P R O P E R T I E S
                         foreach (SerializedProperty property in serializedProperties)
                         {
-                              FieldInfo field = FetchInfo<FieldInfo>(property.name, targetType);
+                              if (!TryFetchInfo(property.name, targetType, out FieldInfo field)) continue;
+
                               EvaluateLayouts(field);
                               if (EvaluateVisibility(field))
                               {
                                     GUI.enabled = EvaluateEnabled(field);
+
                                     EditorGUILayout.PropertyField(property);
                               }
                         }
@@ -81,8 +83,10 @@ namespace Emp37.Utility.Editor
                         #region S E R I A L I Z E D   M E TH O D S
                         foreach (MethodInfo method in serializedMethods)
                         {
+                              if (!method.TryGetAttribute(out ButtonAttribute button)) continue;
+
                               EvaluateLayouts(method);
-                              if (method.TryGetAttribute(out ButtonAttribute button) && EvaluateVisibility(method))
+                              if (EvaluateVisibility(method))
                               {
                                     GUI.enabled = EvaluateEnabled(method);
                                     GUI.backgroundColor = button.BackgroundColor;
@@ -103,24 +107,39 @@ namespace Emp37.Utility.Editor
 
             private void EvaluateLayouts(MemberInfo member)
             {
-                  if (member.TryGetAttribute(out HorizontalGroupAttribute horizontalGroup) && isLayoutActive != horizontalGroup.State)
+                  if (member.IsDefined(typeof(EndRowAttribute)) && isRowActive)
                   {
-                        if (isLayoutActive = horizontalGroup.State)
-                        {
-                              EditorGUILayout.BeginHorizontal();
-                        }
-                        else
-                        {
-                              EditorGUILayout.EndHorizontal();
-                        }
+                        EditorGUILayout.EndHorizontal();
+                        isRowActive = false;
+                  }
+                  if (member.IsDefined(typeof(BeginRowAttribute)) && !isRowActive)
+                  {
+                        _ = EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
+                        isRowActive = true;
+                  }
+
+                  if (member.IsDefined(typeof(EndColumnAttribute)) && isColumnActive)
+                  {
+                        EditorGUILayout.EndVertical();
+                        isColumnActive = false;
+                  }
+                  if (member.IsDefined(typeof(BeginColumnAttribute)) && !isColumnActive)
+                  {
+                        _ = EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true));
+                        isColumnActive = true;
                   }
             }
             private void ResolveLayouts()
             {
-                  if (isLayoutActive)
+                  if (isRowActive)
                   {
-                        isLayoutActive = false;
+                        isRowActive = false;
                         EditorGUILayout.EndHorizontal();
+                  }
+                  if (isColumnActive)
+                  {
+                        isColumnActive = false;
+                        EditorGUILayout.EndVertical();
                   }
             }
             private bool EvaluateEnabled(MemberInfo member)
