@@ -14,8 +14,8 @@ namespace Emp37.Utility.Editor
       {
             private Type targetType;
 
-            private bool showMonoScript;
-            private SerializedProperty monoScript;
+            private bool showDefaultScript;
+            private SerializedProperty defaultScript;
 
             private SerializedProperty[] serializedProperties;
             private MethodInfo[] serializedMethods;
@@ -27,7 +27,7 @@ namespace Emp37.Utility.Editor
             {
                   targetType = target.GetType();
 
-                  showMonoScript = !targetType.IsDefined(typeof(HideDefaultScriptAttribute));
+                  showDefaultScript = !targetType.IsDefined(typeof(HideDefaultScriptAttribute));
 
                   #region I N I T I A L I Z E   P R O P E R T I E S
                   if (serializedProperties == null)
@@ -42,7 +42,7 @@ namespace Emp37.Utility.Editor
                                     properties.Enqueue(property);
                               }
                         }
-                        monoScript = properties.Dequeue();
+                        defaultScript = properties.Dequeue();
                         serializedProperties = properties.ToArray();
                   }
                   #endregion
@@ -57,10 +57,10 @@ namespace Emp37.Utility.Editor
                   serializedObject.Update();
                   {
                         #region D E F A U L T   S C R I P T
-                        if (showMonoScript)
+                        if (showDefaultScript)
                         {
                               GUI.enabled = false;
-                              EditorGUILayout.PropertyField(monoScript);
+                              EditorGUILayout.PropertyField(defaultScript);
                         }
                         #endregion
 
