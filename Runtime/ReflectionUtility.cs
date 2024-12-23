@@ -18,17 +18,17 @@ namespace Emp37.Utility
                   All = 7,
             }
 
-            public const BindingFlags DefaultFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+            public const BindingFlags ReflectionFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
-            private static readonly Dictionary<(Type, string), MemberInfo> cachedMembers = new();
+            private static readonly Dictionary<(Type, string), MemberInfo> cachedInfo = new();
 
-            public static T FetchInfo<T>(string name, Type type, BindingFlags bindings = DefaultFlags) where T : MemberInfo
+            public static T FetchInfo<T>(string name, Type type, BindingFlags bindings = ReflectionFlags) where T : MemberInfo
             {
                   if (type == null) throw new ArgumentNullException(nameof(type), "The provided type cannot be null.");
                   if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Member name cannot be empty.", nameof(name));
 
                   (Type, string) key = (type, name);
-                  if (!cachedMembers.TryGetValue(key, out MemberInfo member))
+                  if (!cachedInfo.TryGetValue(key, out MemberInfo member))
                   {
                         Type memberType = typeof(T);
                         while (type != null)
@@ -42,7 +42,7 @@ namespace Emp37.Utility
                               };
                               if (member != null)
                               {
-                                    cachedMembers[key] = member;
+                                    cachedInfo[key] = member;
                                     break;
                               }
                               type = type.BaseType;
@@ -50,48 +50,32 @@ namespace Emp37.Utility
                   }
                   return member as T ?? throw new MissingMemberException($"Member '{name}' of type '{typeof(T).Name}' not found in the type hierarchy of '{key.Item1.FullName}'."); ;
             }
-            public static bool TryFetchInfo<T>(string name, Type type, out T value, BindingFlags bindings = DefaultFlags) where T : MemberInfo
+            public static bool TryFetchInfo<T>(string name, Type type, out T value, BindingFlags bindings = ReflectionFlags) where T : MemberInfo
             {
-                  value = null;
-
-                  if (type == null || string.IsNullOrWhiteSpace(name))
-                  {
-                        Debug.LogWarning($"Invalid input: Type '{type}' or name '{name}' is null or empty.");
-                        return false;
-                  }
-
                   try
                   {
                         value = FetchInfo<T>(name, type, bindings);
                   }
                   catch (Exception ex)
                   {
+                        value = null;
+
                         Debug.LogWarning(ex.Message);
                   }
-
                   return value != null;
             }
-            public static object FetchValue(string name, object target, MemberTypes enabled = MemberTypes.All, BindingFlags bindings = DefaultFlags, params object[] parameters)
+            public static object FetchValue(string name, object target, MemberTypes enabled = MemberTypes.All, BindingFlags bindings = ReflectionFlags, params object[] parameters)
             {
-                  if (target == null) throw new ArgumentNullException(nameof(target));
-
-                  Type type = target.GetType();
-
-                  if (enabled.HasFlag(MemberTypes.Field) && TryFetchInfo(name, type, out FieldInfo field, bindings))
+                  if (target != null)
                   {
-                        return field.GetValue(target);
-                  }
-                  if (enabled.HasFlag(MemberTypes.Property) && TryFetchInfo(name, type, out PropertyInfo property, bindings) && property.CanRead)
-                  {
-                        return property.GetValue(target);
-                  }
-                  if (enabled.HasFlag(MemberTypes.Method) && TryFetchInfo(name, type, out MethodInfo method, bindings))
-                  {
-                        return method.Invoke(target, parameters);
+                        Type type = target.GetType();
+                        if (enabled.HasFlag(MemberTypes.Field) && TryFetchInfo(name, type, out FieldInfo field, bindings)) return field.GetValue(target);
+                        if (enabled.HasFlag(MemberTypes.Property) && TryFetchInfo(name, type, out PropertyInfo property, bindings) && property.CanRead) return property.GetValue(target);
+                        if (enabled.HasFlag(MemberTypes.Method) && TryFetchInfo(name, type, out MethodInfo method, bindings)) return method.Invoke(target, parameters);
                   }
                   return null;
             }
-            public static object InvokeMethod(MethodInfo method, object target, string[] args = null, BindingFlags bindings = DefaultFlags)
+            public static object InvokeMethod(MethodInfo method, object target, string[] args = null, BindingFlags bindings = ReflectionFlags)
             {
                   List<object> values = new();
                   ParameterInfo[] parameters = method.GetParameters();

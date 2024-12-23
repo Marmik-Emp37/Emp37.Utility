@@ -48,7 +48,7 @@ namespace Emp37.Utility.Editor
                   #endregion
 
                   #region I N I T I A L I Z E   M E T H O D S
-                  serializedMethods = targetType.GetMethods(DefaultFlags);
+                  serializedMethods = targetType.GetMethods(ReflectionFlags);
                   #endregion
             }
 

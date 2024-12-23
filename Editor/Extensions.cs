@@ -18,19 +18,19 @@ namespace Emp37.Utility.Editor
             /// <returns>Attribute of type TAttribute if found, otherwise null.</returns>
             /// <exception cref="ArgumentNullException">When the serialized property is null.</exception>
             /// <exception cref="ArgumentException">When the serialized property target object type is null.</exception>
-            public static TAttribute GetAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DefaultFlags) where TAttribute : Attribute
+            public static TAttribute GetAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = ReflectionFlags) where TAttribute : Attribute
             {
                   if (property == null) throw new ArgumentNullException(nameof(property), "SerializedProperty cannot be null.");
                   object target = (property.serializedObject?.targetObject) ?? throw new ArgumentException($"Serialized object or its target is null for property '{property.name}'.");
                   FieldInfo field = FetchInfo<FieldInfo>(property.name, target.GetType(), bindings) ?? throw new MissingFieldException($"Field '{property.name}' not found in target type '{target.GetType().FullName}'.");
                   return field.GetCustomAttribute<TAttribute>();
             }
-            public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags bindings = DefaultFlags) where TAttribute : Attribute
+            public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags bindings = ReflectionFlags) where TAttribute : Attribute
             {
                   attribute = property?.GetAttribute<TAttribute>(bindings);
                   return attribute != null;
             }
-            public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DefaultFlags) where TAttribute : Attribute
+            public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = ReflectionFlags) where TAttribute : Attribute
             {
                   if (property == null)
                   {
