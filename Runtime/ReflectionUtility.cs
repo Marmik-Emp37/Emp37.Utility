@@ -48,7 +48,7 @@ namespace Emp37.Utility
                               type = type.BaseType;
                         }
                   }
-                  return member as T ?? throw new MissingMemberException($"Member '{name}' of type '{typeof(T).Name}' not found in the type hierarchy of '{key.Item1.FullName}'."); ;
+                  return member as T;
             }
             public static bool TryFetchInfo<T>(string name, Type type, out T value, BindingFlags bindings = ReflectionFlags) where T : MemberInfo
             {
