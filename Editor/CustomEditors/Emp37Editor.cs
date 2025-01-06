@@ -14,6 +14,7 @@ namespace Emp37.Utility.Editor
       {
             private Type targetType;
 
+            private const string defaultScriptName = "m_Script";
             private bool showDefaultScript;
             private SerializedProperty defaultScript;
 
@@ -32,17 +33,13 @@ namespace Emp37.Utility.Editor
                   #region I N I T I A L I Z E   P R O P E R T I E S
                   if (serializedProperties == null)
                   {
-                        Queue<SerializedProperty> properties = new();
+                        List<SerializedProperty> properties = new();
                         SerializedProperty iterator = serializedObject.GetIterator();
                         while (iterator.NextVisible(true))
                         {
-                              SerializedProperty property = serializedObject.FindProperty(iterator.name);
-                              if (property != null)
-                              {
-                                    properties.Enqueue(property);
-                              }
+                              if (iterator.name == defaultScriptName) defaultScript = iterator.Copy();
+                              else properties.Add(iterator.Copy());
                         }
-                        defaultScript = properties.Dequeue();
                         serializedProperties = properties.ToArray();
                   }
                   #endregion
