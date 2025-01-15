@@ -21,8 +21,6 @@ namespace Emp37.Utility.Editor
             private SerializedProperty[] serializedProperties;
             private MethodInfo[] serializedMethods;
 
-            private bool isRowActive, isColumnActive;
-
 
             private void OnEnable()
             {
@@ -66,7 +64,6 @@ namespace Emp37.Utility.Editor
                         {
                               if (!TryFetchInfo(property.name, targetType, out FieldInfo field)) continue;
 
-                              EvaluateLayouts(field);
                               if (EvaluateVisibility(field))
                               {
                                     GUI.enabled = EvaluateEnabled(field);
@@ -74,7 +71,6 @@ namespace Emp37.Utility.Editor
                                     EditorGUILayout.PropertyField(property);
                               }
                         }
-                        ResolveLayouts();
                         #endregion
 
                         #region S E R I A L I Z E D   M E TH O D S
@@ -82,7 +78,6 @@ namespace Emp37.Utility.Editor
                         {
                               if (!method.TryGetAttribute(out ButtonAttribute button)) continue;
 
-                              EvaluateLayouts(method);
                               if (EvaluateVisibility(method))
                               {
                                     GUI.enabled = EvaluateEnabled(method);
@@ -94,7 +89,6 @@ namespace Emp37.Utility.Editor
                                     }
                               }
                         }
-                        ResolveLayouts();
                         #endregion
 
                         GUI.enabled = true;
@@ -102,43 +96,6 @@ namespace Emp37.Utility.Editor
                   serializedObject.ApplyModifiedProperties();
             }
 
-            private void EvaluateLayouts(MemberInfo member)
-            {
-                  if (member.IsDefined(typeof(EndRowAttribute)) && isRowActive)
-                  {
-                        EditorGUILayout.EndHorizontal();
-                        isRowActive = false;
-                  }
-                  if (member.IsDefined(typeof(BeginRowAttribute)) && !isRowActive)
-                  {
-                        _ = EditorGUILayout.BeginHorizontal(GUILayout.ExpandHeight(true));
-                        isRowActive = true;
-                  }
-
-                  if (member.IsDefined(typeof(EndColumnAttribute)) && isColumnActive)
-                  {
-                        EditorGUILayout.EndVertical();
-                        isColumnActive = false;
-                  }
-                  if (member.IsDefined(typeof(BeginColumnAttribute)) && !isColumnActive)
-                  {
-                        _ = EditorGUILayout.BeginVertical(GUILayout.ExpandHeight(true));
-                        isColumnActive = true;
-                  }
-            }
-            private void ResolveLayouts()
-            {
-                  if (isRowActive)
-                  {
-                        isRowActive = false;
-                        EditorGUILayout.EndHorizontal();
-                  }
-                  if (isColumnActive)
-                  {
-                        isColumnActive = false;
-                        EditorGUILayout.EndVertical();
-                  }
-            }
             private bool EvaluateEnabled(MemberInfo member)
             {
                   bool output = true;
