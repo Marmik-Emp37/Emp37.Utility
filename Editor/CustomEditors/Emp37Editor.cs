@@ -35,7 +35,10 @@ namespace Emp37.Utility.Editor
                         SerializedProperty iterator = serializedObject.GetIterator();
                         while (iterator.NextVisible(true))
                         {
-                              if (iterator.name == defaultScriptName) defaultScript = iterator.Copy();
+                              if (iterator.name == defaultScriptName)
+                              {
+                                    defaultScript = iterator.Copy();
+                              }
                               else properties.Add(iterator.Copy());
                         }
                         serializedProperties = properties.ToArray();
@@ -52,7 +55,7 @@ namespace Emp37.Utility.Editor
                   serializedObject.Update();
                   {
                         #region D E F A U L T   S C R I P T
-                        if (showDefaultScript)
+                        if (defaultScript != null && showDefaultScript)
                         {
                               GUI.enabled = false;
                               EditorGUILayout.PropertyField(defaultScript);
