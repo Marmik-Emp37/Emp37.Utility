@@ -14,7 +14,6 @@ namespace Emp37.Utility.Editor
       {
             private Type targetType;
 
-            private const string defaultScriptName = "m_Script";
             private bool showDefaultScript;
             private SerializedProperty defaultScript;
 
@@ -31,16 +30,17 @@ namespace Emp37.Utility.Editor
                   #region I N I T I A L I Z E   P R O P E R T I E S
                   if (serializedProperties == null)
                   {
-                        List<SerializedProperty> properties = new();
+                        Queue<SerializedProperty> properties = new();
                         SerializedProperty iterator = serializedObject.GetIterator();
                         while (iterator.NextVisible(true))
                         {
-                              if (iterator.name == defaultScriptName)
+                              SerializedProperty property = serializedObject.FindProperty(iterator.name);
+                              if (property != null)
                               {
-                                    defaultScript = iterator.Copy();
+                                    properties.Enqueue(property);
                               }
-                              else properties.Add(iterator.Copy());
                         }
+                        defaultScript = properties.Dequeue();
                         serializedProperties = properties.ToArray();
                   }
                   #endregion
@@ -70,7 +70,6 @@ namespace Emp37.Utility.Editor
                               if (EvaluateVisibility(field))
                               {
                                     GUI.enabled = EvaluateEnabled(field);
-
                                     EditorGUILayout.PropertyField(property);
                               }
                         }
@@ -85,7 +84,6 @@ namespace Emp37.Utility.Editor
                               {
                                     GUI.enabled = EvaluateEnabled(method);
                                     GUI.backgroundColor = button.BackgroundColor;
-
                                     if (GUILayout.Button(button.Name ?? method.Name.ToTitleCase(), GUILayout.Height(button.Height)))
                                     {
                                           InvokeMethod(method, target, button.Parameters);
