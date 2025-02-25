@@ -1,21 +1,23 @@
 using UnityEngine;
 
 using UnityEditor;
-using Type = UnityEditor.SerializedPropertyType;
 
 namespace Emp37.Utility.Editor
 {
+      using Type = SerializedPropertyType;
+
       [CustomPropertyDrawer(typeof(MaxAttribute))]
       internal class AttributeDrawer_Max : BasePropertyDrawer
       {
             public override void Initialize(SerializedProperty property) => Validate(property);
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   if (property.propertyType is not (Type.Float or Type.Integer or Type.Vector2 or Type.Vector3 or Type.Vector2Int or Type.Vector3Int))
                   {
-                        EditorGUI.HelpBox(position, $"Use {nameof(MaxAttribute)} on 'Floating' or 'Integer' field types.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, Type.Float, Type.Integer);
                         return;
                   }
+
                   EditorGUI.BeginChangeCheck();
                   EditorGUI.PropertyField(position, property, label);
                   if (EditorGUI.EndChangeCheck())
@@ -26,7 +28,7 @@ namespace Emp37.Utility.Editor
 
             private void Validate(SerializedProperty property)
             {
-                  var attribute = base.attribute as MaxAttribute;
+                  var attr = attribute as MaxAttribute;
                   switch (property.propertyType)
                   {
                         #region I N T E G E R
@@ -71,8 +73,8 @@ namespace Emp37.Utility.Editor
                               }
                               #endregion
                   }
-                  int @int(int value) => Mathf.Clamp(value, int.MinValue, (int) attribute.Value);
-                  float @float(float value) => Mathf.Clamp(value, float.MinValue, attribute.Value);
+                  int @int(int value) => Mathf.Clamp(value, int.MinValue, (int) attr.Value);
+                  float @float(float value) => Mathf.Clamp(value, float.MinValue, attr.Value);
             }
       }
 }

@@ -7,15 +7,13 @@ namespace Emp37.Utility
       /// <summary>
       /// Attribute used to modify the label of a serialized property.
       /// </summary>
-      [AttributeUsage(AttributeTargets.Field)]
+      [AttributeUsage(AttributeTargets.Field, Inherited = true)]
       public class LabelAttribute : PropertyAttribute
       {
-            public readonly GUIContent Label;
+            public readonly string Label = string.Empty, IconName;
 
-            public LabelAttribute(string text)
-            {
-                  Label = new(text);
-                  order = -20;
-            }
+            public LabelAttribute() => order = -100;
+            public LabelAttribute(string label) : this() => Label = label;
+            public LabelAttribute(string label, string iconName) : this(label) => IconName = iconName;
       }
 }

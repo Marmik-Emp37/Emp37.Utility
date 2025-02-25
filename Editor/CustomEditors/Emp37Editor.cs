@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Linq;
 
 using UnityEngine;
 
@@ -14,119 +15,146 @@ namespace Emp37.Utility.Editor
       {
             private Type targetType;
 
-            private bool showDefaultScript;
-            private SerializedProperty defaultScript;
-
             private SerializedProperty[] serializedProperties;
             private MethodInfo[] serializedMethods;
+
+            private bool showDefaultProperty;
+            private SerializedProperty defaultProperty;
+
+            private bool isHorizontalLayoutActive;
 
 
             private void OnEnable()
             {
                   targetType = target.GetType();
 
-                  showDefaultScript = !targetType.IsDefined(typeof(HideDefaultScriptAttribute));
+                  showDefaultProperty = !HasAttribute<HideDefaultPropertyAttribute>(targetType);
 
-                  #region I N I T I A L I Z E   P R O P E R T I E S
+                  #region I N I T I A L I Z E   S E R I A L I Z E D   P R O P E R T I E S
                   if (serializedProperties == null)
                   {
-                        Queue<SerializedProperty> properties = new();
+                        List<SerializedProperty> properties = new();
                         SerializedProperty iterator = serializedObject.GetIterator();
+
                         while (iterator.NextVisible(true))
                         {
                               SerializedProperty property = serializedObject.FindProperty(iterator.name);
-                              if (property != null)
-                              {
-                                    properties.Enqueue(property);
-                              }
+                              if (property != null) properties.Add(property);
                         }
-                        defaultScript = properties.Dequeue();
+
+                        defaultProperty = properties[0];
+                        properties.RemoveAt(0);
+
                         serializedProperties = properties.ToArray();
                   }
                   #endregion
 
-                  #region I N I T I A L I Z E   M E T H O D S
-                  serializedMethods = targetType.GetMethods(ReflectionFlags);
+                  #region I N I T I A L I Z E   S E R I A L I Z E D   M E T H O D S
+                  serializedMethods = targetType.GetMethods(DEFAULT_FLAGS).Where(static method => method.IsDefined(typeof(ButtonAttribute), true)).ToArray();
                   #endregion
             }
 
             public override void OnInspectorGUI()
             {
+                  if (TryGetAttributes(targetType, out NoteAttribute[] notes, true))
+                  {
+                        foreach (NoteAttribute attribute in notes)
+                              using (new EditorGUIHelper.BackgroundColorScope(attribute.Color))
+                                    EditorGUILayout.HelpBox(attribute.Content);
+                  }
+
+                  #region D R A W   D E F A U L T   P R O P E R T Y
+                  if (showDefaultProperty && defaultProperty != null)
+                  {
+                        GUI.enabled = false;
+                        EditorGUILayout.PropertyField(defaultProperty);
+                  }
+                  #endregion
+
                   serializedObject.Update();
                   {
-                        #region D E F A U L T   S C R I P T
-                        if (defaultScript != null && showDefaultScript)
-                        {
-                              GUI.enabled = false;
-                              EditorGUILayout.PropertyField(defaultScript);
-                        }
-                        #endregion
-
-                        #region S E R I A L I Z E D   P R O P E R T I E S
+                        #region D R A W   S E R I A L I Z E D   P R O P E R T I E S
                         foreach (SerializedProperty property in serializedProperties)
                         {
-                              if (!TryFetchInfo(property.name, targetType, out FieldInfo field)) continue;
+                              FieldInfo field = property.GetField();
+                              if (field == null || !EvaluateVisibility(field)) continue;
 
-                              if (EvaluateVisibility(field))
-                              {
-                                    GUI.enabled = EvaluateEnabled(field);
-                                    EditorGUILayout.PropertyField(property);
-                              }
+                              EvaluateGroup(field);
+
+                              GUI.enabled = EvaluateEnabled(field);
+                              EditorGUILayout.PropertyField(property, true);
                         }
+                        EndActiveGroup();
                         #endregion
 
-                        #region S E R I A L I Z E D   M E TH O D S
+                        #region D R A W   S E R I A L I Z E D   M E TH O D S
                         foreach (MethodInfo method in serializedMethods)
                         {
-                              if (!method.TryGetAttribute(out ButtonAttribute button)) continue;
+                              ButtonAttribute button = GetAttribute<ButtonAttribute>(method, true);
+                              if (button == null || !EvaluateVisibility(method)) continue;
 
-                              if (EvaluateVisibility(method))
+                              EvaluateGroup(method);
+
+                              GUI.enabled = EvaluateEnabled(method);
+                              GUI.backgroundColor = button.BackgroundColor;
+                              if (GUILayout.Button(button.Name ?? Utility.ToTitleCase(method.Name), GUILayout.Height(button.Height)))
                               {
-                                    GUI.enabled = EvaluateEnabled(method);
-                                    GUI.backgroundColor = button.BackgroundColor;
-                                    if (GUILayout.Button(button.Name ?? method.Name.ToTitleCase(), GUILayout.Height(button.Height)))
-                                    {
-                                          InvokeMethod(method, target, button.Parameters);
-                                    }
+                                    AutoInvokeMethod(method, target, button.Parameters);
                               }
                         }
+                        EndActiveGroup();
                         #endregion
-
-                        GUI.enabled = true;
                   }
                   serializedObject.ApplyModifiedProperties();
+
+                  GUI.enabled = true;
             }
 
-            private bool EvaluateEnabled(MemberInfo member)
+            private void EvaluateGroup(ICustomAttributeProvider provider)
+            {
+                  if (!TryGetAttribute(provider, out HorizontalAttribute horizontal)) return;
+
+                  if (horizontal.BeginGroup && !isHorizontalLayoutActive)
+                  {
+                        EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+                        isHorizontalLayoutActive = true;
+                  }
+                  else
+                  if (!horizontal.BeginGroup)
+                  {
+                        EndActiveGroup();
+                  }
+            }
+            private void EndActiveGroup()
+            {
+                  if (isHorizontalLayoutActive)
+                  {
+                        EditorGUILayout.EndHorizontal();
+                        isHorizontalLayoutActive = false;
+                  }
+            }
+            private bool EvaluateVisibility(ICustomAttributeProvider provider)
             {
                   bool output = true;
 
-                  if (member.TryGetAttribute(out ReadonlyAttribute readonlyAttr))
-                  {
-                        output &= readonlyAttr.ExclusiveToPlaymode && !EditorApplication.isPlaying;
-                  }
-                  if (member.TryGetAttribute(out EnableWhenAttribute enableAttr))
-                  {
-                        output &= FetchValue(enableAttr.ConditionName, target) is bool enableFlag && enableFlag;
-                  }
-                  if (member.TryGetAttribute(out DisableWhenAttribute disableAttr))
-                  {
-                        output &= FetchValue(disableAttr.ConditionName, target) is bool disableFlag && !disableFlag;
-                  }
+                  if (TryGetAttribute(provider, out ShowWhenAttribute a0, true))
+                        output &= ReadMember(a0.ConditionName, target) is bool value && value;
+                  if (TryGetAttribute(provider, out HideWhenAttribute a1, true))
+                        output &= ReadMember(a1.ConditionName, target) is bool value && !value;
+
                   return output;
             }
-            private bool EvaluateVisibility(MemberInfo member)
+            private bool EvaluateEnabled(ICustomAttributeProvider provider)
             {
                   bool output = true;
 
-                  if (member.TryGetAttribute(out ShowWhenAttribute showAttr))
-                  {
-                        output &= FetchValue(showAttr.ConditionName, target) is bool showFlag && showFlag;
-                  }
-                  if (member.TryGetAttribute(out HideWhenAttribute hideAttr))
-                  {
-                        output &= FetchValue(hideAttr.ConditionName, target) is bool hideFlag && !hideFlag;
-                  }
+                  if (TryGetAttribute(provider, out ReadonlyAttribute a0, true))
+                        output &= a0.ExclusiveToPlaymode && !EditorApplication.isPlaying;
+                  if (TryGetAttribute(provider, out EnableWhenAttribute a1, true))
+                        output &= ReadMember(a1.ConditionName, target) is bool value && value;
+                  if (TryGetAttribute(provider, out DisableWhenAttribute a2, true))
+                        output &= ReadMember(a2.ConditionName, target) is bool value && !value;
+
                   return output;
             }
       }

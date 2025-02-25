@@ -5,43 +5,33 @@ using UnityEditor;
 namespace Emp37.Utility.Editor
 {
       [CustomPropertyDrawer(typeof(CommentAttribute), true)]
-      internal class AttributeDrawer_Comment : BasePropertyDrawer
+      internal class AttributeDrawer_Comment : BaseDecoratorDrawer
       {
             private CommentAttribute Attribute => attribute as CommentAttribute;
 
             private const byte BackgroundAlpha = 25;
-            private const float MinHeight = 21F, StripWidth = 3F;
+            private const float MinHeight = 21F, HighlightWidth = 3F;
 
-            private readonly GUIStyle labelStyle = new(EditorStyles.label) { richText = true, wordWrap = true };
+            private readonly GUIStyle contentStyle = new(EditorStyles.label) { richText = true, wordWrap = true };
+            private float ContentHeight => Mathf.Max(MinHeight, contentStyle.CalcHeight(Attribute.Content, EditorGUIHelper.ReleventWidth));
 
-
-            public override void Initialize(SerializedProperty property)
+            public override void Initialize()
             {
-                  labelStyle.fontStyle = Attribute.Style;
+                  contentStyle.fontStyle = Attribute.FontStyle;
             }
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Draw(Rect position)
             {
-                  Rect commentRect = position;
-                  commentRect.size = new(x: EditorGUIHelper.ReleventWidth, y: GetStyleHeight(Attribute.Content) /* - [ 1 ]*/);
-                  EditorGUI.LabelField(commentRect, Attribute.Content, labelStyle);
+                  position.height = ContentHeight; // - [ 1 ]
+                  EditorGUI.LabelField(position, Attribute.Content, contentStyle);
 
-                  EditorGUI.DrawRect(commentRect, Attribute.Tint.WithAlpha(BackgroundAlpha));
+                  Color32 color = Attribute.Tint;
+                  color.a = BackgroundAlpha;
+                  EditorGUI.DrawRect(position, color);
 
-                  commentRect.width = StripWidth;
-                  commentRect.x -= commentRect.width + 1;
-                  EditorGUI.DrawRect(commentRect, Attribute.Tint);
-
-                  position.y += commentRect.height + EditorGUIUtility.standardVerticalSpacing; // - [ 2 ]
-                  position.height = EditorGUI.GetPropertyHeight(property);
-                  EditorGUI.PropertyField(position, property, label, true);
+                  position.width = HighlightWidth;
+                  position.x -= position.width + 1F;
+                  EditorGUI.DrawRect(position, Attribute.Tint);
             }
-            public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-            {
-                  float height = base.GetPropertyHeight(property, label);
-                  height += GetStyleHeight(Attribute.Content) + EditorGUIUtility.standardVerticalSpacing; // - [ 1 ] + [ 2 ]
-                  return height;
-            }
-
-            private float GetStyleHeight(GUIContent content) => Mathf.Clamp(labelStyle.CalcHeight(content, EditorGUIHelper.ReleventWidth), MinHeight, float.MaxValue);
+            public override float GetHeight() => ContentHeight /* - [ 1 ]*/ + EditorGUIUtility.standardVerticalSpacing;
       }
 }

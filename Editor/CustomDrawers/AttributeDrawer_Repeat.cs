@@ -1,24 +1,23 @@
 using UnityEngine;
 
 using UnityEditor;
-using Type = UnityEditor.SerializedPropertyType;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(RepeatAttribute), true)]
+      using Type = SerializedPropertyType;
+
+      [CustomPropertyDrawer(typeof(RepeatAttribute))]
       internal class AttributeDrawer_Repeat : BasePropertyDrawer
       {
-            public override void Initialize(SerializedProperty property)
-            {
-                  Validate(property);
-            }
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Initialize(SerializedProperty property) => Validate(property);
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   if (property.propertyType is not (Type.Float or Type.Integer or Type.Vector2 or Type.Vector3 or Type.Vector2Int or Type.Vector3Int))
                   {
-                        EditorGUI.HelpBox(position, "Use RepeatAttribute on 'Floating' or 'Integer' field types.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, Type.Float, Type.Integer);
                         return;
                   }
+
                   EditorGUI.BeginChangeCheck();
                   EditorGUI.PropertyField(position, property, label);
                   if (EditorGUI.EndChangeCheck())
@@ -29,7 +28,7 @@ namespace Emp37.Utility.Editor
 
             private void Validate(SerializedProperty property)
             {
-                  var attribute = base.attribute as RepeatAttribute;
+                  var attr = attribute as RepeatAttribute;
                   switch (property.propertyType)
                   {
                         #region I N T E G E R
@@ -74,8 +73,8 @@ namespace Emp37.Utility.Editor
                               }
                               #endregion
                   }
-                  int @int(int value) => (int) (attribute.Min + Mathf.Repeat(value - attribute.Min, attribute.Max - attribute.Min));
-                  float @float(float value) => attribute.Min + Mathf.Repeat(value - attribute.Min, attribute.Max - attribute.Min);
+                  int @int(int value) => (int) (attr.Min + Mathf.Repeat(value - attr.Min, attr.Max - attr.Min));
+                  float @float(float value) => attr.Min + Mathf.Repeat(value - attr.Min, attr.Max - attr.Min);
             }
       }
 }

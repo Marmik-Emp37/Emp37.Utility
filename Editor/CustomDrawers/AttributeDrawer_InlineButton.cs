@@ -1,5 +1,3 @@
-using System.Reflection;
-
 using UnityEngine;
 
 using UnityEditor;
@@ -11,21 +9,20 @@ namespace Emp37.Utility.Editor
       {
             private const float Gap = 2F;
 
-
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
-                  var attribute = base.attribute as InlineButtonAttribute;
+                  var attr = attribute as InlineButtonAttribute;
 
-                  position.width -= attribute.Width;
-                  EditorGUI.PropertyField(position, property, label);
+                  position.width -= attr.Width + Gap;
+                  EditorGUI.PropertyField(position, property, label, true);
+
                   position.x += position.width + Gap;
-                  position.width = attribute.Width - Gap;
-
-                  if (GUI.Button(position, attribute.Name ?? attribute.Method))
+                  position.width = attr.Width;
+                  if (GUI.Button(position, attr.Name ?? attr.Method))
                   {
                         object target = property.serializedObject.targetObject;
-                        MethodInfo method = ReflectionUtility.FetchInfo<MethodInfo>(attribute.Method, target.GetType());
-                        if (method != null) ReflectionUtility.InvokeMethod(method, target, attribute.Parameters);
+                        System.Reflection.MethodInfo method = ReflectionUtility.FindMethod(attr.Method, target.GetType());
+                        if (method != null) ReflectionUtility.AutoInvokeMethod(method, target, attr.Parameters);
                   }
             }
       }

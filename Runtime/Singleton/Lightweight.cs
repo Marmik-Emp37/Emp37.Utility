@@ -7,13 +7,12 @@ namespace Emp37.Utility.Singleton
       /// </summary>
       /// <remarks>
       /// <b>NOTE:</b> This implementation -
-      /// <br>• does not support the 'Recompile and Continue Playing' value in <i>Preferences > General > Script Changes While Playing</i>.</br>
-      /// <br>• requires explicit placement of component T on the scene.</br>
+      /// <br>• Does not support the 'Recompile and Continue Playing' value in <i>Preferences > General > Script Changes While Playing</i>.</br>
+      /// <br>• Requires explicit placement of component T on the scene.</br>
       /// </remarks>
       public abstract class Lightweight<T> : MonoBehaviour where T : Lightweight<T> // ~Hextant Studios
       {
             public static T Instance { get; private set; }
-
 
             protected virtual void Awake()
             {

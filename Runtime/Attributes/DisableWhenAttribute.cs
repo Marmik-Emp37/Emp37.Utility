@@ -5,7 +5,7 @@ namespace Emp37.Utility
       /// <summary>
       /// Attribute to conditionally disable the associated field in the Inspector.
       /// </summary>
-      [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method)]
+      [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method, Inherited = true)]
       public class DisableWhenAttribute : Attribute
       {
             public readonly string ConditionName;

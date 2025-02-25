@@ -6,24 +6,24 @@ namespace Emp37.Utility.Editor
 {
       internal abstract class BasePropertyDrawer : PropertyDrawer
       {
-            private bool init;
-
+            private bool isInitialized;
 
             public virtual void Initialize(SerializedProperty property) { }
-            public abstract void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label);
+            public abstract void Draw(Rect position, SerializedProperty property, GUIContent label);
 
             public sealed override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
             {
-                  if (!init)
+                  if (!isInitialized)
                   {
                         Initialize(property);
-                        init = true;
+                        isInitialized = true;
                   }
-                  using (new EditorGUI.PropertyScope(position, label, property))
-                  {
-                        OnPropertyDraw(position, property, label);
-                  }
+                  label = EditorGUI.BeginProperty(position, label, property);
+                  Draw(position, property, label);
+                  EditorGUI.EndProperty();
             }
-            public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);
+            public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label, true);
+
+            protected void ShowInvalidUsageBox(Rect position, params SerializedPropertyType[] expectedTypes) => EditorGUI.HelpBox(position, $"Use {attribute.GetType().Name} on fields of type {string.Join(" | ", expectedTypes)}.", UnityEditor.MessageType.Error);
       }
 }

@@ -1,25 +1,42 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using UnityEngine;
 
-namespace Emp37.Utility.Tween
+namespace Emp37.Utility.Tweening
 {
       public class Engine : MonoBehaviour
       {
             private static Engine instance;
+
             private static readonly List<Element> tweens = new();
 
 
+            private void Awake()
+            {
+                  if (instance != null && instance != this)
+                  {
+                        Destroy(gameObject);
+                        return;
+                  }
+                  instance = this;
+                  DontDestroyOnLoad(gameObject);
+                  enabled = false;
+            }
             private void LateUpdate()
             {
                   int count = tweens.Count;
                   for (int i = count - 1; i >= 0; i--)
                   {
-                        var context = tweens[i];
-                        context.Update();
-                        if (context.IsComplete)
+                        Element element = tweens[i];
+                        if (element.IsComplete)
                         {
-                              tweens.RemoveAt(i);
+                              int lastIndex = count - 1;
+                              if (i != lastIndex) tweens[i] = tweens[lastIndex];
+                              tweens.RemoveAt(lastIndex);
+                        }
+                        else
+                        {
+                              element.Update();
                         }
                   }
                   if (count == 0)
@@ -29,31 +46,19 @@ namespace Emp37.Utility.Tween
             }
             private void OnDestroy()
             {
-                  instance = null;
+                  if (instance == this) instance = null;
             }
 
-            private static void Initialize()
+            public static bool Add(Element tween)
             {
-                  instance = FindFirstObjectByType<Engine>();
-                  if (instance == null)
-                  {
-                        instance = new GameObject(typeof(Engine).Name).AddComponent<Engine>();
-                  }
-                  DontDestroyOnLoad(instance);
-            }
-            public static void Push(Element tween)
-            {
-                  if (!Application.isPlaying || tween.IsInvalid) return;
+                  if (!Application.isPlaying || tween.IsInvalid) return false;
 
-                  if (instance == null) Initialize();
+                  instance ??= new GameObject(typeof(Engine).Name).AddComponent<Engine>();
 
-                  int index = tweens.FindIndex(existingTween => existingTween.ConflictsWith(tween));
-                  if (index != -1)
-                  {
-                        tweens.RemoveAt(index);
-                  }
                   tweens.Add(tween);
                   instance.enabled = true;
+
+                  return true;
             }
       }
 }

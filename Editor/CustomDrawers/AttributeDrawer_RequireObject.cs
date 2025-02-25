@@ -7,34 +7,26 @@ namespace Emp37.Utility.Editor
       [CustomPropertyDrawer(typeof(RequireObjectAttribute))]
       internal class AttributeDrawer_RequireObject : BasePropertyDrawer
       {
-            private const float ErrorBoxHeight = 21F;
+            private const float MessageHeight = 21F;
 
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
-                  if (property.propertyType != SerializedPropertyType.ObjectReference)
+                  if (property.propertyType is not SerializedPropertyType.ObjectReference)
                   {
-                        EditorGUI.HelpBox(position, $"Use RequireObject attribute on a field of type '{SerializedPropertyType.ObjectReference}'.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, SerializedPropertyType.ObjectReference);
                         return;
                   }
+
                   if (property.objectReferenceValue == null)
                   {
-                        var attribute = base.attribute as RequireObjectAttribute;
-
-                        position.height = ErrorBoxHeight;
-                        EditorGUI.HelpBox(position, attribute.Message, UnityEditor.MessageType.Error);
-                        position.y += ErrorBoxHeight + EditorGUIUtility.standardVerticalSpacing; // - [ 1 ]
+                        position.height = MessageHeight;
+                        EditorGUI.HelpBox(position, (attribute as RequireObjectAttribute).Message, UnityEditor.MessageType.Error);
+                        position.y += MessageHeight + EditorGUIUtility.standardVerticalSpacing; // - [ 1 ]
                   }
-                  position.height = EditorGUIUtility.singleLineHeight;
+
+                  position.height = base.GetPropertyHeight(property, label); // - [ 2 ]
                   EditorGUI.PropertyField(position, property, label);
             }
-            public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-            {
-                  float height = base.GetPropertyHeight(property, label);
-                  if (property.propertyType == SerializedPropertyType.ObjectReference && property.objectReferenceValue == null)
-                  {
-                        height += ErrorBoxHeight + EditorGUIUtility.standardVerticalSpacing; // - [ 1 ]
-                  }
-                  return height;
-            }
+            public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => base.GetPropertyHeight(property, label) /* - [ 2 ]*/ + (property.propertyType is SerializedPropertyType.ObjectReference && property.objectReferenceValue == null ? MessageHeight + EditorGUIUtility.standardVerticalSpacing /* - [ 1 ]*/ : 0F);
       }
 }

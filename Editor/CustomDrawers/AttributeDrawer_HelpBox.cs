@@ -9,35 +9,26 @@ namespace Emp37.Utility.Editor
       {
             private HelpBoxAttribute Attribute => attribute as HelpBoxAttribute;
 
-            private const float BoxOffset = -4F, TextOffset = 34F;
-
-            private GUIContent Icon;
-            private static readonly GUIStyle labelStyle = new(EditorStyles.label)
+            private static readonly GUIStyle contentStyle = new(EditorStyles.label)
             {
                   alignment = TextAnchor.MiddleLeft,
                   wordWrap = true,
+                  richText = true,
             };
 
+            private float BoxHeight => Mathf.Max(24F, contentStyle.CalcHeight(Attribute.Content, EditorGUIHelper.ReleventWidth));
 
             public override void Initialize()
             {
-                  var type = Attribute.MessageType;
-                  Icon = type is 0 ? null : EditorGUIUtility.IconContent("console." + type switch { MessageType.Warning => "warnicon", MessageType.Error => "erroricon", _ => "infoicon", });
+                  MessageType type = Attribute.MessageType;
+                  Attribute.Content.image = type is 0 ? default : EditorGUIUtility.IconContent($"console.{type switch { MessageType.Warning => "warnicon", MessageType.Error => "erroricon", _ => "infoicon" }}").image;
             }
-            public override void OnGUI(Rect position)
+            public override void Draw(Rect position)
             {
-                  base.OnGUI(position);
-                  position.height = Attribute.Height;
-
-                  EditorGUI.HelpBox(position.Indent(BoxOffset), string.Empty, 0);
-
-                  if (Icon != null)
-                  {
-                        EditorGUI.LabelField(position, Icon);
-                        position = position.Indent(TextOffset);
-                  }
-                  EditorGUI.LabelField(position, Attribute.Message, labelStyle);
+                  position.height = BoxHeight; // - [ 1 ]
+                  EditorGUI.HelpBox(position, string.Empty, 0);
+                  EditorGUI.LabelField(position.Indent(2F), Attribute.Content);
             }
-            public override float GetHeight() => Attribute.Height + EditorGUIUtility.standardVerticalSpacing;
+            public override float GetHeight() => BoxHeight /* - [ 1 ]*/ + EditorGUIUtility.standardVerticalSpacing;
       }
 }

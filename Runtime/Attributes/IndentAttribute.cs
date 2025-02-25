@@ -1,17 +1,15 @@
 using System;
 
-using UnityEngine;
-
 namespace Emp37.Utility
 {
       /// <summary>
       /// Attribute used to indent a serialized property in the inspector.
       /// </summary>
-      [AttributeUsage(AttributeTargets.Field)]
-      public class IndentAttribute : PropertyAttribute
+      [AttributeUsage(AttributeTargets.Field, Inherited = true)]
+      public class IndentAttribute : UnityEngine.PropertyAttribute
       {
-            public readonly int Value;
+            public readonly int Level;
 
-            public IndentAttribute(int level) => Value = level;
+            public IndentAttribute(int level) => Level = level;
       }
 }

@@ -1,100 +1,94 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
 
 using UnityEngine;
-using UnityEngine.Events;
 
-namespace Emp37.Utility.Tween
+namespace Emp37.Utility.Tweening
 {
       using static Ease;
 
-#pragma warning disable IDE1006 // Naming Styles
       public class Element : ITweenAction
       {
-            private bool initialized;
+            // Configuration
             private readonly Transform transform;
-            private readonly float durationMultiplier;
-            private readonly Vector3 target;
-            private Vector3 initial;
-            private ITweenAction.Type actionType;
-            private float delay, progress, overshoot = 1F, period = 0.37F;
-            private Delta deltaMode;
-            private Func<float> easeMethod;
-            private UnityAction onInitialize, onStart, onComplete;
-            private UnityAction<float> onUpdate;
-            private UnityAction<Vector3> onTween;
+            private Vector3 a;
+            private readonly Vector3 b;
+            private Delta timeMode;
+            private bool hasInitialized;
+
+            // Timing
+            private readonly float inverseDuration;
+            private float progress, delay;
+
+            // Easing
+            private Func<float> easeFunction = () => 1F;
+            private float easeOvershoot, easePeriod;
+
+            // Callbacks
+            private Action onInitialize = delegate { };
+            private Action onStart;
+            private Action<Vector3> onValueChanged = delegate { };
+            private Action<float> onUpdate = delegate { };
+            private Action onComplete;
 
             public bool IsComplete { get; private set; }
             public bool IsInvalid
             {
                   get
                   {
-                        bool output;
-                        List<string> warnings = new (bool condition, string message)[]
-                        {
-                              (!transform, "Missing or null Transform reference."),
-                              (durationMultiplier <= 0F, $"Invalid duration {1F / durationMultiplier} value. It must be greater than 0."),
-                              (actionType == 0, "No tween action defined for this element."),
-                        }.Where(warning => warning.condition).Select(warning => warning.message).ToList();
-
-                        if (output = warnings.Any())
+                        List<string> warnings = new();
+                        if (!transform) warnings.Add($"Missing or null {typeof(Transform).Name} reference.");
+                        if (inverseDuration <= 0F) warnings.Add($"Invalid duration value: {1F / inverseDuration}. It must be greater than 0.");
+                        if (warnings.Count > 0)
                         {
                               warnings.ForEach(warning => Debug.LogWarning("Validation Failed: " + warning));
+                              return true;
                         }
-                        return output;
+                        return false;
                   }
             }
 
-
-            private Element(Transform transform, Vector3 target, float duration)
+            private Element(Transform transform, Vector3 end, float duration)
             {
                   this.transform = transform;
-                  this.target = target;
-                  durationMultiplier = 1F / duration;
-                  easeMethod = () => Linear(progress);
+                  b = end;
+                  inverseDuration = 1F / duration;
+                  easeFunction = () => Linear(progress);
             }
+            public static ITweenAction Create(Transform transform, Vector3 end, float duration) => new Element(transform, end, duration);
 
-            public static ITweenAction Build(Transform transform, Vector3 target, float duration) => new Element(transform, target, duration);
+            Transform ITweenAction.Transform => transform;
+            Element ITweenAction.Bind(Vector3 from, Action<Vector3> apply)
+            {
+                  onInitialize = () => a = from;
+                  onValueChanged = apply;
+                  return this;
+            }
 
             internal void Update()
             {
-                  if (IsComplete) return;
+                  float deltaTime = (timeMode == Delta.Unscaled) ? Time.unscaledDeltaTime : Time.deltaTime;
 
-                  float deltaTime = (deltaMode == Delta.Unscaled) ? Time.unscaledDeltaTime : Time.deltaTime;
-
-                  #region D E L A Y
                   if (delay > 0F)
                   {
                         delay -= deltaTime;
                         return;
                   }
-                  #endregion
 
-                  #region I N I T I A L I Z A T I O N
-                  if (!initialized)
+                  if (!hasInitialized)
                   {
-                        initialized = true;
+                        hasInitialized = true;
                         onInitialize();
 
-                        if (initial == target)
-                        {
-                              IsComplete = true;
-                              Debug.Log("Initial and target values are the same, no tweening necessary.");
-                              return;
-                        }
                         onStart?.Invoke();
                   }
-                  #endregion
 
-                  #region T W E E N I N G
-                  progress = Mathf.Clamp01(progress + deltaTime * durationMultiplier);
-                  float easedRatio = easeMethod();
-                  Vector3 value = Vector3.LerpUnclamped(initial, target, easedRatio);
+                  progress = Mathf.Clamp01(progress + deltaTime * inverseDuration);
+                  float easedRatio = easeFunction();
+                  Vector3 current = Vector3.LerpUnclamped(a, b, easedRatio);
+                  onValueChanged(current);
 
-                  onTween(value);
-                  onUpdate?.Invoke(easedRatio);
-                  #endregion
+                  onUpdate(easedRatio);
 
                   if (progress == 1F)
                   {
@@ -102,20 +96,17 @@ namespace Emp37.Utility.Tween
                         onComplete?.Invoke();
                   }
             }
-            internal bool ConflictsWith(Element other) => transform == other.transform && actionType == other.actionType;
-            private T EnsureComponent<T>(ITweenAction.Type action) where T : Component
+            public void Reset()
             {
-                  if (transform.TryGetComponent(out T component))
-                  {
-                        return component;
-                  }
-                  throw new MissingComponentException($"{nameof(GameObject)} '{transform.name}' is missing a {component} component, which is required for '{action}' tweening.");
+                  progress = 0F;
+                  hasInitialized = IsComplete = false;
             }
 
-            #region T W E E N   C O N F I G U R A T I O N
+            #region B U I L D E R   P A T T E R N
+#pragma warning disable IDE1006
             public Element setEase(Type type)
             {
-                  easeMethod = type switch
+                  easeFunction = type switch
                   {
                         Type.InSine => () => InSine(progress),
                         Type.OutSine => () => OutSine(progress),
@@ -138,117 +129,51 @@ namespace Emp37.Utility.Tween
                         Type.InExpo => () => InExpo(progress),
                         Type.OutExpo => () => OutExpo(progress),
                         Type.InOutExpo => () => InOutExpo(progress),
-                        Type.InBack => () => InBack(progress, overshoot),
-                        Type.OutBack => () => OutBack(progress, overshoot),
-                        Type.InOutBack => () => InOutBack(progress, overshoot),
-                        Type.InElastic => () => InElastic(progress, overshoot, period),
-                        Type.OutElastic => () => OutElastic(progress, overshoot, period),
-                        Type.InOutElastic => () => InOutElastic(progress, overshoot, period),
+                        Type.InBack => () => InBack(progress, easeOvershoot),
+                        Type.OutBack => () => OutBack(progress, easeOvershoot),
+                        Type.InOutBack => () => InOutBack(progress, easeOvershoot),
+                        Type.InElastic => () => InElastic(progress, easeOvershoot, easePeriod),
+                        Type.OutElastic => () => OutElastic(progress, easeOvershoot, easePeriod),
+                        Type.InOutElastic => () => InOutElastic(progress, easeOvershoot, easePeriod),
                         Type.InBounce => () => InBounce(progress),
                         Type.OutBounce => () => OutBounce(progress),
                         Type.InOutBounce => () => InOutBounce(progress),
-                        Type.BreakOutBounce => () => BreakOutBounce(progress),
                         _ => () => Linear(progress)
                   };
                   return this;
             }
             /// <summary>
-            /// Sets delay to the tween.
+            /// Sets the delay before the tween starts.
             /// </summary>
-            /// <param name="value">In seconds.</param>
-            public Element setDelay(float value) { delay = value; return this; }
+            /// <param name="duration">In seconds.</param>
+            public Element setDelay(float duration) { delay = duration; return this; }
             /// <summary>
-            /// Sets the delta to use when tweening.
+            /// Sets the time scale mode (scaled or unscaled) used by the tween.
             /// </summary>
-            public Element setDelta(Delta value) { deltaMode = value; return this; }
+            public Element setTimeMode(Delta value) { timeMode = value; return this; }
             /// <summary>
-            /// Sets the overshoot value for easing types that use overshooting.
+            /// Sets the overshoot value for applicable easing types.
             /// </summary>
-            /// <remarks>This value only affects 'Back and Elastic' easing types. The default is <c>1</c>.</remarks>
-            public Element setOvershoot(float value) { overshoot = value; return this; }
+            /// <remarks>Applies only to Back and Elastic easing functions. Default is <c>1</c>.</remarks>
+            public Element setEaseOvershoot(float value) { easeOvershoot = value; return this; }
             /// <summary>
-            ///  Sets the period value for easing types that use a period.
+            /// Sets the period value for applicable easing types.
             /// </summary>
-            /// <remarks>This value only affects 'Elastic' easing types. The default is <c>0.37</c>.</remarks>
-            public Element setPeriod(float value) { period = value; return this; }
+            /// <remarks>Applies only to Elastic easing functions.</remarks>
+            public Element setEasePeriod(float amount) { easePeriod = amount; return this; }
             /// <summary>
-            /// Sets a callback to be invoked when the tween starts.
+            /// Sets a callback to invoke when the tween starts.
             /// </summary>
-            public Element setOnStart(UnityAction action) { onStart = action; return this; }
+            public Element setOnStart(Action action) { onStart = action; return this; }
             /// <summary>
-            /// Sets a callback to be invoked during each update of the tween.
+            /// Sets a callback to invoke during each tween update.
             /// </summary>
-            /// <param name="action">The action to be invoked on update, with the eased ratio as a parameter.</param>
-            public Element setOnUpdate(UnityAction<float> action) { onUpdate = action; return this; }
+            public Element setOnUpdate(Action<float> action) { onUpdate = action; return this; }
             /// <summary>
-            /// Sets a callback to be invoked when the tween completes.
+            /// Sets a callback to invoke when the tween completes.
             /// </summary>
-            public Element setOnComplete(UnityAction action) { onComplete = action; return this; }
-            #endregion
-
-            #region T W E E N    A C T I O N S
-            Element ITweenAction.executeMove(Vector3? value)
-            {
-                  actionType = ITweenAction.Type.Move;
-                  onInitialize = () => initial = value ?? transform.position;
-                  onTween = value => transform.position = value;
-                  return this;
-            }
-            Element ITweenAction.executeMoveLocal(Vector3? value)
-            {
-                  actionType = ITweenAction.Type.MoveLocal;
-                  onInitialize = () => initial = value ?? transform.localPosition;
-                  onTween = value => transform.localPosition = value;
-                  return this;
-            }
-            Element ITweenAction.executeRotate(Vector3? value)
-            {
-                  actionType = ITweenAction.Type.Rotate;
-                  onInitialize = () => initial = value ?? transform.eulerAngles;
-                  onTween = value => transform.eulerAngles = value;
-                  return this;
-            }
-            Element ITweenAction.executeScale(Vector3? value)
-            {
-                  actionType = ITweenAction.Type.Scale;
-                  onInitialize = () => initial = value ?? transform.localScale;
-                  onTween = value => transform.localScale = value;
-                  return this;
-            }
-            Element ITweenAction.executeCanvasAlpha(float? value)
-            {
-                  var group = EnsureComponent<CanvasGroup>(ITweenAction.Type.CanvasAlpha);
-                  actionType = ITweenAction.Type.CanvasAlpha;
-                  onInitialize = () => initial = new(x: value ?? group.alpha, y: 0F);
-                  onTween = value => group.alpha = value.x;
-                  return this;
-            }
-            Element ITweenAction.executeSpriteAlpha(float? value)
-            {
-                  var renderer = EnsureComponent<SpriteRenderer>(ITweenAction.Type.SpriteAlpha);
-                  actionType = ITweenAction.Type.SpriteAlpha;
-                  onInitialize = () => initial = new(x: value ?? renderer.color.a, y: 0F);
-                  onTween = value =>
-                  {
-                        var tint = renderer.color;
-                        tint.a = value.x;
-                        renderer.color = tint;
-                  };
-                  return this;
-            }
-            Element ITweenAction.executeSpriteTint(Color? value)
-            {
-                  var renderer = EnsureComponent<SpriteRenderer>(ITweenAction.Type.SpriteTint);
-                  actionType = ITweenAction.Type.SpriteTint;
-                  onInitialize = () =>
-                  {
-                        var tint = value ?? renderer.color;
-                        initial = new(x: tint.r, y: tint.g, z: tint.b);
-                  };
-                  onTween = value => renderer.color = new(r: value.x, g: value.y, b: value.z, renderer.color.a);
-                  return this;
-            }
+            public Element setOnComplete(Action action) { onComplete = action; return this; }
+#pragma warning restore IDE1006
             #endregion
       }
-#pragma warning restore IDE1006
 }

@@ -1,16 +1,5 @@
-In-Progress:
-	• VerticalLayoutGroupAttribute. (Nestable with HLGA)
+Pending Tasks:
 
----------------------------------------------------------------
-
-Stashed:
-	• Tween Engine Fix.
-	• Swatches Window.
-	• MessageIfAttributeForClass.
-
----------------------------------------------------------------
-
-Completed:
-	1. Button Naming / Auto-Naming Support.
-	2. Title Text Styling Presets.
-	3. Boolean Toggle Attribute.
+- Fixing Tween Engine.
+  â€¢ Tween chaining onComplete failed.
+- Creating Swatches window for custom color palette.
