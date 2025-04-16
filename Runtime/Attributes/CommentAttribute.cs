@@ -12,10 +12,10 @@ namespace Emp37.Utility
       {
             public readonly GUIContent Content;
             public readonly Color32 Tint = Color.black;
-            public readonly FontStyle Style;
+            public readonly FontStyle FontStyle;
 
             public CommentAttribute(string text) => Content = new(text);
             public CommentAttribute(string text, Shade tint) : this(text) => Tint = ShadeLibrary.Pick(tint);
-            public CommentAttribute(string text, Shade tint, FontStyle style) : this(text, tint) => Style = style;
+            public CommentAttribute(string text, Shade tint, FontStyle style) : this(text, tint) => FontStyle = style;
       }
 }

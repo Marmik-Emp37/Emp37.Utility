@@ -15,7 +15,7 @@ namespace Emp37.Utility
             public LabelAttribute(string text)
             {
                   Label = new(text);
-                  order = -20;
+                  order = -100;
             }
       }
 }

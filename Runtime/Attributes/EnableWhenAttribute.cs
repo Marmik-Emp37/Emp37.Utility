@@ -1,7 +1,5 @@
 using System;
 
-using UnityEngine;
-
 namespace Emp37.Utility
 {
       /// <summary>
