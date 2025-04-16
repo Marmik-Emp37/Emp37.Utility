@@ -19,13 +19,15 @@ namespace Emp37.Utility.Editor
             {
                   labelStyle.fontStyle = Attribute.Style;
             }
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   Rect commentRect = position;
                   commentRect.size = new(x: EditorGUIHelper.ReleventWidth, y: GetStyleHeight(Attribute.Content) /* - [ 1 ]*/);
                   EditorGUI.LabelField(commentRect, Attribute.Content, labelStyle);
 
-                  EditorGUI.DrawRect(commentRect, Attribute.Tint.WithAlpha(BackgroundAlpha));
+                  var color = Attribute.Tint;
+                  color.a = BackgroundAlpha;
+                  EditorGUI.DrawRect(commentRect, color);
 
                   commentRect.width = StripWidth;
                   commentRect.x -= commentRect.width + 1;

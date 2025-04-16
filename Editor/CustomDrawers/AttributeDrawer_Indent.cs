@@ -7,7 +7,7 @@ namespace Emp37.Utility.Editor
       [CustomPropertyDrawer(typeof(IndentAttribute))]
       internal class AttributeDrawer_Indent : BasePropertyDrawer
       {
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   var attribute = base.attribute as IndentAttribute;
 

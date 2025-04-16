@@ -12,7 +12,7 @@ namespace Emp37.Utility.Editor
             private SeparatorAttribute Attribute => attribute as SeparatorAttribute;
 
 
-            public override void OnGUI(Rect position)
+            public override void Draw(Rect position)
             {
                   if (Attribute.Stretch)
                   {

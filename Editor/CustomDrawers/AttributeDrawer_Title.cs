@@ -32,10 +32,8 @@ namespace Emp37.Utility.Editor
                   }
                   size.y = labelStyle.CalcHeight(Attribute.Content, EditorGUIHelper.ReleventWidth);
             }
-            public override void OnGUI(Rect position)
+            public override void Draw(Rect position)
             {
-                  base.OnGUI(position);
-
                   position.y += InitialGap; // - [ 1 ]
                   position.height = size.y;
 

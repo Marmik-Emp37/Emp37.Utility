@@ -24,9 +24,8 @@ namespace Emp37.Utility.Editor
                   var type = Attribute.MessageType;
                   Icon = type is 0 ? null : EditorGUIUtility.IconContent("console." + type switch { MessageType.Warning => "warnicon", MessageType.Error => "erroricon", _ => "infoicon", });
             }
-            public override void OnGUI(Rect position)
+            public override void Draw(Rect position)
             {
-                  base.OnGUI(position);
                   position.height = Attribute.Height;
 
                   EditorGUI.HelpBox(position.Indent(BoxOffset), string.Empty, 0);

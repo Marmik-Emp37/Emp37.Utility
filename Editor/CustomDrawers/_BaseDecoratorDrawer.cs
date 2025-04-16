@@ -4,17 +4,20 @@ namespace Emp37.Utility.Editor
 {
       internal abstract class BaseDecoratorDrawer : UnityEditor.DecoratorDrawer
       {
-            private bool init;
+            private bool hasInitialized;
 
 
             public virtual void Initialize() { }
-            public override void OnGUI(Rect position)
+            public abstract void Draw(Rect position);
+
+            public sealed override void OnGUI(Rect position)
             {
-                  if (!init)
+                  if (!hasInitialized)
                   {
                         Initialize();
-                        init = true;
+                        hasInitialized = true;
                   }
+                  Draw(position);
             }
       }
 }

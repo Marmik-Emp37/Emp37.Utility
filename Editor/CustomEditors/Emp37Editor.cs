@@ -46,7 +46,7 @@ namespace Emp37.Utility.Editor
                   #endregion
 
                   #region I N I T I A L I Z E   M E T H O D S
-                  serializedMethods = targetType.GetMethods(ReflectionFlags);
+                  serializedMethods = targetType.GetMethods(DEFAULT_FLAGS);
                   #endregion
             }
 
@@ -84,7 +84,7 @@ namespace Emp37.Utility.Editor
                               {
                                     GUI.enabled = EvaluateEnabled(method);
                                     GUI.backgroundColor = button.BackgroundColor;
-                                    if (GUILayout.Button(button.Name ?? method.Name.ToTitleCase(), GUILayout.Height(button.Height)))
+                                    if (GUILayout.Button(button.Name ?? Utility.ToTitleCase(method.Name), GUILayout.Height(button.Height)))
                                     {
                                           InvokeMethod(method, target, button.Parameters);
                                     }

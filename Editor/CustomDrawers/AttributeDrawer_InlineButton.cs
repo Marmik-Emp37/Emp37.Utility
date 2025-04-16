@@ -12,7 +12,7 @@ namespace Emp37.Utility.Editor
             private const float Gap = 2F;
 
 
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   var attribute = base.attribute as InlineButtonAttribute;
 
@@ -24,7 +24,7 @@ namespace Emp37.Utility.Editor
                   if (GUI.Button(position, attribute.Name ?? attribute.Method))
                   {
                         object target = property.serializedObject.targetObject;
-                        MethodInfo method = ReflectionUtility.FetchInfo<MethodInfo>(attribute.Method, target.GetType());
+                        MethodInfo method = ReflectionUtility.FetchInfo< MethodInfo>(attribute.Method, target.GetType());
                         if (method != null) ReflectionUtility.InvokeMethod(method, target, attribute.Parameters);
                   }
             }
