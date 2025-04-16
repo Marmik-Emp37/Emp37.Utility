@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using UnityEngine;
@@ -6,8 +7,7 @@ namespace Emp37.Utility
 {
       using static Shade;
 
-
-      public readonly struct ShadeLibrary
+      public static class ShadeLibrary
       {
             private static readonly Dictionary<Shade, Color32> library = new()
             {
@@ -284,9 +284,16 @@ namespace Emp37.Utility
                         new(255, 255, 000, 255)
                   }
             };
-            private static readonly int shadesLength = System.Enum.GetValues(typeof(Shade)).Length;
 
-            public static Color32 PickRandom => Pick((Shade) Random.Range(0, shadesLength));
+            private static readonly int librarySize = Enum.GetValues(typeof(Shade)).Length;
+
+            public static Color32 Random => library[(Shade) UnityEngine.Random.Range(0, librarySize)];
             public static Color32 Pick(Shade shade) => library[shade];
+            public static Color32 Pick(Shade shade, byte alpha)
+            {
+                  Color32 value = library[shade];
+                  value.a = alpha;
+                  return value;
+            }
       }
 }

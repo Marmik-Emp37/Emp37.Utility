@@ -46,7 +46,7 @@ namespace Emp37.Utility.Editor
                   #endregion
 
                   #region I N I T I A L I Z E   M E T H O D S
-                  serializedMethods = targetType.GetMethods(ReflectionFlags);
+                  serializedMethods = targetType.GetMethods(DEFAULT_FLAGS);
                   #endregion
             }
 
@@ -65,7 +65,7 @@ namespace Emp37.Utility.Editor
                         #region S E R I A L I Z E D   P R O P E R T I E S
                         foreach (SerializedProperty property in serializedProperties)
                         {
-                              if (!TryFetchInfo(property.name, targetType, out FieldInfo field)) continue;
+                              if (FindField(property.name, targetType) is not { } field) continue;
 
                               if (EvaluateVisibility(field))
                               {
@@ -84,9 +84,9 @@ namespace Emp37.Utility.Editor
                               {
                                     GUI.enabled = EvaluateEnabled(method);
                                     GUI.backgroundColor = button.BackgroundColor;
-                                    if (GUILayout.Button(button.Name ?? method.Name.ToTitleCase(), GUILayout.Height(button.Height)))
+                                    if (GUILayout.Button(button.Name ?? Utility.ToTitleCase(method.Name), GUILayout.Height(button.Height)))
                                     {
-                                          InvokeMethod(method, target, button.Parameters);
+                                          AutoInvokeMethod(method, target, button.Parameters);
                                     }
                               }
                         }
@@ -107,11 +107,11 @@ namespace Emp37.Utility.Editor
                   }
                   if (member.TryGetAttribute(out EnableWhenAttribute enableAttr))
                   {
-                        output &= FetchValue(enableAttr.ConditionName, target) is bool enableFlag && enableFlag;
+                        output &= ReadAny(enableAttr.Condition, target) is bool enableFlag && enableFlag;
                   }
                   if (member.TryGetAttribute(out DisableWhenAttribute disableAttr))
                   {
-                        output &= FetchValue(disableAttr.ConditionName, target) is bool disableFlag && !disableFlag;
+                        output &= ReadAny(disableAttr.Condition, target) is bool disableFlag && !disableFlag;
                   }
                   return output;
             }
@@ -121,11 +121,11 @@ namespace Emp37.Utility.Editor
 
                   if (member.TryGetAttribute(out ShowWhenAttribute showAttr))
                   {
-                        output &= FetchValue(showAttr.ConditionName, target) is bool showFlag && showFlag;
+                        output &= ReadAny(showAttr.ConditionName, target) is bool showFlag && showFlag;
                   }
                   if (member.TryGetAttribute(out HideWhenAttribute hideAttr))
                   {
-                        output &= FetchValue(hideAttr.ConditionName, target) is bool hideFlag && !hideFlag;
+                        output &= ReadAny(hideAttr.Condition, target) is bool hideFlag && !hideFlag;
                   }
                   return output;
             }

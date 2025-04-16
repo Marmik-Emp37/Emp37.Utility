@@ -6,24 +6,23 @@ namespace Emp37.Utility.Editor
 {
       internal abstract class BasePropertyDrawer : PropertyDrawer
       {
-            private bool init;
+            private bool hasInitialized;
 
 
             public virtual void Initialize(SerializedProperty property) { }
-            public abstract void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label);
+            public abstract void Draw(Rect position, SerializedProperty property, GUIContent label);
 
             public sealed override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
             {
-                  if (!init)
+                  if (!hasInitialized)
                   {
                         Initialize(property);
-                        init = true;
+                        hasInitialized = true;
                   }
-                  using (new EditorGUI.PropertyScope(position, label, property))
-                  {
-                        OnPropertyDraw(position, property, label);
-                  }
+                  EditorGUI.BeginProperty(position, label, property);
+                  Draw(position, property, label);
+                  EditorGUI.EndProperty();
             }
-            public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);
+            public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label, true);
       }
 }

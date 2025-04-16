@@ -15,7 +15,7 @@ namespace Emp37.Utility.Editor
             {
                   property.isExpanded = false;
             }
-            public override void OnPropertyDraw(Rect position, SerializedProperty property, GUIContent label)
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
 #if UNITY_2022_1_OR_NEWER
                   if (property.propertyType != SerializedPropertyType.ObjectReference)

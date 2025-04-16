@@ -1,14 +1,12 @@
 ﻿using System;
 
-using UnityEngine;
-
 namespace Emp37.Utility
 {
       /// <summary>
       /// Attribute for disabling a field in the inspector.
       /// </summary>
       [AttributeUsage(AttributeTargets.Field)]
-      public class ReadonlyAttribute : PropertyAttribute
+      public class ReadonlyAttribute : UnityEngine.PropertyAttribute
       {
             public readonly bool ExclusiveToPlaymode;
 
