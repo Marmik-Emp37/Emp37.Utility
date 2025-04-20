@@ -1,7 +1,5 @@
 using System;
 
-using UnityEngine;
-
 namespace Emp37.Utility
 {
       /// <summary>
@@ -10,9 +8,9 @@ namespace Emp37.Utility
       [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method)]
       public class EnableWhenAttribute : Attribute
       {
-            public readonly string ConditionName;
+            public readonly string Condition;
 
             /// <param name="condition">The name of the boolean member type as (field, property or method) on this target.</param>
-            public EnableWhenAttribute(string condition) => ConditionName = condition;
+            public EnableWhenAttribute(string condition) => Condition = condition;
       }
 }

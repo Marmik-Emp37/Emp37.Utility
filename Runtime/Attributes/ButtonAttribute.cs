@@ -8,7 +8,7 @@ namespace Emp37.Utility
       /// Attribute for drawing a button in the inspector.
       /// </summary>
       [AttributeUsage(AttributeTargets.Method)]
-      public class ButtonAttribute : PropertyAttribute
+      public class ButtonAttribute : Attribute
       {
             public string Name = null;
             public readonly float Height = 21F;
@@ -20,7 +20,6 @@ namespace Emp37.Utility
             }
             public ButtonAttribute(Size size) => Height = size switch { Size.Small => 18F, Size.Medium => 27F, Size.Large => 36F, _ => Height };
             public ButtonAttribute(Size size, Shade shade) : this(size) => BackgroundColor = ShadeLibrary.Pick(shade);
-            /// <param name="parameters">The method parameter name(s) as Field or Property within this type.</param>
-            public ButtonAttribute(Size size, Shade shade, params string[] parameters) : this(size, shade) => Parameters = parameters;
+            public ButtonAttribute(Size size, Shade shade, params string[] parameterNames) : this(size, shade) => Parameters = parameterNames;
       }
 }

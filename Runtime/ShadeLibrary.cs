@@ -7,7 +7,7 @@ namespace Emp37.Utility
 {
       using static Shade;
 
-      public readonly struct ShadeLibrary
+      public static class ShadeLibrary
       {
             private static readonly Dictionary<Shade, Color32> library = new()
             {

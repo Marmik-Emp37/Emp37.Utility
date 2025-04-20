@@ -22,7 +22,7 @@ namespace Emp37.Utility.Editor
             {
                   if (property == null) throw new ArgumentNullException(nameof(property), "SerializedProperty cannot be null.");
                   object target = (property.serializedObject?.targetObject) ?? throw new ArgumentException($"Serialized object or its target is null for property '{property.name}'.");
-                  FieldInfo field = FetchInfo< FieldInfo>(property.name, target.GetType(), bindings) ?? throw new MissingFieldException($"Field '{property.name}' not found in target type '{target.GetType().FullName}'.");
+                  FieldInfo field = FetchField(property.name, target.GetType(), bindings) ?? throw new MissingFieldException($"Field '{property.name}' not found in target type '{target.GetType().FullName}'.");
                   return field.GetCustomAttribute<TAttribute>();
             }
             public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
@@ -42,7 +42,7 @@ namespace Emp37.Utility.Editor
                         Log($"{nameof(SerializedObject)} or it's target is null.");
                         return false;
                   }
-                  FieldInfo field = FetchInfo<FieldInfo>(property.name, target.GetType(), bindings);
+                  FieldInfo field = FetchField(property.name, target.GetType(), bindings);
                   if (field == null)
                   {
                         Log($"'{property.name}' not found in type '{target.GetType().FullName}'.");

@@ -1,11 +1,9 @@
 using System;
 
-using UnityEngine;
-
 namespace Emp37.Utility
 {
       [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
-      public class HelpBoxAttribute : PropertyAttribute
+      public class HelpBoxAttribute : UnityEngine.PropertyAttribute
       {
             public readonly string Message;
             public readonly MessageType MessageType;
