@@ -18,16 +18,18 @@ namespace Emp37.Utility.Editor
             /// <returns>Attribute of type TAttribute if found, otherwise null.</returns>
             /// <exception cref="ArgumentNullException">When the serialized property is null.</exception>
             /// <exception cref="ArgumentException">When the serialized property target object type is null.</exception>
-            public static TAttribute GetAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
+            public static TAttribute FetchAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
             {
-                  if (property == null) throw new ArgumentNullException(nameof(property), "SerializedProperty cannot be null.");
-                  object target = (property.serializedObject?.targetObject) ?? throw new ArgumentException($"Serialized object or its target is null for property '{property.name}'.");
+                  if (property == null) throw new ArgumentNullException(nameof(property));
+
+                  object target = property.serializedObject.targetObject;
                   FieldInfo field = FetchField(property.name, target.GetType(), bindings) ?? throw new MissingFieldException($"Field '{property.name}' not found in target type '{target.GetType().FullName}'.");
+                  // incomplete does not get nested properties, need to cache the results implementation solution commented below.
                   return field.GetCustomAttribute<TAttribute>();
             }
             public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
             {
-                  attribute = property?.GetAttribute<TAttribute>(bindings);
+                  attribute = property?.FetchAttribute<TAttribute>(bindings);
                   return attribute != null;
             }
             public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
@@ -60,5 +62,23 @@ namespace Emp37.Utility.Editor
                   return attribute != null;
             }
             #endregion
+
+
+            //public static TAttribute FetchAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
+            //{
+            //      if (property == null) throw new ArgumentNullException(nameof(property));
+
+            //      Type type = property.serializedObject.targetObject.GetType();
+            //      string[] path = property.propertyPath.Split('.');
+            //      Array.Reverse(path);
+            //      foreach (string segment in path)
+            //      {
+            //            FieldInfo field = FetchField(segment, type, BindingFlags.ExactBinding);
+            //            if (field == null) continue;
+
+            //            return field.GetCustomAttribute<TAttribute>();
+            //      }
+            //      return null;
+            //}
       }
 }
