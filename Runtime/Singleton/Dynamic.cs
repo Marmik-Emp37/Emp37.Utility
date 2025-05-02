@@ -24,13 +24,13 @@ namespace Emp37.Utility.Singleton
       public abstract class Dynamic<T> : MonoBehaviour where T : Dynamic<T>
       {
             private static T instance;
-            private static bool exiting;
+            private static bool isExiting;
 
             public static T Instance
             {
                   get
                   {
-                        if (exiting)
+                        if (isExiting)
                         {
                               Debug.LogWarning($"Instance of '{typeof(T).FullName}' no longer exists.");
                               return null;
@@ -56,6 +56,6 @@ namespace Emp37.Utility.Singleton
             }
 
             protected virtual void OnDestroy() => instance = instance == this ? null : instance;
-            protected virtual void OnApplicationQuit() => exiting = true;
+            protected virtual void OnApplicationQuit() => isExiting = true;
       }
 }

@@ -65,7 +65,7 @@ namespace Emp37.Utility.Editor
                         #region S E R I A L I Z E D   P R O P E R T I E S
                         foreach (SerializedProperty property in serializedProperties)
                         {
-                              if (!TryFetchField(property.name, targetType, out FieldInfo field)) continue;
+                              if (FindField(property.name, targetType) is not { } field) continue;
 
                               if (EvaluateVisibility(field))
                               {

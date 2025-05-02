@@ -1,16 +1,4 @@
-In-Progress:
-	• VerticalLayoutGroupAttribute. (Nestable with HLGA)
-
----------------------------------------------------------------
-
-Stashed:
-	• Tween Engine Fix.
-	• Swatches Window.
-	• MessageIfAttributeForClass.
-
----------------------------------------------------------------
-
-Completed:
-	1. Button Naming / Auto-Naming Support.
-	2. Title Text Styling Presets.
-	3. Boolean Toggle Attribute.
+• Tween Engine Fix.
+• Swatches Window.
+• MessageIfAttributeForClass.
+• IconLabelAttr
