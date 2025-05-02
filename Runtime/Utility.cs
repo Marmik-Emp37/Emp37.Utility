@@ -11,7 +11,7 @@ namespace Emp37.Utility
             /// Formats a string by adding spaces between characters and converting them to uppercase.
             /// </summary>
             /// <param name="text">The input string to format.</param>
-            public static string ToStylizedTitleCase(string text) => string.IsNullOrWhiteSpace(text) ? text : string.Concat(ToTitleCase(text).Select((c, idx) => (char.IsUpper(c) && idx > 0 ? "   " : " ") + char.ToUpper(c)));
+            public static string ToStylizedTitleCase(string text) => string.IsNullOrWhiteSpace(text) ? text : string.Concat(ToTitleCase(text).Select((c, idx) => idx > 0 ? (char.IsUpper(c) ? "   " : " ") + char.ToUpper(c) : char.ToUpper(c).ToString()));
             public static string Truncate(string text, int length) => text.Length > length ? $"{text[..length]}..." : text;
             /// <summary>
             /// Rescales a given value from a specified input range to a specified output range.
