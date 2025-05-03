@@ -14,25 +14,23 @@ namespace Emp37.Utility.Editor
             /// Retrieves the attribute of type <typeparamref name="TAttribute"/> associated with a serialized property.
             /// </summary>
             /// <param name="property">The serialized property to inspect.</param>
-            /// <param name="bindings">Binding flags for fetching the field information.</param>
+            /// <param name="flags">Binding flags for fetching the field information.</param>
             /// <returns>Attribute of type TAttribute if found, otherwise null.</returns>
             /// <exception cref="ArgumentNullException">When the serialized property is null.</exception>
             /// <exception cref="ArgumentException">When the serialized property target object type is null.</exception>
-            public static TAttribute FetchAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
+            public static TAttribute FindAttribute<TAttribute>(this SerializedProperty property, BindingFlags flags = DEFAULT_FLAGS) where TAttribute : Attribute
             {
                   if (property == null) throw new ArgumentNullException(nameof(property));
-
-                  object target = property.serializedObject.targetObject;
-                  FieldInfo field = FetchField(property.name, target.GetType(), bindings) ?? throw new MissingFieldException($"Field '{property.name}' not found in target type '{target.GetType().FullName}'.");
-                  // incomplete does not get nested properties, need to cache the results implementation solution commented below.
-                  return field.GetCustomAttribute<TAttribute>();
+                  Type type = property.serializedObject.targetObject.GetType();
+                  FieldInfo field = FindField(property.name, type, flags);
+                  return field?.GetCustomAttribute<TAttribute>();
             }
-            public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
+            public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags flags = DEFAULT_FLAGS) where TAttribute : Attribute
             {
-                  attribute = property?.FetchAttribute<TAttribute>(bindings);
+                  attribute = property?.FindAttribute<TAttribute>(flags);
                   return attribute != null;
             }
-            public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
+            public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags flags = DEFAULT_FLAGS) where TAttribute : Attribute
             {
                   if (property == null)
                   {
@@ -44,7 +42,7 @@ namespace Emp37.Utility.Editor
                         Log($"{nameof(SerializedObject)} or it's target is null.");
                         return false;
                   }
-                  FieldInfo field = FetchField(property.name, target.GetType(), bindings);
+                  FieldInfo field = FindField(property.name, target.GetType(), flags);
                   if (field == null)
                   {
                         Log($"'{property.name}' not found in type '{target.GetType().FullName}'.");
@@ -62,23 +60,5 @@ namespace Emp37.Utility.Editor
                   return attribute != null;
             }
             #endregion
-
-
-            //public static TAttribute FetchAttribute<TAttribute>(this SerializedProperty property, BindingFlags bindings = DEFAULT_FLAGS) where TAttribute : Attribute
-            //{
-            //      if (property == null) throw new ArgumentNullException(nameof(property));
-
-            //      Type type = property.serializedObject.targetObject.GetType();
-            //      string[] path = property.propertyPath.Split('.');
-            //      Array.Reverse(path);
-            //      foreach (string segment in path)
-            //      {
-            //            FieldInfo field = FetchField(segment, type, BindingFlags.ExactBinding);
-            //            if (field == null) continue;
-
-            //            return field.GetCustomAttribute<TAttribute>();
-            //      }
-            //      return null;
-            //}
       }
 }

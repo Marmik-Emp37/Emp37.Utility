@@ -23,7 +23,7 @@ namespace Emp37.Utility.Editor
                   if (GUI.Button(position, attribute.Name ?? attribute.Method))
                   {
                         object target = property.serializedObject.targetObject;
-                        MethodInfo method = ReflectionUtility.FetchMethod(attribute.Method, target.GetType());
+                        MethodInfo method = ReflectionUtility.FindMethod(attribute.Method, target.GetType());
                         if (method != null) ReflectionUtility.AutoInvokeMethod(method, target, attribute.Parameters);
                   }
             }
