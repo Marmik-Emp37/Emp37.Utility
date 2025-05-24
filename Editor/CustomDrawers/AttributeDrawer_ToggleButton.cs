@@ -7,6 +7,9 @@ namespace Emp37.Utility.Editor
       [CustomPropertyDrawer(typeof(ToggleButtonAttribute), true)]
       internal class AttributeDrawer_ToggleButton : BasePropertyDrawer
       {
+            public override void Initialize(SerializedProperty property)
+            {
+            }
             public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   if (property.propertyType is not SerializedPropertyType.Boolean)

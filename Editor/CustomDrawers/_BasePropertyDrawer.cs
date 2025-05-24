@@ -6,20 +6,19 @@ namespace Emp37.Utility.Editor
 {
       internal abstract class BasePropertyDrawer : PropertyDrawer
       {
-            private bool hasInitialized;
+            private bool isInitialized;
 
-
-            public virtual void Initialize(SerializedProperty property) { }
+            public abstract void Initialize(SerializedProperty property);
             public abstract void Draw(Rect position, SerializedProperty property, GUIContent label);
 
             public sealed override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
             {
-                  if (!hasInitialized)
+                  if (!isInitialized)
                   {
                         Initialize(property);
-                        hasInitialized = true;
+                        isInitialized = true;
                   }
-                  EditorGUI.BeginProperty(position, label, property);
+                  label = EditorGUI.BeginProperty(position, label, property);
                   Draw(position, property, label);
                   EditorGUI.EndProperty();
             }

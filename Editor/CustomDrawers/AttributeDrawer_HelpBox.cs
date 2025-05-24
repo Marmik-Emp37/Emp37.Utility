@@ -9,34 +9,34 @@ namespace Emp37.Utility.Editor
       {
             private HelpBoxAttribute Attribute => attribute as HelpBoxAttribute;
 
-            private const float BoxOffset = -4F, TextOffset = 34F;
-
-            private GUIContent Icon;
-            private static readonly GUIStyle labelStyle = new(EditorStyles.label)
+            private GUIContent icon, message;
+            private static readonly GUIStyle contentStyle = new(EditorStyles.label)
             {
                   alignment = TextAnchor.MiddleLeft,
                   wordWrap = true,
+                  richText = true,
             };
+
+            private const float MinHeight = 24F;
 
 
             public override void Initialize()
             {
-                  var type = Attribute.MessageType;
-                  Icon = type is 0 ? null : EditorGUIUtility.IconContent("console." + type switch { MessageType.Warning => "warnicon", MessageType.Error => "erroricon", _ => "infoicon", });
+                  MessageType type = Attribute.MessageType;
+                  icon = type is 0 ? null : EditorGUIUtility.IconContent($"console.{type switch { MessageType.Warning => "warnicon", MessageType.Error => "erroricon", _ => "infoicon" }}");
+                  message = new(Attribute.Message);
             }
             public override void Draw(Rect position)
             {
-                  position.height = Attribute.Height;
-
-                  EditorGUI.HelpBox(position.Indent(BoxOffset), string.Empty, 0);
-
-                  if (Icon != null)
+                  position.height = Mathf.Max(MinHeight, contentStyle.CalcHeight(message, position.width)); // - [ 1 ]
+                  EditorGUI.HelpBox(position, string.Empty, 0);
+                  if (icon != null)
                   {
-                        EditorGUI.LabelField(position, Icon);
-                        position = position.Indent(TextOffset);
+                        EditorGUI.LabelField(position, icon, contentStyle);
+                        position = position.Indent(contentStyle.CalcSize(new(icon)).x);
                   }
-                  EditorGUI.LabelField(position, Attribute.Message, labelStyle);
+                  EditorGUI.LabelField(position, message, contentStyle);
             }
-            public override float GetHeight() => Attribute.Height + EditorGUIUtility.standardVerticalSpacing;
+            public override float GetHeight() => Mathf.Max(MinHeight, contentStyle.CalcHeight(message, EditorGUIHelper.ReleventWidth)) /*- [ 1 ]*/ + EditorGUIUtility.standardVerticalSpacing;
       }
 }

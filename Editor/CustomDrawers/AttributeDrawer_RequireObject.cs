@@ -9,6 +9,9 @@ namespace Emp37.Utility.Editor
       {
             private const float ErrorBoxHeight = 21F;
 
+            public override void Initialize(SerializedProperty property)
+            {
+            }
             public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   if (property.propertyType != SerializedPropertyType.ObjectReference)

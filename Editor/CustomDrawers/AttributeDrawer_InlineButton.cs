@@ -11,6 +11,9 @@ namespace Emp37.Utility.Editor
       {
             private const float Gap = 2F;
 
+            public override void Initialize(SerializedProperty property)
+            {               
+            }
             public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   var attribute = base.attribute as InlineButtonAttribute;
