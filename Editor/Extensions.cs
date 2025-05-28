@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
@@ -10,25 +11,32 @@ namespace Emp37.Utility.Editor
 
       public static class Extensions
       {
+            private readonly static Dictionary<SerializedProperty, FieldInfo> propertyCache = new();
             public static FieldInfo GetField(this SerializedProperty property, BindingFlags flags = DEFAULT_FLAGS)
             {
                   if (property == null) throw new ArgumentNullException(nameof(property));
 
-                  Type currentType = property.serializedObject.targetObject.GetType();
-                  string[] path = property.propertyPath.Replace(".Array.data", string.Empty).Split('.');
-                  FieldInfo field = null;
-
-                  for (int last = path.Length - 1, i = 0; i <= last; i++)
+                  if (!propertyCache.TryGetValue(property, out FieldInfo field))
                   {
-                        string segment = path[i];
-                        int index = segment.IndexOf('[');
-                        string name = index >= 0 ? segment[..index] : segment;
+                        Type currentType = property.serializedObject.targetObject.GetType();
+                        string[] path = property.propertyPath.Replace(".Array.data", string.Empty).Split('.');
 
-                        field = FindField(name, currentType, flags);
-                        if (field == null || i == last) break;
+                        for (int last = path.Length - 1, i = 0; i <= last; i++)
+                        {
+                              string segment = path[i];
+                              string name = segment.Contains('[') ? segment[..segment.IndexOf('[')] : segment;
 
-                        Type type = field.FieldType;
-                        currentType = type.IsArray ? type.GetElementType() : type.IsGenericType ? type.GetGenericArguments().FirstOrDefault() : type;
+                              field = FindField(name, currentType, flags);
+                              if (field != null)
+                              {
+                                    propertyCache[property] = field;
+                                    break;
+                              }
+
+                              if (i == last) break;
+                              Type next = field.FieldType;
+                              currentType = next.IsArray ? next.GetElementType() : next.IsGenericType ? next.GetGenericArguments().FirstOrDefault() : next;
+                        }
                   }
                   return field;
             }
