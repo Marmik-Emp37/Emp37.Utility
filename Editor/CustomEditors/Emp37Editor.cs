@@ -15,18 +15,20 @@ namespace Emp37.Utility.Editor
       {
             private Type targetType;
 
-            private bool showDefaultScript;
-            private SerializedProperty defaultScript;
-
+            private SerializedProperty defaultProperty;
             private SerializedProperty[] serializedProperties;
             private MethodInfo[] serializedMethods;
+
+            private NoteAttribute note;
+            private bool showDefaultProperty;
 
 
             private void OnEnable()
             {
                   targetType = target.GetType();
 
-                  showDefaultScript = !targetType.IsDefined(typeof(HideDefaultScriptAttribute));
+                  note = AttributeCache.Get<NoteAttribute>(targetType);
+                  showDefaultProperty = !AttributeCache.Has<HideDefaultPropertyAttribute>(targetType);
 
                   #region I N I T I A L I Z E   S E R I A L I Z E D   P R O P E R T I E S
                   if (serializedProperties == null)
@@ -40,7 +42,7 @@ namespace Emp37.Utility.Editor
                               if (property != null) properties.Add(property);
                         }
 
-                        defaultScript = properties[0];
+                        defaultProperty = properties[0];
                         properties.RemoveAt(0);
 
                         serializedProperties = properties.ToArray();
@@ -56,11 +58,18 @@ namespace Emp37.Utility.Editor
             {
                   serializedObject.Update();
 
-                  #region D R A W   D E F A U L T   S C R I P T
-                  if (showDefaultScript && defaultScript != null)
+                  #region D R A W  N O T E
+                  if (note != null)
+                  {
+                        EditorGUILayout.HelpBox(note.Content);
+                  }
+                  #endregion
+
+                  #region D R A W   D E F A U L T   P R O P E R T Y
+                  if (showDefaultProperty && defaultProperty != null)
                   {
                         GUI.enabled = false;
-                        EditorGUILayout.PropertyField(defaultScript);
+                        EditorGUILayout.PropertyField(defaultProperty);
                   }
                   #endregion
 

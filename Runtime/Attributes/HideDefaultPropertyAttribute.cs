@@ -6,7 +6,7 @@ namespace Emp37.Utility
       /// Attribute for hiding the default script field on a MonoBehaviour's inspector.
       /// </summary>
       [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-      public class HideDefaultScriptAttribute : Attribute
+      public class HideDefaultPropertyAttribute : Attribute
       {
       }
 }
