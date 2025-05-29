@@ -9,7 +9,7 @@ namespace Emp37.Utility.Editor
 {
       using static ReflectionUtility;
 
-      public static class Extensions
+      public static class SerializedPropertyUtility
       {
             private readonly static Dictionary<SerializedProperty, FieldInfo> propertyCache = new();
             public static FieldInfo GetField(this SerializedProperty property, BindingFlags flags = DEFAULT_FLAGS)
