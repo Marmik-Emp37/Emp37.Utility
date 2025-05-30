@@ -19,7 +19,6 @@ namespace Emp37.Utility.Editor
             private SerializedProperty[] serializedProperties;
             private MethodInfo[] serializedMethods;
 
-            private NoteAttribute note;
             private bool showDefaultProperty;
 
 
@@ -27,8 +26,7 @@ namespace Emp37.Utility.Editor
             {
                   targetType = target.GetType();
 
-                  note = AttributeCache.Get<NoteAttribute>(targetType);
-                  showDefaultProperty = !AttributeCache.Has<HideDefaultPropertyAttribute>(targetType);
+                  showDefaultProperty = !AttributeCache.Contains<HideDefaultPropertyAttribute>(targetType);
 
                   #region I N I T I A L I Z E   S E R I A L I Z E D   P R O P E R T I E S
                   if (serializedProperties == null)
@@ -56,12 +54,10 @@ namespace Emp37.Utility.Editor
 
             public override void OnInspectorGUI()
             {
-                  serializedObject.Update();
-
-                  #region D R A W  N O T E
-                  if (note != null)
+                  #region D R A W   A T T R I B U T E S
+                  if (AttributeCache.Contains<NoteAttribute>(targetType, false))
                   {
-                        EditorGUILayout.HelpBox(note.Content);
+                        EditorGUILayout.HelpBox(AttributeCache.FetchFirst<NoteAttribute>(targetType).Content);
                   }
                   #endregion
 
@@ -73,54 +69,57 @@ namespace Emp37.Utility.Editor
                   }
                   #endregion
 
-                  #region D R A W   S E R I A L I Z E D   P R O P E R T I E S
-                  foreach (SerializedProperty property in serializedProperties)
+                  serializedObject.Update();
                   {
-                        FieldInfo field = property.GetField();
-                        if (field == null || !EvaluateVisibility(field)) continue;
-
-                        GUI.enabled = EvaluateEnabled(field);
-                        EditorGUILayout.PropertyField(property, true);
-                  }
-                  #endregion
-
-                  #region D R A W   S E R I A L I Z E D   M E TH O D S
-                  foreach (MethodInfo method in serializedMethods)
-                  {
-                        ButtonAttribute button = method.GetCustomAttribute<ButtonAttribute>(true);
-                        if (button == null || !EvaluateVisibility(method)) continue;
-
-                        GUI.enabled = EvaluateEnabled(method);
-                        GUI.backgroundColor = button.BackgroundColor;
-                        if (GUILayout.Button(button.Name ?? Utility.ToTitleCase(method.Name), GUILayout.Height(button.Height)))
+                        #region D R A W   S E R I A L I Z E D   P R O P E R T I E S
+                        foreach (SerializedProperty property in serializedProperties)
                         {
-                              AutoInvokeMethod(method, target, button.Parameters);
+                              FieldInfo field = property.GetField();
+                              if (field == null || !EvaluateVisibility(field)) continue;
+
+                              GUI.enabled = EvaluateEnabled(field);
+                              EditorGUILayout.PropertyField(property, true);
                         }
+                        #endregion
+
+                        #region D R A W   S E R I A L I Z E D   M E TH O D S
+                        foreach (MethodInfo method in serializedMethods)
+                        {
+                              ButtonAttribute button = method.GetCustomAttribute<ButtonAttribute>(true);
+                              if (button == null || !EvaluateVisibility(method)) continue;
+
+                              GUI.enabled = EvaluateEnabled(method);
+                              GUI.backgroundColor = button.BackgroundColor;
+                              if (GUILayout.Button(button.Name ?? Utility.ToTitleCase(method.Name), GUILayout.Height(button.Height)))
+                              {
+                                    AutoInvokeMethod(method, target, button.Parameters);
+                              }
+                        }
+                        #endregion
+
                   }
-                  #endregion
+                  serializedObject.ApplyModifiedProperties();
 
                   GUI.enabled = true;
-
-                  serializedObject.ApplyModifiedProperties();
             }
 
             private bool EvaluateEnabled(MemberInfo member)
             {
                   bool output = true;
-                  var a0 = member.GetCustomAttribute<ReadonlyAttribute>(true);
+                  var a0 = AttributeCache.FetchFirst<ReadonlyAttribute>(member, true);
                   if (a0 != null) output &= a0.ExclusiveToPlaymode && !EditorApplication.isPlaying;
-                  var a1 = member.GetCustomAttribute<EnableWhenAttribute>(true);
+                  var a1 = AttributeCache.FetchFirst<EnableWhenAttribute>(member, true);
                   if (a1 != null) output &= ReadAny(a1.ConditionName, target) is bool value && value;
-                  var a2 = member.GetCustomAttribute<DisableWhenAttribute>(true);
+                  var a2 = AttributeCache.FetchFirst<DisableWhenAttribute>(member, true);
                   if (a2 != null) output &= ReadAny(a2.ConditionName, target) is bool value && !value;
                   return output;
             }
             private bool EvaluateVisibility(MemberInfo member)
             {
                   bool output = true;
-                  var a0 = member.GetCustomAttribute<ShowWhenAttribute>(true);
+                  var a0 = AttributeCache.FetchFirst<ShowWhenAttribute>(member, true);
                   if (a0 != null) output &= ReadAny(a0.ConditionName, target) is bool value && value;
-                  var a1 = member.GetCustomAttribute<HideWhenAttribute>(true);
+                  var a1 = AttributeCache.FetchFirst<HideWhenAttribute>(member, true);
                   if (a1 != null) output &= ReadAny(a1.ConditionName, target) is bool value && !value;
                   return output;
             }

@@ -26,7 +26,7 @@ namespace Emp37.Utility
 
             public const BindingFlags DEFAULT_FLAGS = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
-            private static readonly Dictionary<(Type, string, Type[]), MemberInfo> cache = new();
+            private static readonly Dictionary<(Type, string, Type[]), MemberInfo> memberCache = new();
 
 
             private static T FetchInfo<T>(Type type, string name, Type[] parameterTypes, BindingFlags flags, Resolver<T> resolver) where T : MemberInfo
@@ -35,7 +35,7 @@ namespace Emp37.Utility
                   if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Member name cannot be null or empty.", nameof(name));
 
                   (Type Type, string Name, Type[] Parameters) key = (type, name, parameterTypes);
-                  if (!cache.TryGetValue(key, out MemberInfo member))
+                  if (!memberCache.TryGetValue(key, out MemberInfo member))
                   {
                         Type current = key.Type;
                         while (current != null)
@@ -43,7 +43,7 @@ namespace Emp37.Utility
                               member = resolver(current, key.Name, key.Parameters, flags);
                               if (member != null)
                               {
-                                    cache[key] = member;
+                                    memberCache[key] = member;
                                     break;
                               }
                               current = current.BaseType;
