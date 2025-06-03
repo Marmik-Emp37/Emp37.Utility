@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Emp37.Utility
 {
-      [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+      [AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
       public class HelpBoxAttribute : PropertyAttribute
       {
             public readonly GUIContent Content;

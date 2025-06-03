@@ -122,26 +122,26 @@ namespace Emp37.Utility
 
             private static readonly ConcurrentDictionary<AttributeKey, Attribute[]> attributeCache = new();
 
-            private static Attribute[] ResolveAttributes<T>(ICustomAttributeProvider provider, bool inherit) where T : Attribute
+            private static T[] ResolveAttributes<T>(ICustomAttributeProvider provider, bool inherit) where T : Attribute
             {
                   AttributeKey key = new(provider, typeof(T), inherit);
-                  if (!attributeCache.TryGetValue(key, out var attributes))
+                  if (!attributeCache.TryGetValue(key, out Attribute[] attributes))
                   {
                         attributes = provider.GetCustomAttributes(typeof(T), inherit).OfType<T>().ToArray();
                         attributeCache[key] = attributes;
                   }
-                  return attributes;
+                  return (T[]) attributes;
             }
-            public static T[] GetAttributes<T>(ICustomAttributeProvider provider, bool inherit = false) where T : Attribute => (T[]) ResolveAttributes<T>(provider, inherit);
+            public static T[] GetAttributes<T>(ICustomAttributeProvider provider, bool inherit = false) where T : Attribute => ResolveAttributes<T>(provider, inherit);
             public static bool TryGetAttributes<T>(ICustomAttributeProvider provider, out T[] attributes, bool inherit = false) where T : Attribute
             {
-                  attributes = (T[]) ResolveAttributes<T>(provider, inherit);
+                  attributes = ResolveAttributes<T>(provider, inherit);
                   return attributes.Length > 0;
             }
-            public static T GetAttribute<T>(ICustomAttributeProvider provider, bool inherit = false) where T : Attribute => (T) ResolveAttributes<T>(provider, inherit).FirstOrDefault();
+            public static T GetAttribute<T>(ICustomAttributeProvider provider, bool inherit = false) where T : Attribute => ResolveAttributes<T>(provider, inherit).FirstOrDefault();
             public static bool TryGetAttribute<T>(ICustomAttributeProvider provider, out T attribute, bool inherit = false) where T : Attribute
             {
-                  attribute = (T) ResolveAttributes<T>(provider, inherit).FirstOrDefault();
+                  attribute = ResolveAttributes<T>(provider, inherit).FirstOrDefault();
                   return attribute != null;
             }
             public static bool HasAttribute<T>(ICustomAttributeProvider provider, bool inherit = false) where T : Attribute => attributeCache.TryGetValue(new(provider, typeof(T), inherit), out var attributes) ? attributes.Length > 0 : provider.IsDefined(typeof(T), inherit);

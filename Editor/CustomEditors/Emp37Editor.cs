@@ -6,6 +6,7 @@ using System.Linq;
 using UnityEngine;
 
 using UnityEditor;
+using Codice.Client.BaseCommands;
 
 namespace Emp37.Utility.Editor
 {
@@ -48,17 +49,18 @@ namespace Emp37.Utility.Editor
                   #endregion
 
                   #region I N I T I A L I Z E   S E R I A L I Z E D   M E T H O D S
-                  serializedMethods = targetType.GetMethods(DEFAULT_FLAGS).Where(static method => method.IsDefined(typeof(MethodAttribute), true)).ToArray();
+                  serializedMethods = targetType.GetMethods(DEFAULT_FLAGS).Where(static method => method.IsDefined(typeof(SerializeMethodAttribute), true)).ToArray();
                   #endregion
             }
 
             public override void OnInspectorGUI()
             {
-                  if (TryGetAttribute(targetType, out NoteAttribute attribute, true))
+                  if (TryGetAttributes(targetType, out NoteAttribute[] notes, true))
                   {
-                        using (new EditorGUIHelper.BackgroundColorScope(attribute.Color))
+                        foreach (NoteAttribute attribute in notes)
                         {
-                              EditorGUILayout.HelpBox(attribute.Content);
+                              using (new EditorGUIHelper.BackgroundColorScope(attribute.Color))
+                                    EditorGUILayout.HelpBox(attribute.Content);
                         }
                   }
 
@@ -97,7 +99,6 @@ namespace Emp37.Utility.Editor
                               }
                         }
                         #endregion
-
                   }
                   serializedObject.ApplyModifiedProperties();
 

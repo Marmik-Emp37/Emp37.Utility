@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(HelpBoxAttribute), true)]
+      [CustomPropertyDrawer(typeof(HelpBoxAttribute))]
       internal class AttributeDrawer_HelpBox : BaseDecoratorDrawer
       {
             private HelpBoxAttribute Attribute => attribute as HelpBoxAttribute;

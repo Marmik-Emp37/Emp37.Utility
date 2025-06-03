@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Emp37.Utility
 {
-      [AttributeUsage(AttributeTargets.Class, Inherited = true)]
+      [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = true)]
       public class NoteAttribute : Attribute
       {
             public readonly GUIContent Content;

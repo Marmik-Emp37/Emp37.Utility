@@ -14,7 +14,7 @@ namespace Emp37.Utility.Editor
             {
                   if (property.propertyType is not (Type.Float or Type.Integer or Type.Vector2 or Type.Vector3 or Type.Vector2Int or Type.Vector3Int))
                   {
-                        EditorGUI.HelpBox(position, $"Use {nameof(MaxAttribute)} on 'Floating' or 'Integer' field types.", UnityEditor.MessageType.Error);
+                        EditorGUI.HelpBox(position, $"Use {nameof(MaxAttribute)} on '{Type.Float}' or '{Type.Integer}' field types.", UnityEditor.MessageType.Error);
                         return;
                   }
 

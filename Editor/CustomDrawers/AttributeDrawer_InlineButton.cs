@@ -1,12 +1,10 @@
-using System.Reflection;
-
 using UnityEngine;
 
 using UnityEditor;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(InlineButtonAttribute), true)]
+      [CustomPropertyDrawer(typeof(InlineButtonAttribute))]
       internal class AttributeDrawer_InlineButton : BasePropertyDrawer
       {
             private const float Gap = 2F;
@@ -23,7 +21,7 @@ namespace Emp37.Utility.Editor
                   if (GUI.Button(position, attribute.Name ?? attribute.Method))
                   {
                         object target = property.serializedObject.targetObject;
-                        MethodInfo method = ReflectionUtility.FindMethod(attribute.Method, target.GetType());
+                        System.Reflection.MethodInfo method = ReflectionUtility.FindMethod(attribute.Method, target.GetType());
                         if (method != null) ReflectionUtility.AutoInvokeMethod(method, target, attribute.Parameters);
                   }
             }

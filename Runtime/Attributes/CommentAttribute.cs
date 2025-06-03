@@ -7,7 +7,7 @@ namespace Emp37.Utility
       /// <summary>
       /// Attribute for adding comments to a field in the inspector.
       /// </summary>
-      [AttributeUsage(AttributeTargets.Field, AllowMultiple = true)]
+      [AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
       public class CommentAttribute : PropertyAttribute
       {
             public readonly GUIContent Content;

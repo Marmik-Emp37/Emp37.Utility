@@ -2,7 +2,7 @@ using System;
 
 namespace Emp37.Utility
 {
-      [AttributeUsage(AttributeTargets.Field)]
+      [AttributeUsage(AttributeTargets.Field, Inherited = true)]
       public class RequireObjectAttribute : UnityEngine.PropertyAttribute
       {
             public readonly string Message = "This field requires an assigned object.";

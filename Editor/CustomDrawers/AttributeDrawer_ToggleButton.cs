@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(ToggleButtonAttribute), true)]
+      [CustomPropertyDrawer(typeof(ToggleButtonAttribute))]
       internal class AttributeDrawer_ToggleButton : BasePropertyDrawer
       {
             public override void Draw(Rect position, SerializedProperty property, GUIContent label)

@@ -5,7 +5,7 @@ namespace Emp37.Utility
       /// <summary>
       /// Attribute used to display a serialized boolean field as a toggle button.
       /// </summary>
-      [AttributeUsage(AttributeTargets.Field)]
+      [AttributeUsage(AttributeTargets.Field, Inherited = true)]
       public class ToggleButtonAttribute : UnityEngine.PropertyAttribute
       {
             public readonly float Height = 21F;
