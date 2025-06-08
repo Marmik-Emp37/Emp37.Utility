@@ -23,5 +23,7 @@ namespace Emp37.Utility.Editor
                   EditorGUI.EndProperty();
             }
             public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label, true);
+
+            protected void ShowInvalidUsageBox(Rect position, params SerializedPropertyType[] expectedTypes) => EditorGUI.HelpBox(position, $"Use {attribute.GetType().Name} on fields of type {string.Join(" | ", expectedTypes)}.", UnityEditor.MessageType.Error);
       }
 }

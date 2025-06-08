@@ -9,7 +9,6 @@ namespace Emp37.Utility.Editor
       {
             private UnityEditor.Editor editor = null;
 
-
             public override void Initialize(SerializedProperty property)
             {
                   property.isExpanded = false;
@@ -19,9 +18,10 @@ namespace Emp37.Utility.Editor
 #if UNITY_2022_1_OR_NEWER
                   if (property.propertyType != SerializedPropertyType.ObjectReference)
                   {
-                        EditorGUI.HelpBox(position, $"Use {typeof(ExpandableObjectAttribute).Name} on field of type '{SerializedPropertyType.ObjectReference}'.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, SerializedPropertyType.ObjectReference);
                         return;
                   }
+
                   EditorGUI.PropertyField(position, property, label);
                   property.isExpanded = EditorGUI.Foldout(position, property.isExpanded, GUIContent.none, true);
                   if (property.objectReferenceValue != null && property.isExpanded)
