@@ -6,7 +6,7 @@ namespace Emp37.Utility.Editor
 {
       using Type = SerializedPropertyType;
 
-      [CustomPropertyDrawer(typeof(RepeatAttribute), true)]
+      [CustomPropertyDrawer(typeof(RepeatAttribute))]
       internal class AttributeDrawer_Repeat : BasePropertyDrawer
       {
             public override void Initialize(SerializedProperty property) => Validate(property);
@@ -14,7 +14,7 @@ namespace Emp37.Utility.Editor
             {
                   if (property.propertyType is not (Type.Float or Type.Integer or Type.Vector2 or Type.Vector3 or Type.Vector2Int or Type.Vector3Int))
                   {
-                        EditorGUI.HelpBox(position, "Use RepeatAttribute on 'Floating' or 'Integer' field types.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, Type.Float, Type.Integer);
                         return;
                   }
 
@@ -28,7 +28,7 @@ namespace Emp37.Utility.Editor
 
             private void Validate(SerializedProperty property)
             {
-                  RepeatAttribute attribute = base.attribute as RepeatAttribute;
+                  var attr = attribute as RepeatAttribute;
                   switch (property.propertyType)
                   {
                         #region I N T E G E R
@@ -73,8 +73,8 @@ namespace Emp37.Utility.Editor
                               }
                               #endregion
                   }
-                  int @int(int value) => (int) (attribute.Min + Mathf.Repeat(value - attribute.Min, attribute.Max - attribute.Min));
-                  float @float(float value) => attribute.Min + Mathf.Repeat(value - attribute.Min, attribute.Max - attribute.Min);
+                  int @int(int value) => (int) (attr.Min + Mathf.Repeat(value - attr.Min, attr.Max - attr.Min));
+                  float @float(float value) => attr.Min + Mathf.Repeat(value - attr.Min, attr.Max - attr.Min);
             }
       }
 }

@@ -1,13 +1,13 @@
 using UnityEngine;
 
-namespace Emp37.Utility.Tween
+namespace Emp37.Utility.Tweening
 {
       public static class Extensions
       {
             public static Element TweenMove(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Build(transform, target, duration).executeMove();
-                  Engine.Push(tween);
+                  var tween = Element.Create(transform, target, duration).Move();
+                  Engine.Add(tween);
                   return tween;
             }
             public static Element TweenMoveX(this Transform transform, float target, float duration)
@@ -31,8 +31,8 @@ namespace Emp37.Utility.Tween
 
             public static Element TweenMoveLocal(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Build(transform, target, duration).executeMoveLocal();
-                  Engine.Push(tween);
+                  var tween = Element.Create(transform, target, duration).MoveLocal();
+                  Engine.Add(tween);
                   return tween;
             }
             public static Element TweenMoveLocalX(this Transform transform, float target, float duration)
@@ -56,8 +56,8 @@ namespace Emp37.Utility.Tween
 
             public static Element TweenRotate(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Build(transform, target, duration).executeRotate();
-                  Engine.Push(tween);
+                  var tween = Element.Create(transform, target, duration).Rotate();
+                  Engine.Add(tween);
                   return tween;
             }
             public static Element TweenRotateX(this Transform transform, float target, float duration)
@@ -79,10 +79,35 @@ namespace Emp37.Utility.Tween
                   return TweenRotate(transform, rotation, duration);
             }
 
+            public static Element TweenRotateLocal(this Transform transform, Vector3 target, float duration)
+            {
+                  var tween = Element.Create(transform, target, duration).RotateLocal();
+                  Engine.Add(tween);
+                  return tween;
+            }
+            public static Element TweenRotateLocalX(this Transform transform, float target, float duration)
+            {
+                  var rotation = transform.eulerAngles;
+                  rotation.x = target;
+                  return TweenRotateLocal(transform, rotation, duration);
+            }
+            public static Element TweenRotateLocalY(this Transform transform, float target, float duration)
+            {
+                  var rotation = transform.eulerAngles;
+                  rotation.y = target;
+                  return TweenRotateLocal(transform, rotation, duration);
+            }
+            public static Element TweenRotateLocalZ(this Transform transform, float target, float duration)
+            {
+                  var rotation = transform.eulerAngles;
+                  rotation.z = target;
+                  return TweenRotateLocal(transform, rotation, duration);
+            }
+
             public static Element TweenScale(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Build(transform, target, duration).executeScale();
-                  Engine.Push(tween);
+                  var tween = Element.Create(transform, target, duration).Scale();
+                  Engine.Add(tween);
                   return tween;
             }
             public static Element TweenScaleX(this Transform transform, float target, float duration)
@@ -106,21 +131,8 @@ namespace Emp37.Utility.Tween
 
             public static Element TweenAlpha(this CanvasGroup group, float target, float duration)
             {
-                  var tween = Element.Build(group.transform, new(target, 0F), duration).executeCanvasAlpha();
-                  Engine.Push(tween);
-                  return tween;
-            }
-
-            public static Element TweenAlpha(this SpriteRenderer renderer, float target, float duration)
-            {
-                  var tween = Element.Build(renderer.transform, new(target, 0F), duration).executeSpriteAlpha();
-                  Engine.Push(tween);
-                  return tween;
-            }
-            public static Element TweenTint(this SpriteRenderer renderer, Color target, float duration)
-            {
-                  var tween = Element.Build(renderer.transform, new(target.r, target.g, target.b), duration).executeSpriteTint();
-                  Engine.Push(tween);
+                  var tween = Element.Create(group.transform, new(target, 0F), duration).CanvasAlpha();
+                  Engine.Add(tween);
                   return tween;
             }
       }

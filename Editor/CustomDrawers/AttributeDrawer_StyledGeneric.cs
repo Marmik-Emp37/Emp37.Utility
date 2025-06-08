@@ -4,24 +4,29 @@ using UnityEngine;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(ExpandableGroupAttribute))]
-      internal class AttributeDrawer_ExpandableGroup : PropertyDrawer
+      [CustomPropertyDrawer(typeof(StyledGenericAttribute), true)]
+      internal class AttributeDrawer_StyledGeneric : BasePropertyDrawer
       {
-            public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+            private readonly Texture expandedContent = EditorGUIUtility.IconContent("d_FolderOpened Icon").image, collapsedContent = EditorGUIUtility.IconContent("d_Folder Icon").image;
+
+            private readonly GUIStyle buttonStyle = new(GUI.skin.button) { alignment = TextAnchor.MiddleLeft, };
+
+            public override void Draw(Rect position, SerializedProperty property, GUIContent label)
             {
                   if (property.propertyType != SerializedPropertyType.Generic)
                   {
-                        EditorGUI.HelpBox(position, $"Use {typeof(ExpandableGroupAttribute).Name} on fields of type {SerializedPropertyType.Generic}.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, SerializedPropertyType.Generic);
                         return;
                   }
 
-                  var attr = attribute as ExpandableGroupAttribute;
+                  var attr = attribute as StyledGenericAttribute;
+
+                  label.image = property.isExpanded ? expandedContent : collapsedContent;
 
                   position.height = attr.Height;
-                  property.isExpanded = GUI.Toggle(position, property.isExpanded, Utility.ToStylizedTitleCase(label.text), GUI.skin.button);
+                  property.isExpanded = GUI.Toggle(position, property.isExpanded, label, buttonStyle);
 
                   if (!property.isExpanded) return;
-
                   position.y += position.height + EditorGUIUtility.standardVerticalSpacing; // - [ 1 ]
 
                   Rect boxRect = new(position) { height = GetPropertyHeight(property, label) - position.height - EditorGUIUtility.standardVerticalSpacing };
@@ -29,7 +34,6 @@ namespace Emp37.Utility.Editor
                   {
                         GUI.Box(boxRect, GUIContent.none);
                   }
-
                   position.y += EditorGUIUtility.standardVerticalSpacing + 1F; // - [ 2 ]
 
                   Rect contentRect = new(position) { width = position.width - 3F };
@@ -39,15 +43,18 @@ namespace Emp37.Utility.Editor
                         bool enterChildren = true;
                         while (iterator.NextVisible(enterChildren) && !SerializedProperty.EqualContents(iterator, end))
                         {
+                              contentRect.height = EditorGUI.GetPropertyHeight(iterator, true);
                               EditorGUI.PropertyField(contentRect, iterator, true);
-                              contentRect.y += EditorGUI.GetPropertyHeight(iterator, true) + EditorGUIUtility.standardVerticalSpacing; // - [ 3 ]
+                              contentRect.y += contentRect.height + EditorGUIUtility.standardVerticalSpacing; // - [ 3 ]
                               enterChildren = false;
                         }
                   }
             }
             public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
             {
-                  var attr = attribute as ExpandableGroupAttribute;
+                  if (property.propertyType != SerializedPropertyType.Generic) return base.GetPropertyHeight(property, label);
+
+                  var attr = attribute as StyledGenericAttribute;
                   if (!property.isExpanded) return attr.Height; // - [ 1 ]
 
                   float height = attr.Height;

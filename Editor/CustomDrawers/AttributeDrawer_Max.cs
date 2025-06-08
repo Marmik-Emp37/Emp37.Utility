@@ -14,7 +14,7 @@ namespace Emp37.Utility.Editor
             {
                   if (property.propertyType is not (Type.Float or Type.Integer or Type.Vector2 or Type.Vector3 or Type.Vector2Int or Type.Vector3Int))
                   {
-                        EditorGUI.HelpBox(position, $"Use {nameof(MaxAttribute)} on '{Type.Float}' or '{Type.Integer}' field types.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, Type.Float, Type.Integer);
                         return;
                   }
 
@@ -28,7 +28,7 @@ namespace Emp37.Utility.Editor
 
             private void Validate(SerializedProperty property)
             {
-                  MaxAttribute attribute = base.attribute as MaxAttribute;
+                  var attr = attribute as MaxAttribute;
                   switch (property.propertyType)
                   {
                         #region I N T E G E R
@@ -73,8 +73,8 @@ namespace Emp37.Utility.Editor
                               }
                               #endregion
                   }
-                  int @int(int value) => Mathf.Clamp(value, int.MinValue, (int) attribute.Value);
-                  float @float(float value) => Mathf.Clamp(value, float.MinValue, attribute.Value);
+                  int @int(int value) => Mathf.Clamp(value, int.MinValue, (int) attr.Value);
+                  float @float(float value) => Mathf.Clamp(value, float.MinValue, attr.Value);
             }
       }
 }

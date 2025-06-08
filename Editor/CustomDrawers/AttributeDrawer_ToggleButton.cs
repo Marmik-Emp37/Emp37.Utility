@@ -11,13 +11,13 @@ namespace Emp37.Utility.Editor
             {
                   if (property.propertyType is not SerializedPropertyType.Boolean)
                   {
-                        EditorGUI.HelpBox(position, $"Use {typeof(ToggleButtonAttribute)} on 'Boolean' field type.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, SerializedPropertyType.Boolean);
                         return;
                   }
 
                   label.text += " : " + (property.boolValue ? "On" : "Off");
                   property.boolValue = GUI.Toggle(position, property.boolValue, label, GUI.skin.button);
             }
-            public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => (attribute as ToggleButtonAttribute).Height;
+            public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => property.propertyType is SerializedPropertyType.Boolean ? (attribute as ToggleButtonAttribute).Height : base.GetPropertyHeight(property, label);
       }
-} 
+}

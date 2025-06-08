@@ -9,26 +9,20 @@ namespace Emp37.Utility.Editor
       {
             private CommentAttribute Attribute => attribute as CommentAttribute;
 
-            private readonly GUIStyle labelStyle = new(EditorStyles.label)
-            {
-                  richText = true,
-                  wordWrap = true,
-            };
-
             private const byte BackgroundAlpha = 25;
             private const float MinHeight = 21F, HighlightWidth = 3F;
 
-            private float ContentHeight => Mathf.Max(MinHeight, labelStyle.CalcHeight(Attribute.Content, EditorGUIHelper.ReleventWidth));
-
+            private readonly GUIStyle contentStyle = new(EditorStyles.label) { richText = true, wordWrap = true };
+            private float ContentHeight => Mathf.Max(MinHeight, contentStyle.CalcHeight(Attribute.Content, EditorGUIHelper.ReleventWidth));
 
             public override void Initialize()
             {
-                  labelStyle.fontStyle = Attribute.FontStyle;
+                  contentStyle.fontStyle = Attribute.FontStyle;
             }
             public override void Draw(Rect position)
             {
                   position.height = ContentHeight; // - [ 1 ]
-                  EditorGUI.LabelField(position, Attribute.Content, labelStyle);
+                  EditorGUI.LabelField(position, Attribute.Content, contentStyle);
 
                   Color32 color = Attribute.Tint;
                   color.a = BackgroundAlpha;

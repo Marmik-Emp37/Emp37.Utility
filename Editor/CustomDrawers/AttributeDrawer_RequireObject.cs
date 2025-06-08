@@ -13,7 +13,7 @@ namespace Emp37.Utility.Editor
             {
                   if (property.propertyType is not SerializedPropertyType.ObjectReference)
                   {
-                        EditorGUI.HelpBox(position, $"Use RequireObject attribute on a field of type '{SerializedPropertyType.ObjectReference}'.", UnityEditor.MessageType.Error);
+                        ShowInvalidUsageBox(position, SerializedPropertyType.ObjectReference);
                         return;
                   }
 

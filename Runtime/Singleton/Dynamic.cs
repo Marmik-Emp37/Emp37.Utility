@@ -24,6 +24,7 @@ namespace Emp37.Utility.Singleton
       public abstract class Dynamic<T> : MonoBehaviour where T : Dynamic<T>
       {
             private static T instance;
+            private static readonly object syncRoot = new();
             private static bool isExiting;
 
             public static T Instance
@@ -35,27 +36,32 @@ namespace Emp37.Utility.Singleton
                               Debug.LogWarning($"Instance of '{typeof(T).FullName}' no longer exists.");
                               return null;
                         }
-                        if (instance == null)
+                        lock (syncRoot)
                         {
-                              instance = FindFirstObjectByType<T>() ?? new GameObject($"{typeof(T).Name}: Singleton").AddComponent<T>();
-                              DontDestroyOnLoad(instance);
+                              return instance ??= FindFirstObjectByType<T>() ?? new GameObject(typeof(T).FullName).AddComponent<T>();
                         }
-                        return instance;
                   }
+                  protected set => instance = value;
             }
 
             protected void Initialize(bool persistency)
             {
-                  if (instance != null && instance != this)
+                  lock (syncRoot)
                   {
-                        Debug.LogWarning($"A duplicate instance of '{typeof(T).FullName}' found on gameObject '{name}'.", gameObject);
-                        return;
+                        if (instance != null && instance != this)
+                        {
+                              Debug.LogWarning($"A duplicate instance of '{typeof(T).FullName}' found on gameObject '{name}'.", gameObject);
+                              return;
+                        }
+                        instance = this as T;
+                        if (persistency) DontDestroyOnLoad(this);
                   }
-                  instance = this as T;
-                  if (persistency) DontDestroyOnLoad(this);
             }
 
-            protected virtual void OnDestroy() => instance = instance == this ? null : instance;
+            protected virtual void OnDestroy()
+            {
+                  lock (syncRoot) if (instance == this) instance = null;
+            }
             protected virtual void OnApplicationQuit() => isExiting = true;
       }
 }

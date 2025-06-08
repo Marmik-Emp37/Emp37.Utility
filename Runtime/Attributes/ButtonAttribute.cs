@@ -1,3 +1,5 @@
+using System;
+
 using UnityEngine;
 
 namespace Emp37.Utility
@@ -5,7 +7,8 @@ namespace Emp37.Utility
       /// <summary>
       /// Attribute for drawing a button in the inspector.
       /// </summary>
-      public class ButtonAttribute : SerializeMethodAttribute
+      [AttributeUsage(AttributeTargets.Method, Inherited = true)]
+      public class ButtonAttribute : Attribute
       {
             public string Name = null;
             public readonly float Height = 18F;
