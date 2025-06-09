@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(ExpandableGroupAttribute), true)]
-      internal class AttributeDrawer_ExpandableGroup : BasePropertyDrawer
+      [CustomPropertyDrawer(typeof(StyledGroupAttribute), true)]
+      internal class AttributeDrawer_StyledGroup : BasePropertyDrawer
       {
             private readonly Texture expandedContent = EditorGUIUtility.IconContent("d_FolderOpened Icon").image, collapsedContent = EditorGUIUtility.IconContent("d_Folder Icon").image;
 
@@ -19,7 +19,7 @@ namespace Emp37.Utility.Editor
                         return;
                   }
 
-                  var attr = attribute as ExpandableGroupAttribute;
+                  var attr = attribute as StyledGroupAttribute;
 
                   label.image = property.isExpanded ? expandedContent : collapsedContent;
 
@@ -49,13 +49,14 @@ namespace Emp37.Utility.Editor
                               enterChildren = false;
                         }
                   }
-            }
+            } 
             public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
             {
-                  if (property.propertyType != SerializedPropertyType.Generic) base.GetPropertyHeight(property, label);
+                  if (property.propertyType != SerializedPropertyType.Generic) return base.GetPropertyHeight(property, label);
 
-                  var attr = attribute as ExpandableGroupAttribute;
+                  var attr = attribute as StyledGroupAttribute;
                   if (!property.isExpanded) return attr.Height; // - [ 1 ]
+
                   float height = attr.Height;
                   height += 2F * (EditorGUIUtility.standardVerticalSpacing + 1F); // - [ 2 ]
 
