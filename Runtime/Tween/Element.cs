@@ -147,7 +147,6 @@ namespace Emp37.Utility.Tween
                         Type.InBounce => () => InBounce(progress),
                         Type.OutBounce => () => OutBounce(progress),
                         Type.InOutBounce => () => InOutBounce(progress),
-                        Type.BreakOutBounce => () => BreakOutBounce(progress),
                         _ => () => Linear(progress)
                   };
                   return this;
