@@ -1,137 +1,106 @@
+using System;
+
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Emp37.Utility.Tweening
 {
+      using static Utility;
+
       public static class Extensions
       {
             public static Element TweenMove(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Create(transform, target, duration).Move();
+                  Element tween = new(() => transform.position, target, duration, value => transform.position = value);
                   Engine.Add(tween);
                   return tween;
             }
-            public static Element TweenMoveX(this Transform transform, float target, float duration)
-            {
-                  var position = transform.position;
-                  position.x = target;
-                  return TweenMove(transform, position, duration);
-            }
-            public static Element TweenMoveY(this Transform transform, float target, float duration)
-            {
-                  var position = transform.position;
-                  position.y = target;
-                  return TweenMove(transform, position, duration);
-            }
-            public static Element TweenMoveZ(this Transform transform, float target, float duration)
-            {
-                  var position = transform.position;
-                  position.z = target;
-                  return TweenMove(transform, position, duration);
-            }
-
+            public static Element TweenMoveX(this Transform transform, float target, float duration) => TweenMove(transform, ReplaceAxis(transform.position, 0, target), duration);
+            public static Element TweenMoveY(this Transform transform, float target, float duration) => TweenMove(transform, ReplaceAxis(transform.position, 1, target), duration);
+            public static Element TweenMoveZ(this Transform transform, float target, float duration) => TweenMove(transform, ReplaceAxis(transform.position, 2, target), duration);
             public static Element TweenMoveLocal(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Create(transform, target, duration).MoveLocal();
+                  Element tween = new(() => transform.localPosition, target, duration, value => transform.localPosition = value);
                   Engine.Add(tween);
                   return tween;
             }
-            public static Element TweenMoveLocalX(this Transform transform, float target, float duration)
-            {
-                  var position = transform.localPosition;
-                  position.x = target;
-                  return TweenMoveLocal(transform, position, duration);
-            }
-            public static Element TweenMoveLocalY(this Transform transform, float target, float duration)
-            {
-                  var position = transform.localPosition;
-                  position.y = target;
-                  return TweenMoveLocal(transform, position, duration);
-            }
-            public static Element TweenMoveLocalZ(this Transform transform, float target, float duration)
-            {
-                  var position = transform.localPosition;
-                  position.z = target;
-                  return TweenMoveLocal(transform, position, duration);
-            }
-
+            public static Element TweenMoveLocalX(this Transform transform, float target, float duration) => TweenMoveLocal(transform, ReplaceAxis(transform.localPosition, 0, target), duration);
+            public static Element TweenMoveLocalY(this Transform transform, float target, float duration) => TweenMoveLocal(transform, ReplaceAxis(transform.localPosition, 1, target), duration);
+            public static Element TweenMoveLocalZ(this Transform transform, float target, float duration) => TweenMoveLocal(transform, ReplaceAxis(transform.localPosition, 2, target), duration);
             public static Element TweenRotate(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Create(transform, target, duration).Rotate();
+                  Element tween = new(() => transform.eulerAngles, target, duration, value => transform.eulerAngles = value);
                   Engine.Add(tween);
                   return tween;
             }
-            public static Element TweenRotateX(this Transform transform, float target, float duration)
-            {
-                  var rotation = transform.eulerAngles;
-                  rotation.x = target;
-                  return TweenRotate(transform, rotation, duration);
-            }
-            public static Element TweenRotateY(this Transform transform, float target, float duration)
-            {
-                  var rotation = transform.eulerAngles;
-                  rotation.y = target;
-                  return TweenRotate(transform, rotation, duration);
-            }
-            public static Element TweenRotateZ(this Transform transform, float target, float duration)
-            {
-                  var rotation = transform.eulerAngles;
-                  rotation.z = target;
-                  return TweenRotate(transform, rotation, duration);
-            }
-
+            public static Element TweenRotateX(this Transform transform, float target, float duration) => TweenRotate(transform, ReplaceAxis(transform.eulerAngles, 0, target), duration);
+            public static Element TweenRotateY(this Transform transform, float target, float duration) => TweenRotate(transform, ReplaceAxis(transform.eulerAngles, 1, target), duration);
+            public static Element TweenRotateZ(this Transform transform, float target, float duration) => TweenRotate(transform, ReplaceAxis(transform.eulerAngles, 2, target), duration);
             public static Element TweenRotateLocal(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Create(transform, target, duration).RotateLocal();
+                  Element tween = new(() => transform.localEulerAngles, target, duration, value => transform.localEulerAngles = value);
                   Engine.Add(tween);
                   return tween;
             }
-            public static Element TweenRotateLocalX(this Transform transform, float target, float duration)
-            {
-                  var rotation = transform.eulerAngles;
-                  rotation.x = target;
-                  return TweenRotateLocal(transform, rotation, duration);
-            }
-            public static Element TweenRotateLocalY(this Transform transform, float target, float duration)
-            {
-                  var rotation = transform.eulerAngles;
-                  rotation.y = target;
-                  return TweenRotateLocal(transform, rotation, duration);
-            }
-            public static Element TweenRotateLocalZ(this Transform transform, float target, float duration)
-            {
-                  var rotation = transform.eulerAngles;
-                  rotation.z = target;
-                  return TweenRotateLocal(transform, rotation, duration);
-            }
-
+            public static Element TweenRotateLocalX(this Transform transform, float target, float duration) => TweenRotateLocal(transform, ReplaceAxis(transform.localEulerAngles, 0, target), duration);
+            public static Element TweenRotateLocalY(this Transform transform, float target, float duration) => TweenRotateLocal(transform, ReplaceAxis(transform.localEulerAngles, 1, target), duration);
+            public static Element TweenRotateLocalZ(this Transform transform, float target, float duration) => TweenRotateLocal(transform, ReplaceAxis(transform.localEulerAngles, 2, target), duration);
             public static Element TweenScale(this Transform transform, Vector3 target, float duration)
             {
-                  var tween = Element.Create(transform, target, duration).Scale();
+                  Element tween = new(() => transform.localScale, target, duration, value => transform.localScale = value);
                   Engine.Add(tween);
                   return tween;
             }
-            public static Element TweenScaleX(this Transform transform, float target, float duration)
-            {
-                  var scale = transform.localScale;
-                  scale.x = target;
-                  return TweenScale(transform, scale, duration);
-            }
-            public static Element TweenScaleY(this Transform transform, float target, float duration)
-            {
-                  var scale = transform.localScale;
-                  scale.y = target;
-                  return TweenScale(transform, scale, duration);
-            }
-            public static Element TweenScaleZ(this Transform transform, float target, float duration)
-            {
-                  var scale = transform.localScale;
-                  scale.z = target;
-                  return TweenScale(transform, scale, duration);
-            }
-
+            public static Element TweenScaleX(this Transform transform, float target, float duration) => TweenScale(transform, ReplaceAxis(transform.localScale, 0, target), duration);
+            public static Element TweenScaleY(this Transform transform, float target, float duration) => TweenScale(transform, ReplaceAxis(transform.localScale, 1, target), duration);
+            public static Element TweenScaleZ(this Transform transform, float target, float duration) => TweenScale(transform, ReplaceAxis(transform.localScale, 2, target), duration);
             public static Element TweenAlpha(this CanvasGroup group, float target, float duration)
             {
-                  var tween = Element.Create(group.transform, new(target, 0F), duration).CanvasAlpha();
+                  Element tween = new(() => group.alpha, target, duration, value => group.alpha = value);
+                  Engine.Add(tween);
+                  return tween;
+            }
+            public static Element TweenAlpha(this Image image, float target, float duration)
+            {
+                  Element tween = new(() => image.color.a, target, duration, value =>
+                  {
+                        var color = image.color;
+                        color.a = value;
+                        image.color = color;
+                  });
+                  Engine.Add(tween);
+                  return tween;
+            }
+            public static Element TweenAlpha(this SpriteRenderer renderer, float target, float duration)
+            {
+                  Element tween = new(() => renderer.color.a, target, duration, value =>
+                  {
+                        var color = renderer.color;
+                        color.a = value;
+                        renderer.color = color;
+                  });
+                  Engine.Add(tween);
+                  return tween;
+            }
+            public static Element TweenColor(this Image image, Color target, float duration)
+            {
+                  Func<Vector3> init = () =>
+                  {
+                        Color color = image.color;
+                        return new(color.r, color.g, color.b);
+                  };
+                  Element tween = new(init, new(target.r, target.g, target.b), duration, value => image.color = new(value.x, value.y, value.z));
+                  Engine.Add(tween);
+                  return tween;
+            }
+            public static Element TweenColor(this SpriteRenderer renderer, Color target, float duration)
+            {
+                  Func<Vector3> init = () =>
+                  {
+                        Color color = renderer.color;
+                        return new(color.r, color.g, color.b);
+                  };
+                  Element tween = new(init, new(target.r, target.g, target.b), duration, value => renderer.color = new(value.x, value.y, value.z));
                   Engine.Add(tween);
                   return tween;
             }

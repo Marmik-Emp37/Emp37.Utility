@@ -18,7 +18,6 @@ namespace Emp37.Utility.Tweening
                         Destroy(gameObject);
                         return;
                   }
-                  instance = this;
                   DontDestroyOnLoad(gameObject);
                   enabled = false;
             }

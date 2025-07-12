@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 using UnityEngine;
 
@@ -7,27 +6,21 @@ namespace Emp37.Utility.Tweening
 {
       using static Ease;
 
-      public class Element : ITweenAction
+      public class Element
       {
-            // Configuration
-            private readonly Transform transform;
             private Vector3 a;
             private readonly Vector3 b;
             private Delta timeMode;
-            private bool hasInitialized;
+            private bool initialized;
 
-            // Timing
             private readonly float inverseDuration;
             private float progress, delay;
 
-            // Easing
-            private Func<float> easeFunction = () => 1F;
-            private float easeOvershoot, easePeriod;
+            private readonly Action onTweenInitialize;
+            private Function easingFunction = Linear;
+            private readonly Action<Vector3> onTweenUpdate;
 
-            // Callbacks
-            private Action onInitialize = delegate { };
             private Action onStart;
-            private Action<Vector3> onValueChanged = delegate { };
             private Action<float> onUpdate = delegate { };
             private Action onComplete;
 
@@ -36,33 +29,54 @@ namespace Emp37.Utility.Tweening
             {
                   get
                   {
-                        List<string> warnings = new();
-                        if (!transform) warnings.Add($"Missing or null {typeof(Transform).Name} reference.");
-                        if (inverseDuration <= 0F) warnings.Add($"Invalid duration value: {1F / inverseDuration}. It must be greater than 0.");
-                        if (warnings.Count > 0)
+                        bool output = false;
+                        if (inverseDuration <= 0F)
                         {
-                              warnings.ForEach(warning => Debug.LogWarning("Validation Failed: " + warning));
-                              return true;
+                              print($"Invalid duration {1F / inverseDuration} value. It must be greater than 0.");
+                              output = true;
                         }
-                        return false;
+                        if (onTweenInitialize == null)
+                        {
+                              print($"Missing initialization callback. Call IBindableTween.Bind to assign an 'inital' method that assigns the inital value after the tween is processed.");
+                              output = true;
+                        }
+                        if (onTweenUpdate == null)
+                        {
+                              print($"Missing update callback. Call IBindableTween.Bind to assign a 'tween' method that updates the tween target.");
+                              output = true;
+                        }
+                        return output;
+
+                        static void print(string message) => Debug.LogWarning($"[{typeof(Element).FullName}] Validation Failed: {message}");
                   }
             }
 
-            private Element(Transform transform, Vector3 end, float duration)
-            {
-                  this.transform = transform;
-                  b = end;
-                  inverseDuration = 1F / duration;
-                  easeFunction = () => Linear(progress);
-            }
-            public static ITweenAction Create(Transform transform, Vector3 end, float duration) => new Element(transform, end, duration);
 
-            Transform ITweenAction.Transform => transform;
-            Element ITweenAction.Bind(Vector3 from, Action<Vector3> apply)
+            public Element(Func<float> initial, float target, float duration, Action<float> tween)
             {
-                  onInitialize = () => a = from;
-                  onValueChanged = apply;
-                  return this;
+                  if (initial != null)
+                  {
+                        onTweenInitialize = () => a = new(initial(), 0F);
+                  }
+                  b = new(target, 0F);
+                  inverseDuration = 1F / duration;
+                  if (tween != null)
+                  {
+                        onTweenUpdate = v => tween(v.x);
+                  }
+            }
+            public Element(Func<Vector3> initial, Vector3 target, float duration, Action<Vector3> tween)
+            {
+                  if (initial != null)
+                  {
+                        onTweenInitialize = () => a = initial();
+                  }
+                  b = target;
+                  inverseDuration = 1F / duration;
+                  if (tween != null)
+                  {
+                        onTweenUpdate = tween;
+                  }
             }
 
             internal void Update()
@@ -75,20 +89,20 @@ namespace Emp37.Utility.Tweening
                         return;
                   }
 
-                  if (!hasInitialized)
+                  if (!initialized)
                   {
-                        hasInitialized = true;
-                        onInitialize();
+                        initialized = true;
+                        onTweenInitialize();
 
                         onStart?.Invoke();
                   }
 
                   progress = Mathf.Clamp01(progress + deltaTime * inverseDuration);
-                  float easedRatio = easeFunction();
-                  Vector3 current = Vector3.LerpUnclamped(a, b, easedRatio);
-                  onValueChanged(current);
+                  float eased = easingFunction(progress);
+                  Vector3 current = Vector3.LerpUnclamped(a, b, eased);
+                  onTweenUpdate(current);
 
-                  onUpdate(easedRatio);
+                  onUpdate(eased);
 
                   if (progress == 1F)
                   {
@@ -99,81 +113,70 @@ namespace Emp37.Utility.Tweening
             public void Reset()
             {
                   progress = 0F;
-                  hasInitialized = IsComplete = false;
+                  initialized = IsComplete = false;
             }
 
             #region B U I L D E R   P A T T E R N
-#pragma warning disable IDE1006
-            public Element setEase(Type type)
+            public Element SetEase(Type type)
             {
-                  easeFunction = type switch
+                  easingFunction = type switch
                   {
-                        Type.InSine => () => InSine(progress),
-                        Type.OutSine => () => OutSine(progress),
-                        Type.InOutSine => () => InOutSine(progress),
-                        Type.InCubic => () => InCubic(progress),
-                        Type.OutCubic => () => OutCubic(progress),
-                        Type.InOutCubic => () => InOutCubic(progress),
-                        Type.InQuint => () => InQuint(progress),
-                        Type.OutQuint => () => OutQuint(progress),
-                        Type.InOutQuint => () => InOutQuint(progress),
-                        Type.InCirc => () => InCirc(progress),
-                        Type.OutCirc => () => OutCirc(progress),
-                        Type.InOutCirc => () => InOutCirc(progress),
-                        Type.InQuad => () => InQuad(progress),
-                        Type.OutQuad => () => OutQuad(progress),
-                        Type.InOutQuad => () => InOutQuad(progress),
-                        Type.InQuart => () => InQuart(progress),
-                        Type.OutQuart => () => OutQuart(progress),
-                        Type.InOutQuart => () => InOutQuart(progress),
-                        Type.InExpo => () => InExpo(progress),
-                        Type.OutExpo => () => OutExpo(progress),
-                        Type.InOutExpo => () => InOutExpo(progress),
-                        Type.InBack => () => InBack(progress, easeOvershoot),
-                        Type.OutBack => () => OutBack(progress, easeOvershoot),
-                        Type.InOutBack => () => InOutBack(progress, easeOvershoot),
-                        Type.InElastic => () => InElastic(progress, easeOvershoot, easePeriod),
-                        Type.OutElastic => () => OutElastic(progress, easeOvershoot, easePeriod),
-                        Type.InOutElastic => () => InOutElastic(progress, easeOvershoot, easePeriod),
-                        Type.InBounce => () => InBounce(progress),
-                        Type.OutBounce => () => OutBounce(progress),
-                        Type.InOutBounce => () => InOutBounce(progress),
-                        _ => () => Linear(progress)
+                        Type.InSine => InSine,
+                        Type.OutSine => OutSine,
+                        Type.InOutSine => InOutSine,
+                        Type.InCubic => InCubic,
+                        Type.OutCubic => OutCubic,
+                        Type.InOutCubic => InOutCubic,
+                        Type.InQuint => InQuint,
+                        Type.OutQuint => OutQuint,
+                        Type.InOutQuint => InOutQuint,
+                        Type.InCirc => InCirc,
+                        Type.OutCirc => OutCirc,
+                        Type.InOutCirc => InOutCirc,
+                        Type.InQuad => InQuad,
+                        Type.OutQuad => OutQuad,
+                        Type.InOutQuad => InOutQuad,
+                        Type.InQuart => InQuart,
+                        Type.OutQuart => OutQuart,
+                        Type.InOutQuart => InOutQuart,
+                        Type.InExpo => InExpo,
+                        Type.OutExpo => OutExpo,
+                        Type.InOutExpo => InOutExpo,
+                        Type.InBack => InBack,
+                        Type.OutBack => OutBack,
+                        Type.InOutBack => InOutBack,
+                        Type.InElastic => InElastic,
+                        Type.OutElastic => OutElastic,
+                        Type.InOutElastic => InOutElastic,
+                        Type.InBounce => InBounce,
+                        Type.OutBounce => OutBounce,
+                        Type.InOutBounce => InOutBounce,
+                        _ => Linear
                   };
                   return this;
             }
+            public Element SetEase(AnimationCurve curve) { easingFunction = curve.Evaluate; return this; }
             /// <summary>
             /// Sets the delay before the tween starts.
             /// </summary>
             /// <param name="duration">In seconds.</param>
-            public Element setDelay(float duration) { delay = duration; return this; }
+            public Element SetDelay(float duration) { delay = duration; return this; }
             /// <summary>
             /// Sets the time scale mode (scaled or unscaled) used by the tween.
             /// </summary>
-            public Element setTimeMode(Delta value) { timeMode = value; return this; }
-            /// <summary>
-            /// Sets the overshoot value for applicable easing types.
-            /// </summary>
-            /// <remarks>Applies only to Back and Elastic easing functions. Default is <c>1</c>.</remarks>
-            public Element setEaseOvershoot(float value) { easeOvershoot = value; return this; }
-            /// <summary>
-            /// Sets the period value for applicable easing types.
-            /// </summary>
-            /// <remarks>Applies only to Elastic easing functions.</remarks>
-            public Element setEasePeriod(float amount) { easePeriod = amount; return this; }
+            public Element SetTimeMode(Delta value) { timeMode = value; return this; }
             /// <summary>
             /// Sets a callback to invoke when the tween starts.
             /// </summary>
-            public Element setOnStart(Action action) { onStart = action; return this; }
+            public Element SetOnStart(Action action) { onStart = action; return this; }
             /// <summary>
             /// Sets a callback to invoke during each tween update.
             /// </summary>
-            public Element setOnUpdate(Action<float> action) { onUpdate = action; return this; }
+            public Element SetOnUpdate(Action<float> action) { onUpdate = action; return this; }
             /// <summary>
             /// Sets a callback to invoke when the tween completes.
             /// </summary>
-            public Element setOnComplete(Action action) { onComplete = action; return this; }
-#pragma warning restore IDE1006
+            public Element SetOnComplete(Action action) { onComplete = action; return this; }
             #endregion
       }
 }
