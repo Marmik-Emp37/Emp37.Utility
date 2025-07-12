@@ -25,5 +25,10 @@ namespace Emp37.Utility
             /// <param name="value">The value to rescale.</param>
             /// <returns>The rescaled value clamped within the specified output range.</returns>
             public static float Remap(float value, float iMin, float iMax, float oMin, float oMax) => Mathf.Lerp(oMin, oMax, Mathf.InverseLerp(iMin, iMax, value));
+            public static Vector3 ReplaceAxis(Vector3 original, int axis, float value)
+            {
+                  original[axis] = value;
+                  return original;
+            }
       }
 }

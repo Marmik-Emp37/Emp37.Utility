@@ -34,6 +34,7 @@ namespace Emp37.Utility.Editor
                               }
 
                               if (i == last) break;
+
                               Type next = field.FieldType;
                               currentType = next.IsArray ? next.GetElementType() : next.IsGenericType ? next.GetGenericArguments().FirstOrDefault() : next;
                         }

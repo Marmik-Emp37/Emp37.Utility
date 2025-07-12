@@ -1,5 +1,4 @@
 Pending Tasks:
 
-- Fixing Tween Engine.
-  • Tween chaining onComplete failed.
+- Null Tween<T> derived class consideration.
 - Creating Swatches window for custom color palette.
