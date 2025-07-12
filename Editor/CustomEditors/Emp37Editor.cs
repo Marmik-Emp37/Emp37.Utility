@@ -41,6 +41,7 @@ namespace Emp37.Utility.Editor
                               SerializedProperty property = serializedObject.FindProperty(iterator.name);
                               if (property != null) properties.Add(property);
                         }
+                        iterator.Dispose();
 
                         defaultProperty = properties[0];
                         properties.RemoveAt(0);
