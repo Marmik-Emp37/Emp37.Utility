@@ -8,7 +8,7 @@ namespace Emp37.Utility.Tweening
       {
             private static Engine instance;
 
-            private static readonly List<Element> tweens = new();
+            private static readonly Dictionary<object, Element> tweens = new();
 
 
             private void Awake()
@@ -23,22 +23,29 @@ namespace Emp37.Utility.Tweening
             }
             private void LateUpdate()
             {
-                  int count = tweens.Count;
-                  for (int i = count - 1; i >= 0; i--)
+                  if (tweens.Count == 0)
                   {
-                        Element element = tweens[i];
-                        if (element.IsComplete)
-                        {
-                              int lastIndex = count - 1;
-                              if (i != lastIndex) tweens[i] = tweens[lastIndex];
-                              tweens.RemoveAt(lastIndex);
-                        }
-                        else
+                        enabled = false;
+                        return;
+                  }
+                  List<object> keysToRemove = new();
+                  foreach (var pair in tweens)
+                  {
+                        Element element = pair.Value;
+                        if (!element.IsComplete)
                         {
                               element.Update();
                         }
+                        else
+                        {
+                              keysToRemove.Add(pair.Key);
+                        }
                   }
-                  if (count == 0)
+                  foreach (var key in keysToRemove)
+                  {
+                        tweens.Remove(key);
+                  }
+                  if (tweens.Count == 0)
                   {
                         enabled = false;
                   }
@@ -54,9 +61,11 @@ namespace Emp37.Utility.Tweening
 
                   instance ??= new GameObject(typeof(Engine).Name).AddComponent<Engine>();
 
-                  tweens.Add(tween);
+                  if (tween.Key != null)
+                  {
+                        tweens[tween.Key] = tween;
+                  }
                   instance.enabled = true;
-
                   return true;
             }
       }

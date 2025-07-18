@@ -24,6 +24,7 @@ namespace Emp37.Utility.Tweening
             private Action<float> onUpdate = delegate { };
             private Action onComplete;
 
+            public object Key { get; private set; }
             public bool IsComplete { get; private set; }
             public bool IsInvalid
             {
@@ -52,7 +53,7 @@ namespace Emp37.Utility.Tweening
             }
 
 
-            public Element(Func<float> initial, float target, float duration, Action<float> tween)
+            public Element(Func<float> initial, float target, float duration, Action<float> tween, object key)
             {
                   if (initial != null)
                   {
@@ -64,8 +65,9 @@ namespace Emp37.Utility.Tweening
                   {
                         onTweenUpdate = v => tween(v.x);
                   }
+                  Key = key;
             }
-            public Element(Func<Vector3> initial, Vector3 target, float duration, Action<Vector3> tween)
+            public Element(Func<Vector3> initial, Vector3 target, float duration, Action<Vector3> tween, object key)
             {
                   if (initial != null)
                   {
@@ -77,6 +79,7 @@ namespace Emp37.Utility.Tweening
                   {
                         onTweenUpdate = tween;
                   }
+                  Key = key;
             }
 
             internal void Update()
