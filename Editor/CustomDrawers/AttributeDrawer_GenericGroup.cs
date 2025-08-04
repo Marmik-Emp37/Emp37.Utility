@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(StyledGenericAttribute), true)]
-      internal class AttributeDrawer_StyledGeneric : BasePropertyDrawer
+      [CustomPropertyDrawer(typeof(GenericGroupAttribute), true)]
+      internal class AttributeDrawer_GenericGroup : BasePropertyDrawer
       {
             private readonly Texture expandedContent = EditorGUIUtility.IconContent("d_FolderOpened Icon").image, collapsedContent = EditorGUIUtility.IconContent("d_Folder Icon").image;
 
@@ -19,7 +19,7 @@ namespace Emp37.Utility.Editor
                         return;
                   }
 
-                  var attr = attribute as StyledGenericAttribute;
+                  var attr = attribute as GenericGroupAttribute;
 
                   label.image = property.isExpanded ? expandedContent : collapsedContent;
 
@@ -54,7 +54,7 @@ namespace Emp37.Utility.Editor
             {
                   if (property.propertyType != SerializedPropertyType.Generic) return base.GetPropertyHeight(property, label);
 
-                  var attr = attribute as StyledGenericAttribute;
+                  var attr = attribute as GenericGroupAttribute;
                   if (!property.isExpanded) return attr.Height; // - [ 1 ]
 
                   float height = attr.Height;

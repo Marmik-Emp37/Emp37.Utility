@@ -36,9 +36,11 @@ namespace Emp37.Utility.Singleton
                               Debug.LogWarning($"Instance of '{typeof(T).FullName}' no longer exists.");
                               return null;
                         }
+                        if (instance != null) return instance;
+
                         lock (syncRoot)
                         {
-                              return instance ??= FindFirstObjectByType<T>() ?? new GameObject(typeof(T).FullName).AddComponent<T>();
+                              return instance = FindFirstObjectByType<T>() ?? new GameObject(typeof(T).FullName).AddComponent<T>();
                         }
                   }
                   protected set => instance = value;
@@ -46,21 +48,18 @@ namespace Emp37.Utility.Singleton
 
             protected void Initialize(bool persistency)
             {
-                  lock (syncRoot)
+                  if (instance != null && instance != this)
                   {
-                        if (instance != null && instance != this)
-                        {
-                              Debug.LogWarning($"A duplicate instance of '{typeof(T).FullName}' found on gameObject '{name}'.", gameObject);
-                              return;
-                        }
-                        instance = this as T;
-                        if (persistency) DontDestroyOnLoad(this);
+                        Debug.LogWarning($"A duplicate instance of '{typeof(T).FullName}' found on gameObject '{name}'.", gameObject);
+                        return;
                   }
+                  instance = this as T;
+                  if (persistency) DontDestroyOnLoad(this);
             }
 
             protected virtual void OnDestroy()
             {
-                  lock (syncRoot) if (instance == this) instance = null;
+                  if (instance == this) instance = null;
             }
             protected virtual void OnApplicationQuit() => isExiting = true;
       }
