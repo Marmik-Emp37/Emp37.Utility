@@ -1,37 +1,54 @@
+using System;
 using UnityEngine;
-
 using UnityEditor;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(CommentAttribute), true)]
-      internal class AttributeDrawer_Comment : BaseDecoratorDrawer
-      {
-            private CommentAttribute Attribute => attribute as CommentAttribute;
+	[CustomPropertyDrawer(typeof(CommentAttribute), true)]
+	internal class AttributeDrawer_Comment : DecoratorDrawer
+	{
+		private const float backgroundAlpha = 0.175F;
+		private const float highlightWidth = 3F;
+		private const float minHeight = 21F;
 
-            private const byte BackgroundAlpha = 25;
-            private const float MinHeight = 21F, HighlightWidth = 3F;
+		private static readonly GUIStyle[] contentStyles = CreateContentGUIStyles();
 
-            private readonly GUIStyle contentStyle = new(EditorStyles.label) { richText = true, wordWrap = true };
-            private float ContentHeight => Mathf.Max(MinHeight, contentStyle.CalcHeight(Attribute.Content, EditorGUIHelper.ReleventWidth));
 
-            public override void Initialize()
-            {
-                  contentStyle.fontStyle = Attribute.FontStyle;
-            }
-            public override void Draw(Rect position)
-            {
-                  position.height = ContentHeight; // - [ 1 ]
-                  EditorGUI.LabelField(position, Attribute.Content, contentStyle);
+		public override void OnGUI(Rect position)
+		{
+			position.size = new(EditorGUIHelper.ReleventWidth, position.height - EditorGUIUtility.standardVerticalSpacing);
+			var attr = attribute as CommentAttribute;
 
-                  Color32 color = Attribute.Tint;
-                  color.a = BackgroundAlpha;
-                  EditorGUI.DrawRect(position, color);
+			EditorGUI.LabelField(position, attr.Content, contentStyles[(int) attr.Style]);
 
-                  position.width = HighlightWidth;
-                  position.x -= position.width + 1F;
-                  EditorGUI.DrawRect(position, Attribute.Tint);
-            }
-            public override float GetHeight() => ContentHeight /* - [ 1 ]*/ + EditorGUIUtility.standardVerticalSpacing;
-      }
+			var color = attr.Tint;
+			color.a = backgroundAlpha;
+
+			EditorGUI.DrawRect(position, color);
+
+			color.a = 1F;
+
+			EditorGUI.DrawRect(new(position) { x = position.x - highlightWidth + 1F, width = highlightWidth }, color);
+		}
+		public override float GetHeight()
+		{
+			var attr = attribute as CommentAttribute;
+
+			var contentHeight = contentStyles[(int) attr.Style].CalcHeight(attr.Content, EditorGUIHelper.ReleventWidth);
+
+			return Mathf.Max(minHeight, contentHeight) + EditorGUIUtility.standardVerticalSpacing;
+		}
+
+		private static GUIStyle[] CreateContentGUIStyles()
+		{
+			var values = Enum.GetValues(typeof(FontStyle));
+
+			var styles = new GUIStyle[values.Length];
+			foreach (FontStyle style in values)
+			{
+				styles[(int) style] = new(EditorStyles.label) { richText = true, wordWrap = true, fontStyle = style };
+			}
+			return styles;
+		}
+	}
 }

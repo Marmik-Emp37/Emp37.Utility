@@ -1,162 +1,166 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Linq;
-
 using UnityEngine;
-
 using UnityEditor;
 
 namespace Emp37.Utility.Editor
 {
-      using static ReflectionUtility;
+	using static ReflectionUtility;
 
-      internal class Emp37Editor : UnityEditor.Editor
-      {
-            private Type targetType;
+	internal class Emp37Editor : UnityEditor.Editor
+	{
+		private Type targetType;
 
-            private SerializedProperty[] serializedProperties;
-            private MethodInfo[] serializedMethods;
+		private bool showDefaultProperty;
+		private SerializedProperty defaultProperty;
 
-            private bool showDefaultProperty;
-            private SerializedProperty defaultProperty;
+		private NoteAttribute[] notes;
+		private (SerializedProperty property, FieldInfo field)[] properties;
+		private (MethodInfo method, ButtonAttribute button)[] buttons;
 
-            private bool isHorizontalLayoutActive;
+		private bool isHorizontalLayoutActive;
 
 
-            private void OnEnable()
-            {
-                  targetType = target.GetType();
 
-                  showDefaultProperty = !HasAttribute<HideDefaultPropertyAttribute>(targetType);
+		private void OnEnable()
+		{
+			targetType = target.GetType();
 
-                  #region I N I T I A L I Z E   S E R I A L I Z E D   P R O P E R T I E S
-                  if (serializedProperties == null)
-                  {
-                        List<SerializedProperty> properties = new();
-                        SerializedProperty iterator = serializedObject.GetIterator();
+			showDefaultProperty = !HasAttribute<HideDefaultPropertyAttribute>(targetType);
+			notes = GetAttributes<NoteAttribute>(targetType, true);
 
-                        while (iterator.NextVisible(true))
-                        {
-                              SerializedProperty property = serializedObject.FindProperty(iterator.name);
-                              if (property != null) properties.Add(property);
-                        }
-                        iterator.Dispose();
+			#region I N I T I A L I Z E   S E R I A L I Z E D   P R O P E R T I E S
+			List<(SerializedProperty, FieldInfo)> propertyList = new();
+			SerializedProperty iterator = serializedObject.GetIterator();
 
-                        defaultProperty = properties[0];
-                        properties.RemoveAt(0);
+			if (iterator.NextVisible(true))
+			{
+				defaultProperty = iterator.Copy();
+				while (iterator.NextVisible(false))
+				{
+					SerializedProperty property = iterator.Copy();
+					if (property.GetField() is { } field) propertyList.Add((property, field));
+				}
+			}
+			iterator.Dispose();
 
-                        serializedProperties = properties.ToArray();
-                  }
-                  #endregion
+			properties = propertyList.ToArray();
+			#endregion
 
-                  #region I N I T I A L I Z E   S E R I A L I Z E D   M E T H O D S
-                  serializedMethods = targetType.GetMethods(DEFAULT_FLAGS).Where(static method => method.IsDefined(typeof(ButtonAttribute), true)).ToArray();
-                  #endregion
-            }
 
-            public override void OnInspectorGUI()
-            {
-                  if (TryGetAttributes(targetType, out NoteAttribute[] notes, true))
-                  {
-                        foreach (NoteAttribute attribute in notes)
-                              using (new EditorGUIHelper.BackgroundColorScope(attribute.Color))
-                                    EditorGUILayout.HelpBox(attribute.Content);
-                  }
+			#region I N I T I A L I Z E   S E R I A L I Z E D   M E T H O D S
+			List<(MethodInfo, ButtonAttribute)> buttonList = new();
+			foreach (MethodInfo method in targetType.GetMethods(DEFAULT_FLAGS))
+			{
+				if (GetAttribute<ButtonAttribute>(method, true) is { } button) buttonList.Add((method, button));
+			}
+			buttons = buttonList.ToArray();
+			#endregion
+		}
 
-                  #region D R A W   D E F A U L T   P R O P E R T Y
-                  if (showDefaultProperty && defaultProperty != null)
-                  {
-                        GUI.enabled = false;
-                        EditorGUILayout.PropertyField(defaultProperty);
-                  }
-                  #endregion
+		public override void OnInspectorGUI()
+		{
+			serializedObject.Update();
 
-                  serializedObject.Update();
-                  {
-                        #region D R A W   S E R I A L I Z E D   P R O P E R T I E S
-                        foreach (SerializedProperty property in serializedProperties)
-                        {
-                              FieldInfo field = property.GetField();
-                              if (field == null || !EvaluateVisibility(field)) continue;
+			#region N O T E S
+			if (notes.Length > 0)
+			{
+				foreach (NoteAttribute note in notes)
+				{
+					using (new EditorGUIHelper.BackgroundColorScope(note.Color))
+					{
+						EditorGUILayout.HelpBox(note.Content);
+					}
+				}
+			}
+			#endregion
 
-                              EvaluateGroup(field);
+			#region D R A W   D E F A U L T   P R O P E R T Y
+			if (showDefaultProperty && defaultProperty != null)
+			{
+				using (new EditorGUI.DisabledScope(true))
+				{
+					EditorGUILayout.PropertyField(defaultProperty);
+				}
+			}
+			#endregion
 
-                              GUI.enabled = EvaluateEnabled(field);
-                              EditorGUILayout.PropertyField(property, true);
-                        }
-                        EndActiveGroup();
-                        #endregion
+			#region D R A W   S E R I A L I Z E D   P R O P E R T I E S
+			foreach ((SerializedProperty property, FieldInfo field) in properties)
+			{
+				if (!EvaluateVisibility(field)) continue;
 
-                        #region D R A W   S E R I A L I Z E D   M E TH O D S
-                        foreach (MethodInfo method in serializedMethods)
-                        {
-                              ButtonAttribute button = GetAttribute<ButtonAttribute>(method, true);
-                              if (button == null || !EvaluateVisibility(method)) continue;
+				EvaluateGroup(field);
 
-                              EvaluateGroup(method);
+				using (new EditorGUI.DisabledScope(!EvaluateEnabled(field)))
+				{
+					EditorGUILayout.PropertyField(property, true);
+				}
+			}
+			EndActiveGroup();
+			#endregion
 
-                              GUI.enabled = EvaluateEnabled(method);
-                              GUI.backgroundColor = button.BackgroundColor;
-                              if (GUILayout.Button(button.Name ?? Utility.ToTitleCase(method.Name), GUILayout.Height(button.Height)))
-                              {
-                                    AutoInvokeMethod(method, target, button.Parameters);
-                              }
-                        }
-                        EndActiveGroup();
-                        #endregion
-                  }
-                  serializedObject.ApplyModifiedProperties();
+			#region D R A W   S E R I A L I Z E D   M E TH O D S
+			foreach ((MethodInfo method, ButtonAttribute button) in buttons)
+			{
+				if (!EvaluateVisibility(method)) continue;
 
-                  GUI.enabled = true;
-            }
+				EvaluateGroup(method);
 
-            private void EvaluateGroup(ICustomAttributeProvider provider)
-            {
-                  if (!TryGetAttribute(provider, out HorizontalAttribute horizontal)) return;
+				using (new EditorGUI.DisabledScope(!EvaluateEnabled(method)))
+				using (new EditorGUIHelper.BackgroundColorScope(button.BackgroundColor))
+				{
+					if (GUILayout.Button(button.Name ?? method.Name.ToTitleCase(), GUILayout.Height(button.Height))) AutoInvokeMethod(method, target, button.Parameters);
+				}
+			}
+			EndActiveGroup();
+			#endregion
 
-                  if (horizontal.BeginGroup && !isHorizontalLayoutActive)
-                  {
-                        EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
-                        isHorizontalLayoutActive = true;
-                  }
-                  else
-                  if (!horizontal.BeginGroup)
-                  {
-                        EndActiveGroup();
-                  }
-            }
-            private void EndActiveGroup()
-            {
-                  if (isHorizontalLayoutActive)
-                  {
-                        EditorGUILayout.EndHorizontal();
-                        isHorizontalLayoutActive = false;
-                  }
-            }
-            private bool EvaluateVisibility(ICustomAttributeProvider provider)
-            {
-                  bool output = true;
+			serializedObject.ApplyModifiedProperties();
+		}
 
-                  if (TryGetAttribute(provider, out ShowWhenAttribute a0, true))
-                        output &= ReadMember(a0.ConditionName, target) is bool value && value;
-                  if (TryGetAttribute(provider, out HideWhenAttribute a1, true))
-                        output &= ReadMember(a1.ConditionName, target) is bool value && !value;
+		private void EvaluateGroup(ICustomAttributeProvider provider)
+		{
+			if (!TryGetAttribute(provider, out HorizontalAttribute horizontal)) return;
 
-                  return output;
-            }
-            private bool EvaluateEnabled(ICustomAttributeProvider provider)
-            {
-                  bool output = true;
+			if (horizontal.Value)
+			{
+				if (isHorizontalLayoutActive) return;
+				EditorGUILayout.BeginHorizontal(GUILayout.ExpandWidth(false));
+				isHorizontalLayoutActive = true;
+			}
+			else
+			{
+				EndActiveGroup();
+			}
+		}
+		private bool EvaluateVisibility(ICustomAttributeProvider provider)
+		{
+			bool output = true;
 
-                  if (TryGetAttribute(provider, out ReadonlyAttribute a0, true))
-                        output &= a0.ExclusiveToPlaymode && !EditorApplication.isPlaying;
-                  if (TryGetAttribute(provider, out EnableWhenAttribute a1, true))
-                        output &= ReadMember(a1.ConditionName, target) is bool value && value;
-                  if (TryGetAttribute(provider, out DisableWhenAttribute a2, true))
-                        output &= ReadMember(a2.ConditionName, target) is bool value && !value;
+			if (TryGetAttribute(provider, out ShowIfAttribute a0, true))
+				output &= TryReadMember(a0.Condition, target, out object obj) && obj is bool value && (value ^ a0.Invert);
 
-                  return output;
-            }
-      }
+			return output;
+		}
+		private bool EvaluateEnabled(ICustomAttributeProvider provider)
+		{
+			bool output = true;
+
+			if (TryGetAttribute(provider, out DisableAttribute a0, true))
+				output &= a0.ExclusiveToPlaymode && !EditorApplication.isPlaying;
+
+			if (TryGetAttribute(provider, out DisableIfAttribute a1, true))
+				output &= TryReadMember(a1.Condition, target, out object obj) && obj is bool value && (!value ^ a1.Invert);
+
+			return output;
+		}
+		private void EndActiveGroup()
+		{
+			if (!isHorizontalLayoutActive) return;
+			EditorGUILayout.EndHorizontal();
+			isHorizontalLayoutActive = false;
+		}
+	}
 }

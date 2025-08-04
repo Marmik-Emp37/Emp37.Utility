@@ -1,51 +1,61 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-
 using UnityEditor;
 
 namespace Emp37.Utility.Editor
 {
-      using static ReflectionUtility;
+	using static ReflectionUtility;
 
-      public static class SerializedPropertyUtility
-      {
-            private readonly static Dictionary<SerializedProperty, FieldInfo> propertyCache = new();
-            public static FieldInfo GetField(this SerializedProperty property, BindingFlags flags = DEFAULT_FLAGS)
-            {
-                  if (property == null) throw new ArgumentNullException(nameof(property));
+	public static class SerializedPropertyUtility
+	{
+		private readonly struct FieldKey : IEquatable<FieldKey>
+		{
+			public readonly Type RootType;
+			public readonly string Path;
+			public readonly BindingFlags Flags;
 
-                  if (!propertyCache.TryGetValue(property, out FieldInfo field))
-                  {
-                        Type currentType = property.serializedObject.targetObject.GetType();
-                        string[] path = property.propertyPath.Replace(".Array.data", string.Empty).Split('.');
+			public FieldKey(Type rootType, string path, BindingFlags flags)
+			{
+				RootType = rootType;
+				Path = path;
+				Flags = flags;
+			}
 
-                        for (int last = path.Length - 1, i = 0; i <= last; i++)
-                        {
-                              string segment = path[i];
-                              string name = segment.Contains('[') ? segment[..segment.IndexOf('[')] : segment;
+			public bool Equals(FieldKey other) => RootType == other.RootType && Path == other.Path && Flags == other.Flags;
+			public override bool Equals(object obj) => obj is FieldKey other && Equals(other);
+			public override int GetHashCode() => HashCode.Combine(RootType, Path, Flags);
+		}
 
-                              field = FindField(name, currentType, flags);
-                              if (field != null)
-                              {
-                                    propertyCache[property] = field;
-                                    break;
-                              }
+		private readonly static Dictionary<FieldKey, FieldInfo> propertyCache = new();
 
-                              if (i == last) break;
+		public static FieldInfo GetField(this SerializedProperty property, BindingFlags flags = DEFAULT_FLAGS)
+		{
+			if (property == null) throw new ArgumentNullException(nameof(property));
 
-                              Type next = field.FieldType;
-                              currentType = next.IsArray ? next.GetElementType() : next.IsGenericType ? next.GetGenericArguments().FirstOrDefault() : next;
-                        }
-                  }
-                  return field;
-            }
-            public static bool HasAttribute<TAttribute>(this SerializedProperty property, BindingFlags flags = DEFAULT_FLAGS) where TAttribute : Attribute => GetField(property, flags) is { } field && field.IsDefined(typeof(TAttribute), true);
-            public static bool TryGetAttribute<TAttribute>(this SerializedProperty property, out TAttribute attribute, BindingFlags flags = DEFAULT_FLAGS) where TAttribute : Attribute
-            {
-                  attribute = GetField(property, flags)?.GetCustomAttribute<TAttribute>(true);
-                  return attribute != null;
-            }
-      }
+			Type type = property.serializedObject.targetObject.GetType();
+			string path = property.propertyPath.Replace(".Array.data", string.Empty);
+
+			FieldKey key = new(type, path, flags);
+
+			if (propertyCache.TryGetValue(key, out FieldInfo field)) return field;
+
+			Type current = type;
+			string[] segments = path.Split('.');
+
+			for (int last = segments.Length - 1, i = 0; i <= last; i++)
+			{
+				string segment = segments[i];
+				string name = segment.Contains('[') ? segment[..segment.IndexOf('[')] : segment;
+
+				field = FindField(name, current, flags);
+				if (field == null || i == last) break;
+
+				Type next = field.FieldType;
+				current = next.IsArray ? next.GetElementType() : next.IsGenericType ? next.GetGenericArguments()[0] : next;
+			}
+			propertyCache[key] = field;
+			return field;
+		}
+	}
 }
