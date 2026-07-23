@@ -2,65 +2,98 @@ using UnityEngine;
 
 namespace Emp37.Utility.Singleton
 {
-      /// <summary>
-      /// A dynamic MonoBehaviour-based singleton to use at runtime.
-      /// </summary>
-      /// <typeparam name="T">The type of the singleton, which must inherit from <see cref="Dynamic{T}"/>.</typeparam>
-      /// <remarks>
-      /// <b>NOTE:</b> This implementation -
-      /// <br>• Requires calling <see cref="Initialize(bool)"/> to initialize the singleton instance.</br>
-      /// <br>• Supports auto initialization.</br>
-      /// <br>Usage example for a singleton of type <see cref="Dynamic{T}"/>:</br>
-      /// <code>
-      /// public class MySingleton : Dynamic&lt;MySingleton&gt;
-      /// {
-      ///     void Awake()
-      ///     {
-      ///         Initialize(true); // make this singleton persist across scenes
-      ///     }
-      /// }
-      /// </code>
-      /// </remarks>
-      public abstract class Dynamic<T> : MonoBehaviour where T : Dynamic<T>
-      {
-            private static T instance;
-            private static readonly object syncRoot = new();
-            private static bool isExiting;
+	/// <summary>
+	/// Determines what happens to a second instance of a singleton when one already exists.
+	/// </summary>
+	public enum DuplicateAction : byte
+	{
+		DestroyGameObject,
+		DestroyComponent,
+		KeepAndWarn,
+	}
 
-            public static T Instance
-            {
-                  get
-                  {
-                        if (isExiting)
-                        {
-                              Debug.LogWarning($"Instance of '{typeof(T).FullName}' no longer exists.");
-                              return null;
-                        }
-                        if (instance != null) return instance;
+	/// <summary>
+	/// A dynamic MonoBehaviour based singleton to use at runtime.
+	/// </summary>
+	/// <remarks>
+	/// <b>NOTE:</b> This implementation -
+	/// <br>â€¢ Requires calling <see cref="Initialize(bool, DuplicateAction)"/> to register the singleton instance.</br>
+	/// <br>â€¢ Resolves an unregistered instance on first access, creating one if none is found.</br>
+	/// <br>â€¢ Is main-thread only, like the rest of the Unity API.</br>
+	/// <br></br>
+	/// <br>Usage example for a singleton of type <see cref="Dynamic{T}"/>:</br>
+	/// <code>
+	/// public class MySingleton : Dynamic&lt;MySingleton&gt;
+	/// {
+	///     private void Awake()
+	///     {
+	///         Initialize(persistent: true); // make this singleton persist across scenes
+	///     }
+	/// }
+	/// </code>
+	/// </remarks>
+	[DisallowMultipleComponent]
+	public abstract class Dynamic<T> : MonoBehaviour where T : Dynamic<T>
+	{
+		private static T instance;
 
-                        lock (syncRoot)
-                        {
-                              return instance = FindFirstObjectByType<T>() ?? new GameObject(typeof(T).FullName).AddComponent<T>();
-                        }
-                  }
-                  protected set => instance = value;
-            }
+		/// <summary>
+		/// Returns the registered instance if it exists, otherwise searches the scenes (including inactive objects) and, failing that, creates a new GameObject to host one.
+		/// Returns <see langword="null"/> once the application has begun quitting.
+		/// </summary>
+		public static T Instance
+		{
+			get
+			{
+				if (instance != null) return instance;
+				if (RuntimeState.IsQuitting)
+				{
+					Debug.LogWarning($"Cannot access '{typeof(T).Name}' because the application is quitting.");
+					return null;
+				}
+				instance = FindAnyObjectByType<T>(FindObjectsInactive.Include) ?? new GameObject(typeof(T).Name).AddComponent<T>();
+				return instance;
+			}
+		}
 
-            protected void Initialize(bool persistency)
-            {
-                  if (instance != null && instance != this)
-                  {
-                        Debug.LogWarning($"A duplicate instance of '{typeof(T).FullName}' found on gameObject '{name}'.", gameObject);
-                        return;
-                  }
-                  instance = this as T;
-                  if (persistency) DontDestroyOnLoad(this);
-            }
+		protected virtual void OnDestroy()
+		{
+			if (ReferenceEquals(instance, this)) instance = null;
+		}
 
-            protected virtual void OnDestroy()
-            {
-                  if (instance == this) instance = null;
-            }
-            protected virtual void OnApplicationQuit() => isExiting = true;
-      }
+		/// <summary>
+		/// Registers this object as the singleton instance, or disposes of it if one is already registered.
+		/// </summary>
+		/// <param name="persistent">
+		/// When <see langword="true"/>, keeps the object alive across scene loads via <see cref="Object.DontDestroyOnLoad(Object)"/>.
+		/// <br>Unity ignores this and logs a warning if the GameObject has a parent.</br>
+		/// </param>
+		/// <param name="actionOnDuplicate">How to dispose of this object if an instance is already registered.</param>
+		protected void Initialize(bool persistent = false, DuplicateAction actionOnDuplicate = 0)
+		{
+			T self = this as T;
+
+			if (instance != null && !ReferenceEquals(instance, self))
+			{
+				switch (actionOnDuplicate)
+				{
+					case DuplicateAction.DestroyGameObject:
+						Warn("Destroying the GameObject."); Destroy(gameObject);
+						break;
+					case DuplicateAction.DestroyComponent:
+						Warn("Destroying the component."); Destroy(this);
+						break;
+					case DuplicateAction.KeepAndWarn:
+						Warn("The duplicate will remain active.");
+						break;
+				}
+				return;
+
+				void Warn(string message) => Debug.LogWarning($"Found duplicate '{typeof(T).Name}' on '{name}'. {message}", gameObject);
+			}
+			instance = self;
+
+			if (persistent) DontDestroyOnLoad(this);
+		}
+	}
 }
