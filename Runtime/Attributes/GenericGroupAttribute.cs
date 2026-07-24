@@ -12,6 +12,6 @@ namespace Emp37.Utility
 
             public GenericGroupAttribute() { }
             public GenericGroupAttribute(Size size) => Height = size switch { Size.Medium => 27F, Size.Large => 36F, _ => Height };
-            public GenericGroupAttribute(Size size, Shade shade) : this(size) => BackgroundColor = ShadeLibrary.Pick(shade);
+            public GenericGroupAttribute(Size size, Shade shade) : this(size) => BackgroundColor = ShadePalette.ToColor32(shade);
       }
 }

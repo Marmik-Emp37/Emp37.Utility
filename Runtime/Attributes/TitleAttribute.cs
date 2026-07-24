@@ -11,18 +11,18 @@ namespace Emp37.Utility
       public class TitleAttribute : PropertyAttribute
       {
             public readonly GUIContent Content;
-            public readonly Color Text = ShadeLibrary.Pick(Shade.EditorText), Underline = ShadeLibrary.Pick(Shade.White);
+            public readonly Color Text = ShadePalette.ToColor32(Shade.EditorText), Underline = ShadePalette.ToColor32(Shade.White);
             /// <summary>
             /// Specifies weather the underline should stretch to default width or adjust to the title width.
             /// </summary>
             public bool Stretch = true;
 
             public TitleAttribute(string title) => Content = new(title);
-            public TitleAttribute(string title, Shade shade) : this(title) => Text = Underline = ShadeLibrary.Pick(shade);
+            public TitleAttribute(string title, Shade shade) : this(title) => Text = Underline = ShadePalette.ToColor32(shade);
             public TitleAttribute(string title, Shade text, Shade underline) : this(title)
             {
-                  Text = ShadeLibrary.Pick(text);
-                  Underline = ShadeLibrary.Pick(underline);
+                  Text = ShadePalette.ToColor32(text);
+                  Underline = ShadePalette.ToColor32(underline);
             }
       }
 }

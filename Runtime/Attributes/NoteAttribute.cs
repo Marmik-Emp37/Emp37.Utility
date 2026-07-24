@@ -11,6 +11,6 @@ namespace Emp37.Utility
             public readonly Color Color = Color.white;
 
             public NoteAttribute(string text) => Content = new(text);
-            public NoteAttribute(string text, Shade shade) : this(text) => Color = ShadeLibrary.Pick(shade);
+            public NoteAttribute(string text, Shade shade) : this(text) => Color = ShadePalette.ToColor32(shade);
       }
 }
