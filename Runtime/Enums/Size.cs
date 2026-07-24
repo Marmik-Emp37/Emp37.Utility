@@ -1,10 +1,9 @@
 namespace Emp37.Utility
 {
-      public enum Size
-      {
-            Default,
-            Small,
-            Medium,
-            Large,
-      }
+        public enum Size
+        {
+                Default,
+                Large,
+                ExtraLarge
+        }
 }

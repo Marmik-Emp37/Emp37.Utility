@@ -1,24 +1,29 @@
 using UnityEngine;
-
 using UnityEditor;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(SeparatorAttribute), true)]
-      internal class AttributeDrawer_Separator : BaseDecoratorDrawer
-      {
-            private SeparatorAttribute Attribute => attribute as SeparatorAttribute;
+        [CustomPropertyDrawer(typeof(SeparatorAttribute), true)]
+        internal class AttributeDrawer_Separator : DecoratorDrawer
+        {
+                public override void OnGUI(Rect position)
+                {
+                        var attr = attribute as SeparatorAttribute;
 
-            public override void Draw(Rect position)
-            {
-                  if (Attribute.Stretch)
-                  {
-                        position.x = 0F;
-                        position.width = EditorGUIUtility.currentViewWidth;
-                  }
-                  position.height = Attribute.Thickness;
-                  EditorGUI.DrawRect(position, Attribute.Color);
-            }
-            public override float GetHeight() => Attribute.Thickness + EditorGUIUtility.standardVerticalSpacing;
-      }
+                        if (attr.Stretch)
+                        {
+                                position.x = 0F;
+                                position.width = EditorGUIUtility.currentViewWidth;
+                        }
+                        position.height = attr.Thickness;
+
+                        EditorGUI.DrawRect(position, attr.Color);
+                }
+                public override float GetHeight()
+                {
+                        var attr = attribute as SeparatorAttribute;
+
+                        return attr.Thickness + EditorGUIUtility.standardVerticalSpacing;
+                }
+        }
 }

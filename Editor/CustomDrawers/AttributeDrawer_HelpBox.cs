@@ -1,34 +1,33 @@
-using UnityEngine;
-
 using UnityEditor;
+using static UnityEditor.EditorGUIUtility;
+using UnityEngine;
 
 namespace Emp37.Utility.Editor
 {
-      [CustomPropertyDrawer(typeof(HelpBoxAttribute), true)]
-      internal class AttributeDrawer_HelpBox : BaseDecoratorDrawer
-      {
-            private HelpBoxAttribute Attribute => attribute as HelpBoxAttribute;
+	[CustomPropertyDrawer(typeof(HelpBoxAttribute), true)]
+	internal class AttributeDrawer_HelpBox : DecoratorDrawer
+	{
+		private const float minHeight = 21F;
 
-            private static readonly GUIStyle contentStyle = new(EditorStyles.label)
-            {
-                  alignment = TextAnchor.MiddleLeft,
-                  wordWrap = true,
-                  richText = true,
-            };
+		private static readonly Texture[] icons = { default, IconContent("console.infoicon").image, IconContent("console.warnicon").image, IconContent("console.erroricon").image, };
 
-            private float BoxHeight => Mathf.Max(24F, contentStyle.CalcHeight(Attribute.Content, EditorGUIHelper.ReleventWidth));
 
-            public override void Initialize()
-            {
-                  MessageType type = Attribute.MessageType;
-                  Attribute.Content.image = type is 0 ? default : EditorGUIUtility.IconContent($"console.{type switch { MessageType.Warning => "warnicon", MessageType.Error => "erroricon", _ => "infoicon" }}").image;
-            }
-            public override void Draw(Rect position)
-            {
-                  position.height = BoxHeight; // - [ 1 ]
-                  EditorGUI.HelpBox(position, string.Empty, 0);
-                  EditorGUI.LabelField(position.Indent(2F), Attribute.Content);
-            }
-            public override float GetHeight() => BoxHeight /* - [ 1 ]*/ + EditorGUIUtility.standardVerticalSpacing;
-      }
+		public override void OnGUI(Rect position)
+		{
+			position.height -= standardVerticalSpacing;
+			var attr = attribute as HelpBoxAttribute;
+
+			var content = new GUIContent(attr.Text, icons[(int) attr.Type]);
+			EditorGUI.LabelField(position, content, EditorStyles.helpBox);
+		}
+		public override float GetHeight()
+		{
+			var attr = attribute as HelpBoxAttribute;
+
+			var content = new GUIContent(attr.Text, icons[(int) attr.Type]);
+			var contentHeight = EditorStyles.helpBox.CalcHeight(content, EditorGUIHelper.ReleventWidth);
+
+			return Mathf.Max(minHeight, contentHeight) + standardVerticalSpacing;
+		}
+	}
 }
