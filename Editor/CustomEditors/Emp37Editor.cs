@@ -98,7 +98,7 @@ namespace Emp37.Utility.Editor
 
                               GUI.enabled = EvaluateEnabled(method);
                               GUI.backgroundColor = button.BackgroundColor;
-                              if (GUILayout.Button(button.Name ?? Utility.ToTitleCase(method.Name), GUILayout.Height(button.Height)))
+                              if (GUILayout.Button(button.Name ?? method.Name.ToTitleCase(), GUILayout.Height(button.Height)))
                               {
                                     AutoInvokeMethod(method, target, button.Parameters);
                               }

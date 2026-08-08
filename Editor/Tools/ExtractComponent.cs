@@ -15,7 +15,7 @@ namespace Emp37.Utility.Editor
             private static void Extract(MenuCommand command, Mode mode)
             {
                   Component source = command.context as Component;
-                  string name = Utility.ToTitleCase(source.GetType().Name);
+                        string name = source.GetType().Name.ToTitleCase();
                   int undoGroup = Undo.GetCurrentGroup();
                   Undo.IncrementCurrentGroup();
 
