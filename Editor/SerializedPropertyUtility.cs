@@ -34,10 +34,9 @@ namespace Emp37.Utility.Editor
 			if (property == null) throw new ArgumentNullException(nameof(property));
 
 			Type type = property.serializedObject.targetObject.GetType();
-			string path = property.propertyPath.Replace(".Array.data", string.Empty);
+			string path = NormalizePath(property.propertyPath);
 
 			FieldKey key = new(type, path, flags);
-
 			if (propertyCache.TryGetValue(key, out FieldInfo field)) return field;
 
 			Type current = type;
@@ -45,17 +44,28 @@ namespace Emp37.Utility.Editor
 
 			for (int last = segments.Length - 1, i = 0; i <= last; i++)
 			{
-				string segment = segments[i];
-				string name = segment.Contains('[') ? segment[..segment.IndexOf('[')] : segment;
+				string name = StripIndexer(segments[i]);
 
 				field = FindField(name, current, flags);
 				if (field == null || i == last) break;
 
-				Type next = field.FieldType;
-				current = next.IsArray ? next.GetElementType() : next.IsGenericType ? next.GetGenericArguments()[0] : next;
+				current = ElementType(field.FieldType);
 			}
 			propertyCache[key] = field;
 			return field;
+
+			static string NormalizePath(string propertyPath) => propertyPath.Replace(".Array.data", string.Empty);
+			static string StripIndexer(string segment)
+			{
+				int bracket = segment.IndexOf('[');
+				return bracket < 0 ? segment : segment[..bracket];
+			}
+			static Type ElementType(Type type)
+			{
+				if (type.IsArray) return type.GetElementType();
+				if (type.IsGenericType) return type.GetGenericArguments()[0];
+				return type;
+			}
 		}
 	}
 }
