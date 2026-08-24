@@ -1,4 +1,0 @@
-Pending Tasks:
-
-- Null Tween<T> derived class consideration.
-- Creating Swatches window for custom color palette.
