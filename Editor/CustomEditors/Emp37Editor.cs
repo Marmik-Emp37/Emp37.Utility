@@ -158,8 +158,8 @@ namespace Emp37.Utility.Editor
                         if (TryGetAttribute(provider, out DisableAttribute a0, true))
                                 output &= a0.ExclusiveToPlaymode && !EditorApplication.isPlaying;
 
-                        if (TryGetAttribute(provider, out DisableIfAttribute a1, true))
-                                output &= TryReadMember(a1.Condition, target, out object obj) && obj is bool value && (!value ^ a1.Invert);
+                        if (TryGetAttribute(provider, out EnableIfAttribute a1, true))
+                                output &= TryReadMember(a1.Condition, target, out object obj) && obj is bool value && (value ^ a1.Invert);
 
                         return output;
                 }

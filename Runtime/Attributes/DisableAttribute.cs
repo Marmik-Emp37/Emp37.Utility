@@ -5,7 +5,7 @@ namespace Emp37.Utility
 	/// <summary>
 	/// Attribute for disabling a field in the inspector.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Field, AllowMultiple = false, Inherited = true)]
+	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
 	public class DisableAttribute : Attribute
 	{
 		public readonly bool ExclusiveToPlaymode;
