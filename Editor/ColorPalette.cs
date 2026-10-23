@@ -86,70 +86,61 @@ namespace Emp37.Utility.Editor
 			{
 				scroll = scope.scrollPosition;
 
-				int count = colors.Count, total = count + 1;
-				Vector2 cellSize = new(x: swatchSize + Spacing, y: swatchSize + EditorStyles.miniLabel.lineHeight + (2F * Spacing));
+				int count = colors.Count;
+				int total = count + 1;
+				float labelHeight = EditorStyles.miniLabel.lineHeight;
+				Vector2 cellSize = new(x: swatchSize + Spacing, y: swatchSize + Spacing + labelHeight + Spacing);
+				int columns = Mathf.Max(1, Mathf.FloorToInt((EditorGUIUtility.currentViewWidth - Spacing) / cellSize.x));
+				int rows = Mathf.CeilToInt(total / (float) columns);
 
-				int columns = Mathf.Max(1, Mathf.FloorToInt((EditorGUIUtility.currentViewWidth - Spacing) / cellSize.x)), rows = Mathf.CeilToInt((float) total / columns);
 				Rect gridRect = GUILayoutUtility.GetRect(columns * cellSize.x, rows * cellSize.y);
-				Event e = Event.current;
+				gridRect.position += Vector2.one * Spacing;
+
+				Event current = Event.current;
 
 				for (int i = 0; i < total; i++)
 				{
 					int row = i / columns, column = i % columns;
 
-					Rect cellRect = new(gridRect)
+					Rect swatchRect = new(gridRect.x + column * cellSize.x, gridRect.y + row * cellSize.y, swatchSize, swatchSize);
+					if (i == count)
 					{
-						position = gridRect.position + new Vector2((column * cellSize.x) + Spacing, (row * cellSize.y) + Spacing),
-						size = cellSize
-					};
-					Rect swatchRect = new(cellRect)
-					{
-						size = swatchSize * Vector2.one
-					};
-
-					if (i < count)
-					{
-						if (e.type == EventType.MouseDown && e.button == 2 && cellRect.Contains(e.mousePosition))
+						if (GUI.Button(swatchRect, "+"))
 						{
-							pendingRemoval = i;
-							e.Use();
-							continue;
+							colors.Add(Color.white);
+							hasUnsavedChanges = true;
 						}
+						continue;
+					}
+					if (current.type == EventType.MouseDown && current.button == 2 && swatchRect.Contains(current.mousePosition))
+					{
+						pendingRemoval = i;
+						current.Use();
+						continue;
+					}
 
-						using (EditorGUI.ChangeCheckScope checkScope = new())
+					using (EditorGUI.ChangeCheckScope check = new())
+					{
+						Color edited = EditorGUI.ColorField(swatchRect, GUIContent.none, colors[i], false, false, false);
+						if (check.changed)
 						{
-							Color edited = EditorGUI.ColorField(swatchRect, GUIContent.none, colors[i], false, false, false);
-							if (checkScope.changed)
+							colors[i] = edited;
+							hasUnsavedChanges = true;
+						}
+					}
+					Rect hexRect = new(swatchRect.x, swatchRect.y + swatchRect.height, swatchRect.width, labelHeight);
+					using (EditorGUI.ChangeCheckScope checkScope = new())
+					{
+						string text = EditorGUI.DelayedTextField(hexRect, "#" + ColorUtility.ToHtmlStringRGB(colors[i]), EditorStyles.miniLabel);
+						if (checkScope.changed)
+						{
+							if (!text.StartsWith("#")) text = "#" + text;
+							if (ColorUtility.TryParseHtmlString(text, out Color color))
 							{
-								colors[i] = edited;
+								colors[i] = color;
 								hasUnsavedChanges = true;
 							}
 						}
-
-						Rect hexRect = new(cellRect)
-						{
-							y = cellRect.y + swatchRect.height,
-							width = swatchRect.width,
-							height = EditorStyles.miniLabel.lineHeight
-						};
-						using (EditorGUI.ChangeCheckScope checkScope = new())
-						{
-							string text = EditorGUI.DelayedTextField(hexRect, "#" + ColorUtility.ToHtmlStringRGB(colors[i]), EditorStyles.miniLabel);
-							if (checkScope.changed)
-							{
-								if (!text.StartsWith("#")) text = "#" + text;
-								if (ColorUtility.TryParseHtmlString(text, out Color color))
-								{
-									colors[i] = color;
-									hasUnsavedChanges = true;
-								}
-							}
-						}
-					}
-					else if (GUI.Button(swatchRect, "+"))
-					{
-						colors.Add(Color.white);
-						hasUnsavedChanges = true;
 					}
 				}
 			}
