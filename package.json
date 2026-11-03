@@ -1,0 +1,8 @@
+{
+  "name": "com.emp37.utility",
+  "version": "2.1.0",
+  "displayName": "Emp37.Utility",
+  "description": "Inspector attributes, singletons, reflection helpers and a color palette for Unity.",
+  "unity": "2019.4",
+  "license": "MIT"
+}
