@@ -77,6 +77,8 @@ All attributes live in `Emp37.Utility` and are consumed by the shared `Emp37Edit
 | **`EnableIf(condition)`** | Field / Method | Enables the member only when the named bool field/property/method returns `true` (supports `Invert`). |
 | **`Disable(exclusiveToPlaymode?)`** | Field / Method | Greys out / disables the member, optionally only while in Play mode. |
 | **`Max(value)`** | Field | Clamps a numeric or vector field (`float`, `int`, `Vector2/3`, `Vector2Int/3Int`) to a maximum. |
+| **`PreviewField(size?)`** | Field | Draws an object reference (e.g. `Sprite`, `Texture`, `Prefab`) as a square thumbnail. Default size is 64. |
+| **`Unit(text)`** | Field | Draws a short text (e.g. a unit like `"m/s"`) inside the right edge of a numeric, vector or `string` field. |
 | **`RequireObject(message?)`** | Field | Shows an error `HelpBox` under an object-reference field while it's unassigned. |
 | **`ExpandableObject`** | Field | Makes an assigned object-reference field expandable, nesting its own editor inline. |
 | **`ToggleButton(size?)`** | Field (`bool`) | Renders the bool as a toggle styled as a button, labeled `"Name : True/False"`. |
@@ -130,11 +132,11 @@ ReflectionUtility.TryGetAttribute(fieldInfo, out TitleAttribute title);
 var all = ReflectionUtility.GetAttributes<SeparatorAttribute>(fieldInfo);
 
 // members - searches field -> property -> method, also cached
-var member = ReflectionUtility.FindMember(targetType, "health", MemberTypes.All);
-bool found = ReflectionUtility.TryReadMember(target, "health", out object value);
+var member = ReflectionUtility.FindMember("health", targetType);
+bool found = ReflectionUtility.TryReadMember("health", target, out object value);
 
 // invoke a method, resolving its parameters from same-named fields/properties on the target
-ReflectionUtility.AutoInvokeMethod(target, methodInfo);
+ReflectionUtility.AutoInvokeMethod(methodInfo, target, argNames: new[] { "damageAmount" });
 ```
 Call `ReflectionUtility.ClearAttributeCache()` / `ClearMemberCache()` if you need to invalidate the caches (e.g. after hot-reloading reflected types).
 

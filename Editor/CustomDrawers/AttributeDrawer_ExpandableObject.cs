@@ -9,7 +9,6 @@ namespace Emp37.Utility.Editor
         {
                 private UnityEditor.Editor editor = null;
 
-
                 public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
                 {
                         if (property.propertyType != SerializedPropertyType.ObjectReference)
