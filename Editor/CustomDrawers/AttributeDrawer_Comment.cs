@@ -7,36 +7,33 @@ namespace Emp37.Utility.Editor
 	[CustomPropertyDrawer(typeof(CommentAttribute), true)]
 	internal class AttributeDrawer_Comment : DecoratorDrawer
 	{
-		private const float backgroundAlpha = 0.175F;
-		private const float highlightWidth = 3F;
-		private const float minHeight = 21F;
+		private const float BackgroundAlpha = 0.175F;
+		private const float HighlightWidth = 3F;
+		private const float MinHeight = 21F;
 
 		private static readonly GUIStyle[] contentStyles = CreateContentGUIStyles();
 
 
 		public override void OnGUI(Rect position)
 		{
-			position.size = new(EditorGUIHelper.ReleventWidth, position.height - EditorGUIUtility.standardVerticalSpacing);
 			var attr = attribute as CommentAttribute;
 
+			position.size = new(EditorGUIHelper.ReleventWidth, position.height - EditorGUIUtility.standardVerticalSpacing);
 			EditorGUI.LabelField(position, attr.Content, contentStyles[(int) attr.Style]);
 
-			var color = attr.Tint;
-			color.a = backgroundAlpha;
-
+			Color color = attr.Tint;
+			color.a = BackgroundAlpha;
 			EditorGUI.DrawRect(position, color);
-
 			color.a = 1F;
 
-			EditorGUI.DrawRect(new(position) { x = position.x - highlightWidth + 1F, width = highlightWidth }, color);
+			EditorGUI.DrawRect(new(position) { x = position.x - HighlightWidth + 1F, width = HighlightWidth }, color);
 		}
 		public override float GetHeight()
 		{
 			var attr = attribute as CommentAttribute;
 
 			var contentHeight = contentStyles[(int) attr.Style].CalcHeight(attr.Content, EditorGUIHelper.ReleventWidth);
-
-			return Mathf.Max(minHeight, contentHeight) + EditorGUIUtility.standardVerticalSpacing;
+			return Mathf.Max(MinHeight, contentHeight) + EditorGUIUtility.standardVerticalSpacing;
 		}
 
 		private static GUIStyle[] CreateContentGUIStyles()

@@ -6,17 +6,17 @@ namespace Emp37.Utility.Editor
         [CustomPropertyDrawer(typeof(InlineButtonAttribute), true)]
         internal class AttributeDrawer_InlineButton : PropertyDrawer
         {
-                private const float gap = 2F;
+                private const float Gap = 2F;
 
 
                 public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
                 {
                         var attr = attribute as InlineButtonAttribute;
 
-                        position.width -= attr.Width + gap;
+                        position.width -= attr.Width + Gap;
                         EditorGUI.PropertyField(position, property, label, true);
 
-                        position.x += position.width + gap;
+                        position.x += position.width + Gap;
                         position.width = attr.Width;
 
                         if (GUI.Button(position, attr.Name ?? attr.Method))
