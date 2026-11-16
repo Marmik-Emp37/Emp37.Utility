@@ -89,7 +89,7 @@ namespace Emp37.Utility.Editor
 			List<(MethodInfo, ButtonAttribute)> buttonList = new();
 			foreach (MethodInfo method in targetType.GetMethods(DEFAULT_FLAGS))
 			{
-				if (GetAttribute<ButtonAttribute>(method, true) is { } button) buttonList.Add((method, button));
+				if (TryGetAttribute(method, out ButtonAttribute button, true)) buttonList.Add((method, button));
 			}
 			buttons = buttonList.ToArray();
 			#endregion
@@ -138,9 +138,12 @@ namespace Emp37.Utility.Editor
 				}
 				if (!EvaluateVisibility(field)) continue;
 				EvaluateGroup(field);
-				using (new EditorGUI.DisabledScope(!EvaluateEnabled(field)))
+
+				bool isEnabled = EvaluateEnabled(field);
+				using (EditorGUI.ChangeCheckScope scope = new())
 				{
-					EditorGUILayout.PropertyField(property, true);
+					using (new EditorGUI.DisabledScope(!isEnabled)) EditorGUILayout.PropertyField(property, true);
+					if (scope.changed && isEnabled && TryGetAttribute(field, out OnValueChangedAttribute onChanged)) InvokeMethod(onChanged.Method, target);
 				}
 			}
 			EndActiveHorizontalGroup();

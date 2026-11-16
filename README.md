@@ -77,6 +77,7 @@ All attributes live in `Emp37.Utility` and are consumed by the shared `Emp37Edit
 | **`EnableIf(condition)`** | Field / Method | Enables the member only when the named bool field/property/method returns `true` (supports `Invert`). |
 | **`Disable(exclusiveToPlaymode?)`** | Field / Method | Greys out / disables the member, optionally only while in Play mode. |
 | **`Max(value)`** | Field | Clamps a numeric or vector field (`float`, `int`, `Vector2/3`, `Vector2Int/3Int`) to a maximum. |
+| **`OnValueChanged(method)`** | Field | Calls the named parameterless method after the field is edited in the Inspector (once the new value is applied, on every selected object). |
 | **`TabGroup(name?)`** | Field | Groups consecutive fields into tabs under a toolbar. A named `[TabGroup("Name")]` opens a tab that includes every following field until the next one. A bare `[TabGroup]` closes the toolbar. Fields only. |
 | **`PreviewField(size?)`** | Field | Draws an object reference (e.g. `Sprite`, `Texture`, `Prefab`) as a square thumbnail. Default size is 64. |
 | **`Unit(text)`** | Field | Draws a short text (e.g. a unit like `"m/s"`) inside the right edge of a numeric, vector or `string` field. |
