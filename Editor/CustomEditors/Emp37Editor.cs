@@ -20,6 +20,7 @@ namespace Emp37.Utility.Editor
 		private (MethodInfo, ButtonAttribute)[] buttons;
 
 		private bool isHorizontalLayoutActive;
+		private readonly List<string> pendingCallbacks = new();
 
 		private int[] propertyGroup, propertyTab;
 		private string[][] groupTabNames;
@@ -94,7 +95,6 @@ namespace Emp37.Utility.Editor
 			buttons = buttonList.ToArray();
 			#endregion
 		}
-
 		public override void OnInspectorGUI()
 		{
 			serializedObject.Update();
@@ -143,7 +143,7 @@ namespace Emp37.Utility.Editor
 				using (EditorGUI.ChangeCheckScope scope = new())
 				{
 					using (new EditorGUI.DisabledScope(!isEnabled)) EditorGUILayout.PropertyField(property, true);
-					if (scope.changed && isEnabled && TryGetAttribute(field, out OnValueChangedAttribute onChanged)) InvokeMethod(onChanged.Method, target);
+					if (scope.changed && isEnabled && TryGetAttribute(field, out OnValueChangedAttribute onChanged)) pendingCallbacks.Add(onChanged.Method);
 				}
 			}
 			EndActiveHorizontalGroup();
@@ -164,6 +164,16 @@ namespace Emp37.Utility.Editor
 			#endregion
 
 			serializedObject.ApplyModifiedProperties();
+
+			if (pendingCallbacks.Count > 0)
+			{
+				string[] methods = pendingCallbacks.ToArray();
+				pendingCallbacks.Clear();
+				foreach (string method in methods)
+				{
+					foreach (UnityEngine.Object obj in targets) InvokeMethod(method, obj);
+				}
+			}
 		}
 
 		private void EvaluateGroup(ICustomAttributeProvider provider)
