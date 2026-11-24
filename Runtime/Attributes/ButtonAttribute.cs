@@ -9,7 +9,7 @@ namespace Emp37.Utility
 		public readonly string[] Parameters = null;
 		public readonly float Height = 18F;
 		public string Name = null;
-		public Color BackgroundColor = Color.white;
+		public Shade Tint = Shade.White;
 
 		public ButtonAttribute() { }
 		public ButtonAttribute(params string[] parameters) => Parameters = parameters;

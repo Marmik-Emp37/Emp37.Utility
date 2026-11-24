@@ -155,7 +155,7 @@ namespace Emp37.Utility.Editor
 				if (!EvaluateVisibility(method)) continue;
 				EvaluateGroup(method);
 				using (new EditorGUI.DisabledScope(!EvaluateEnabled(method)))
-				using (new EditorGUIHelper.BackgroundColorScope(button.BackgroundColor))
+				using (new EditorGUIHelper.BackgroundColorScope(button.Tint.ToColor()))
 				{
 					if (GUILayout.Button(button.Name ?? method.Name.ToTitleCase(), GUILayout.ExpandWidth(true), GUILayout.Height(button.Height))) AutoInvokeMethod(method, target, button.Parameters);
 				}
